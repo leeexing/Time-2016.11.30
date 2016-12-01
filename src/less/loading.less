@@ -1,0 +1,145 @@
+@width:10px;
+@color:#F80;
+.scale(@time:0.75s, @delay:0.12s,@name:scale,@long:cubic-bezier(.2, .68, .18, 1.08), @do: infinite){
+  -webkit-animation: @arguments;
+  -o-animation: @arguments;
+  animation: @arguments;
+}
+@keyframes scale {
+  30%{
+    transform: scale(0.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+//第二个loading效果
+.grid-pulse(@time:1,@delay:0){
+  animation-delay: @delay;
+  animation-duration: @time;
+}
+
+.loaders {
+  display: flex;
+  flex-direction: row;
+  flex-wrap:wrap;
+  justify-content: space-between;
+  width: 100%;
+  height: @width * 20;
+  background: @color - #111;
+  border: none;
+  .loader {
+    flex-grow: 1;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    flex-basis: 25%;
+    max-width: 25%;
+    height: 100px;
+  }
+}
+.ball-pulse {
+  div {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    background-color: #fff;
+    border-radius: 100%;
+    margin:@width - 8px;
+  }
+  div:nth-child(1) {
+    .scale(0.75s,0.12s)
+  }
+  div:nth-child(2) {
+    .scale(0.75s,0.24s)
+  }
+  div:nth-child(3) {
+    .scale(0.75s,0.36s)
+  }
+}
+
+.ball-grid-pulse {
+  width: 57px;
+  div {
+    display: inline-block;
+    float: left;
+    width: 15px;
+    height: 15px;
+    background-color: #fff;
+    border-radius: 100%;
+    margin: 2px;
+    animation-iteration-count: infinite;
+    animation-name: ball-grid-pulse;
+    animation-delay: 0s;
+  }
+  div:nth-child(1){
+    .grid-pulse(1s,0.2s);
+  }
+  div:nth-child(2){
+    .grid-pulse(1s,0.2s);
+  }
+  div:nth-child(3){
+    .grid-pulse(1.22s,0.26s);
+  }
+  div:nth-child(4){
+    .grid-pulse(1.40s,-0.25s);
+  }
+  div:nth-child(5){
+    .grid-pulse(1.28s,0.12s);
+  }
+  div:nth-child(6){
+    .grid-pulse(1.32s,0.35s);
+  }
+  div:nth-child(7){
+    .grid-pulse(1.12s,-0.5s);
+  }
+  div:nth-child(8){
+    .grid-pulse(0.9s,-0.2s);
+  }
+  div:nth-child(9){
+    .grid-pulse(1.5s,0.42s);
+  }
+}
+@keyframes ball-grid-pulse {
+  0%{
+    transform: scale(1);
+  }
+  50%{
+    transform: scale(0.5);
+    opacity: 0.7;
+  }
+  100%{
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.triangle {
+  div {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-left:20px solid transparent;
+    border-right:20px solid transparent;
+    border-bottom:20px solid #fff;
+    animation:triangle 3s cubic-bezier(.09, .57, .49, .9) infinite;
+  }
+}
+
+@keyframes triangle {
+  25%{
+    transform: perspective(100px) rotateX(180deg) rotateY(0);
+  }
+  50%{
+    transform: perspective(100px) rotateX(180deg) rotateY(180deg);
+  }
+  75%{
+    transform: perspective(100px) rotateX(0) rotateY(180deg);
+  }
+  100%{
+    transform: perspective(100px) rotateX(0) rotateY(0);
+  }
+}
