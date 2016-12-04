@@ -1,3 +1,5 @@
 test -- bug
 这里是调试bug的地方
 想看看多人协作抓取时是否能够获取到
+我这lee的文件中获取到 origin的bug分支
+同时 修改了test.txt 文件里面的内容--good
