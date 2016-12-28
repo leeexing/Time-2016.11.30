@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>继承者</title>
+    <link rel="stylesheet" href="../lib/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="../css/index.css"/>
+    <link rel="stylesheet" href="../css/oop.css"/>
+</head>
+<body>
+
+    <div class="panel-body inherit">
+    <ul>
+        <li id="4">
+            <h4>我在二环路的里面 想着你</h4>
+            <div></div>
+        </li>
+        <li id="5">
+            <h4>你在远方的山上 春风十里</h4>
+            <div></div>
+        </li>
+        <li id="6">
+            <h4>对面的风吹向你 下了雨</h4>
+            <div></div>
+        </li>
+    </ul>
+</div>
+
+    <div class="clipping-oprate">
+        <div>
+            X<input id="input_x" class="input-x" type="range" min="-0.5" max="0.5" step="any" value="0" />
+        </div>
+        <div>
+            Y<input id="input_y" class="input-y" type="range" min="-0.5" max="0.5" step="any" value="0"/>
+        </div>
+        <div>
+            Z<input id="input_z" class="input-z" type="range" min="-0.5" max="0.5" step="any" value="0"/>
+        </div>
+    </div>
+
+
+    <script src="../lib/jquery-1.12.1.min.js"></script>
+    <script src="../js/Interface.js"></script>
+    <script>
+
+        var divElem = document.querySelector(".inherit");
+        console.log(divElem);
+        console.log(divElem.style.cssText = "border:1px solid #f90;background:#eee;margin:20px;border-radius:5px;") ;
+
+        /*$(".clipping-oprate input").mousedown(function () {
+            $(this).on("mousemove", function () {
+                var x = parseFloat($(".clipping-oprate .input-x").val()).toFixed(2);
+                var y = parseFloat($(".clipping-oprate .input-y").val()).toFixed(2);
+                var z = parseFloat($(".clipping-oprate .input-z").val()).toFixed(2);
+                console.log(x, y, z);
+            });
+        }).mouseup(function () {
+            $(this).off("mousemove");
+        });*/
+        var input_x = document.getElementsByClassName("input-x");
+        console.log(input_x);
+        var inputAll = document.getElementsByTagName("input")[0];
+        console.error(inputAll);
+        inputAll.oninput = function(){
+            console.log(this.value)
+        };
+        input_x.onchange = function(){
+            console.log(this.value)
+        };
+        document.getElementById("input_y").oninput  = function(){
+            console.log(this.value);
+        };
+        /*document.querySelector(".input-z").oninput = function(){
+            console.log(this.value);
+        }*/
+
+        //问题的症结在这里---byClassName 返回的是一个数组。需要加上一个下标。只有getById()才返回一个元素吧
+        document.getElementsByClassName("input-z")[0].oninput = function(){
+            console.log(this.value);
+        };
+
+
+
+        //////分割线///////////////////////分割线///////////////////////////分割线///////
+
+
+
+
+        var Person = function(name, age){
+            this.name = name;
+            this.age = age;
+            this.books = [];
+        };
+        Person.prototype.say = function(){
+            console.log(this.name + "," + this.age);
+        };
+        Person.prototype.getBooks = function(){
+            return this.books;
+        };
+        //person是一个函数，有prototype和constructor属性
+        /*console.log(Person.prototype);
+        console.log(Person.constructor);
+        console.log(typeof Person);//function*/
+
+        //创建一个空对象，里面有constructor和__proto__属性
+        /*var obj = {};
+        console.log(obj.__proto__);
+        console.log(obj.__proto__);*/
+
+        //这里的lee其实是一个对象
+        var lee = new Person();
+        console.info(lee.__proto__);
+        console.info(lee.prototype);
+        console.log(lee);
+
+        var Student = function(name, age){
+
+        };
+        Student.prototype = new Person();
+        var stu1 = new Student();
+        console.log(stu1);
+
+    </script>
+</body>
+</html>
