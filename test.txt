@@ -1,4 +1,4 @@
-test
+﻿test
 很想给你写封信
 告诉你这里的天
 很想给你写封信 却只是想想而已
@@ -11,3 +11,5 @@ test
 you are my only one
 you are my love and only one
 you are the only one
+
+这里是设么意思，没有通不过去？
