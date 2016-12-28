@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>立即执行函数</title>
+</head>
+<body>
+    <div class="a-wrap">
+        <a href=""></a><a href=""></a><a href=""></a><a href=""></a><a href=""></a><a href=""></a><a
+            href=""></a><a href=""></a><a href=""></a><a href=""></a>
+    </div>
+
+    <script type="text/javascript">
+        /**     用闭包保存状态
+         * 和普通function执行的时候传参数一样，自执行的函数表达式也可以这么传参，因为闭包直接可以引用传入的这些参数，
+         * 利用这些被lock住的传入参数，自执行函数表达式可以有效地保存状态。
+         */
+                //这种方法是错误的，因为i没有被locked住
+                // 相反，当循环执行以后，我们在点击的时候i才获得数值
+                // 因为这个时候i操真正获得值
+        var elems = document.getElementsByTagName("a");
+        for(var i=0;i<elems.length;i++){
+            elems[i].addEventListener("click",function(e){
+                e.preventDefault();
+                alert("I am link #" + i);
+            },false);
+        }
+
+
+        //正确的方法应该用闭包的方法将i锁定
+        var elem = document.getElementsByTagName("a");
+        for(var i=0;i<elem.length;i++){
+            //使用闭包
+            (function(lockIndex){
+                elem[i].addEventListener("click",function(){
+                    e.preventDefault();
+                    alert("I am link" + i);
+                },false);
+            })(i);
+        }
+
+        //当然还可以在执行函数的时候使用闭包将i传进去
+        var Elem = document.getElementsByTagName("a");
+        for(var i=0;i<elem.length;i++){
+            //使用闭包
+                Elem[i].addEventListener("click",(function(index){
+//                    e.preventDefault();
+                    alert("I am link" + index);
+                })(i),false);
+        }
+
+
+        /**     自执行匿名函数和立即执行的函数表达式区别
+         *我们一直叫自执行函数，确切的说是自执行匿名函数（Self-executing anonymous function）
+         * 但英文原文作者一直倡议使用立即调用的函数表达式（Immediately-Invoked Function Expression）这一名称
+         */
+
+        // 这是一个自执行的函数，函数内部执行自身，递归
+        function foo() { foo(); }
+
+        // 这是一个自执行的匿名函数，因为没有标示名称
+        // 必须使用arguments.callee属性来执行自己
+        var foo1 = function () { arguments.callee(); };
+
+        // 有些人叫这个是自执行的匿名函数（即便它不是），因为它没有调用自身，它只是立即执行而已。
+        (function () { /* code */ } ());
+
+        // 为函数表达式添加一个标示名称，可以方便Debug
+        // 但一旦命名了，这个函数就不再是匿名的了
+        (function foo() { /* code */ } ());
+
+        // 立即调用的函数表达式（IIFE）也可以自执行，不过可能不常用罢了
+//        (function () { arguments.callee(); } ());
+        (function foo() { foo(); } ());
+
+
+        /**
+         * 立即执行函数
+         */
+//        在外面定义的变量不用，再传参的时候明确定义了吧
+        var x = 42;
+        var message = (function(x){
+            return function(){
+                console.log("X is " + x);
+            }
+        })(x);      //在这里，其实已经将x传进去了
+        console.log(meaage);
+        message();  //Xx is 12
+
+        x = 12;
+        message();  //虽然上面重新定义了x的值，但是执行message的时候，输出仍然是12.这就是闭包
+    </script>
+</body>
+</html>

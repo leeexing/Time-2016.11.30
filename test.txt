@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 ﻿<<<<<<< HEAD
 test
+=======
+﻿test
+>>>>>>> dev
 很想给你写封信
 告诉你这里的天
 很想给你写封信 却只是想想而已
@@ -12,6 +16,7 @@ test
 you are my only one
 you are my love and only one
 you are the only one
+<<<<<<< HEAD
 =======
 test -- bug
 这里是调试bug的地方
@@ -23,3 +28,7 @@ test -- bug
 >>>>>>> bug
 
 怎么在dev分支上push的文件git上没有更新呢？
+=======
+
+这里是设么意思，没有通不过去？
+>>>>>>> dev

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Ajax</title>
+    <link rel="stylesheet" href="../lib/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="../css/index.css"/>
+    <link rel="stylesheet" href="../css/oop.css"/>
+</head>
+<body>
+    <div id="feed-container"></div>
+
+
+
+
+    <script src="../lib/jquery-1.12.1.min.js"></script>
+    <script src="../js/Interface.js"></script>
+    <script>
+        //先定义一个Ajax处理器的一个接口
+        var AjaxHandler = new Interface("AjaxHandler",["request","createXhrObject"]);
+        var simpleAjaxHandler = function(){};
+        simpleAjaxHandler.prototype = {
+            request: function(method,url,data,callback){
+                var xhr = this.createXhrObject();   //这里就是Ajax的东西了
+                xhr.onreadystatechange = function(){
+                    if(xhr.readyState != 4) return;
+                    if(xhr.status == 200){
+                        callback.success(xhr.responseText,xhr.reponseXml);
+                    } else {
+                        callback.failure(xhr.status);
+                    }
+                };
+                xhr.open(method,url,true);
+                if(method != "post") data = null;
+                xhr.send(data);
+            },
+            createXhrObject: function(){
+                var methods = [
+                        function(){return new XMLHttpRequest();},
+                        function(){return new ActiveXObject("MSxml12.XMLHTTP");},
+                        function(){return new ActiveXObject("Microsoft.XMLHTTP");}
+                ];
+                for(var i= 0;i<methods.length;i++){
+                    try{
+                        var f = methods[i]();
+                        /**
+                         * 下面一段代码的作用是用来提高运行效率的。不知道你理解与否
+                         */
+                        this.createXhrObject = methods[i];
+                        return f;
+                    } catch(e){
+                        continue;
+                    }
+                }
+                throw new Error("你的浏览器需要支持XMLHttpRequest对象");
+            }
+        };
+
+        var DisplayRSS = new Interface("DisplayRSS",["append","clear","remove"]);
+        /**
+         * 这里的DisplayLst是通过ul和li显示的，在实际的应用中可以创建其他的方式显示
+         * 只要每个显示方式都实现我们的DisplayList的接口即可
+         * @param id
+         * @param parent
+         * @constructor
+         */
+        var DisplayList = function(id,parent){
+            this.list = document.createElement("ul");
+            this.list.id = id;
+            parent.appendChild(this.list);
+        };
+
+        DisplayList.prototype = {
+            append:function(txt){
+                var newEl = document.createElement("li");
+                this.list.appendChild(newEl);
+                newEl.innerHTML = txt;
+                return newEl;
+            },
+            clear:function(){
+                this.list.innerHTML = "";
+            },
+            remove:function(el){
+                this.list.removeChild(el);
+            }
+        };
+
+        //将一些信息保存起来，存放在一个容器中
+        var conf = {
+            id:"simple-feed-reader",
+            parent: document.getElementById("feed-container"),
+            feedUrl:"view-source:http://news.baidu.com/n?cmd=1&class=internews&tn=rss",
+            updateInterval:120
+        };
+
+        /**
+         * 对于一个feedreader而言，首先要知道用什么方式来显示，第一个参数就传入我们的display
+         * 第二个参数要知道通过哪种方式来访问 ajax
+         * 第三个参数传入我们的配置 conf
+         * @constructor
+         */
+        var FeedReader = function(dispaly, ajaxHandler,conf){
+            this.display = dispaly;
+            this.ajaxHandler = ajaxHandler;
+            this.conf = conf;
+            this.startUpdate();
+        };
+        FeedReader.prototype = {
+            startUpdate: function(){
+                this.fetchFeed();
+                var that = this;
+                this.interval = setInterval(function(){
+                    that.startUpdate();
+                },this.conf.updateInterval*1000);
+            },
+            stopUpdate: function(){
+                clearInterval(this.interval);
+            },
+            fetchFeed: function(){
+                var that = this;
+                var callback = {
+                    success: function(txt,xml){
+                        that.parseFeed(xhl)
+                    },
+                    failure: function(code){
+                        that.showError(code);
+                    }
+                };
+                this.ajaxHandler.request("get",this.conf.feedUrl,null,callback);
+            },
+            parseFeed: function(xml){
+                var items = xml.getElementsByTagName("item");
+                this.display.clear();
+                for(var i= 0;i<items.length;i++){
+                    var title = items[i].getElementsByTagName("title")[0];
+                    var link = items[i].getElementsByTagName("link")[0];
+                    var txt = '<a href="'+link.firstChild.data+'">'+title.firstChild.data+'</a>';
+                    this.display.append(txt);
+                }
+            },
+            showError: function(code){
+                this.display.clear();
+                this.display.append("发生错误："+code);
+            }
+
+        };
+
+        /**
+         * 接下来我们需要创建FeedReader对象了，需要传入DisplayList和simpleAjaxHandler
+         * 这里我们使用工厂模式进行创建
+         * 专门创建一个方法将不同的组件组合在一起
+         */
+        var FeedManager = {
+            createSimpleFeedReader: function(conf){
+                var display = new DisplayList(conf.id+"-dispaly",conf.parent);
+                Interface.checkImplements(display,DisplayRSS);
+                var ajaxHandler = new simpleAjaxHandler();
+                Interface.checkImplements(ajaxHandler,AjaxHandler);
+                var feedReader = new FeedReader(display,ajaxHandler,conf);
+                return feedReader;
+            },
+            //这里就可以创建其他的方法，体现了工厂模式的优势--降低耦合
+            createOtherMethod: function(){
+
+            }
+        };
+
+        FeedManager.createSimpleFeedReader(conf);
+
+    </script>
+</body>
+</html>

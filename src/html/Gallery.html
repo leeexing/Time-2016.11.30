@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>图像库--方法组合</title>
+    <link rel="stylesheet" href="../lib/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="../css/index.css"/>
+    <link rel="stylesheet" href="../css/oop.css"/>
+</head>
+<body>
+
+    <div id="content"></div>
+
+
+
+
+    <script src="../lib/jquery-1.12.1.min.js"></script>
+    <script src="../js/Interface.js"></script>
+    <script src="../js/Gallery.js"></script>
+    <script>
+
+        window.onload = loadsuccess;
+        function loadsuccess(){
+            var gg = new GalleryGroup("gg01");
+            var dd = new GalleryImage("../image/item1.jpg");
+            gg.add(dd);
+            gg.add(new GalleryImage("../image/item2.jpg"));
+            gg.add(new GalleryImage("../image/item3.jpg"));
+            document.getElementById("content").appendChild(gg.getElement());
+
+            var gg2 = new GalleryGroup("gg02");
+            gg2.add(new GalleryImage("../image/item4.jpg"));
+            gg2.add(new GalleryImage("../image/item5.jpg"));
+            gg2.add(new GalleryImage("../image/item6.jpg"));
+
+            gg.add(gg2);
+
+            gg.get(0).hide();
+        }
+
+    </script>
+</body>
+</html>

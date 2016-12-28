@@ -1,0 +1,31 @@
+.oop li {
+    height: 36px;
+    margin: 5px 0;
+}
+.oop li input[type='button'] {
+    margin-left: 5px;
+}
+.inherit li input[type='button'] {
+    margin-left: 5px;
+}
+.inherit li h4 {
+    color:#f90;
+}
+
+
+.alert-layer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 50%;
+    bottom: 0;
+    background-color: #aaa;
+    z-index: 99;
+}
+
+#demo {
+    width: 100px;
+    height:100px;
+    background: #000;
+    margin: 10px auto;
+}

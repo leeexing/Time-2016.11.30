@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>神雕侠侣</title>
+    <link rel="stylesheet" href="../lib/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="../css/index.css"/>
+    <link rel="stylesheet" href="../css/oop.css"/>
+</head>
+<body>
+    <script src="../lib/jquery-1.12.1.min.js"></script>
+    <script src="../js/Interface.js"></script>
+    <script>
+        var walkable = new interface("walkable", ["walk"]);
+        var fightable = new interface("fightable", ["fight","kill"]);
+        var Knight = function(name){
+            this.name = name;
+        };
+        Knight.prototype.walk = function(){
+            alert(this.name+" is walking");
+        };
+        Knight.prototype.fight = function(){
+            alert(this.name+" is fighting");
+        };
+        Knight.prototype.kill = function(){
+            alert(this.name+" is kiling");
+        };
+
+        var k = new Knight("悟空");
+
+        function addKnight(Knight){
+            interface.checkImplements(Knight, walkable, fightable);
+//            k.fight();
+        }
+        addKnight(k);
+
+
+        var PersonInterface = new interface("Person",["setNo","setName","getName","getNo"]);
+        var Person = function(name,age,no){
+            this.name = name;
+            this.age = age;
+            this.no = no;
+        };
+        Person.prototype = {
+            setNo: function(no){
+                if(!this.checkNo(no)){
+                    throw new Error("学号必须是4位！");
+                }
+                else{
+                    this.no = no;
+                }
+            },
+            checkNo: function(no){
+                if(!no || no.length != 4) return false;
+                return true;
+            },
+            getNo: function(){
+                return this.no;
+            },
+            setName: function(name){
+                this.name = name;
+            },
+            getName: function(){
+                return this.name;
+            },
+            show: function(){
+                alert(this.name + " is " + this.age + ", and number: " + this.no);
+            }
+        };
+        var stu = new Person("刘若琪",265,"0001");
+        stu.no = '9999';
+
+        function addPerson(Person){
+            interface.checkImplements(Person,PersonInterface);
+            stu.show();
+        }
+        addPerson(stu);
+
+    </script>
+</body>
+</html>

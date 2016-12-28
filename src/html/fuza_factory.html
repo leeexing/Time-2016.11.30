@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>复杂的工厂模式</title>
+    <link rel="stylesheet" href="../lib/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="../css/index.css"/>
+    <link rel="stylesheet" href="../css/oop.css"/>
+</head>
+<body>
+    <script src="../lib/jquery-1.12.1.min.js"></script>
+    <script src="../js/Interface.js"></script>
+    <script>
+
+        var ICar = new Interface("ICar",["assemble","wash","run"]);
+
+        var AudiCar = function(){};
+        AudiCar.prototype = {
+            assemble: function(){
+                alert("奥迪小轿车组装中");
+            },
+            wash: function(){
+                alert("奥迪小轿车清洗中");
+            },
+            run: function(){
+                alert("奥迪小轿车行驶中");
+            }
+        };
+
+        var AudiTruck  = function(){};
+        AudiTruck.prototype = {
+            assemble: function(){
+                alert("奥迪大卡车组装中");
+            },
+            wash: function(){
+                alert("奥迪大卡车清洗中");
+            },
+            run: function(){
+                alert("奥迪大卡车行驶中");
+            }
+        };
+
+        var CarShop = function(){};
+        CarShop.prototype = {
+            sellCar: function(model){
+                var car = this.createCar(model);
+
+                car.assemble();
+                car.wash();
+                return car;
+            },
+            createCar: function(model){
+                throw new Error("这是一个抽象的对象，需要在子类中实现")
+            }
+        };
+
+        var AudiCarShop = function(){};
+        extend(AudiCarShop,CarShop);
+        function extend(subClass, supClass){
+            var F = function(){};
+            F.prototype = supClass.prototype;
+            subClass.prototype = new F();
+            //supClass这个子类的supClass属性，和父类supClass是不一样的
+            subClass.supClass = supClass.prototype;
+        }
+
+        AudiCarShop.prototype.createCar = function(model){
+            var car;
+            switch(model){
+                case "car":
+                    car = new AudiCar();
+                    break;
+                case "truck":
+                    car = new AudiTruck();
+                    break;
+            }
+            Interface.checkImplements(car, ICar);
+            return car;
+        };
+
+        var BenzCar = function(){};
+        BenzCar.prototype = {
+            assemble: function(){
+                alert("奔驰的小轿车组装中");
+            },
+            wash: function(){
+                alert("奔驰的小轿车清洗中");
+            },
+            run: function(){
+                alert("奔驰的小轿车行驶中");
+            }
+        };
+
+        var BenzTruck  = function(){};
+        BenzTruck.prototype = {
+            assemble: function(){
+                alert("奔驰的大卡车组装中");
+            },
+            wash: function(){
+                alert("奔驰的大卡车清洗中");
+            },
+            run: function(){
+                alert("奔驰的大卡车行驶中");
+            }
+        };
+
+        //如果现在想创建一个奔驰的工厂，那么只需要这样
+        var BenzCarShop = function(){};
+        extend(BenzCarShop, CarShop);
+        BenzCarShop.prototype.createCar = function(model){
+            var car;
+            switch(model){
+                case "car":
+                    car = new BenzCar();
+                    break;
+                case "truck":
+                    car = new BenzTruck();
+                    break;
+            }
+            Interface.checkImplements(car, ICar);
+            return car;
+        };
+
+        var c = new BenzCarShop().sellCar("car");
+        console.log(c);
+        c.run();
+
+    </script>
+</body>
+</html>

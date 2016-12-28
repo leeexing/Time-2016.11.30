@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>单体模式---创建闭包</title>
+    <link rel="stylesheet" href="../lib/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="../css/index.css"/>
+    <link rel="stylesheet" href="../css/oop.css"/>
+</head>
+<body>
+
+
+    <script src="../lib/jquery-1.12.1.min.js"></script>
+    <script src="../js/Interface.js"></script>
+    <script>
+        /**
+         * 这里我们想返回一个公共方法和一个公共属性，函数里面还有一些不能被外部访问到的私有属性方法
+         * 同时，我们想只有在我们需要的时候再创建相应的变量空间以免浪费内存空间
+         */
+
+        var singleTon = (function(){
+            var instantiated;
+            function init(){
+                //这里定义单例代码
+                var privateVar = "happy";
+                function privateFun(){
+                    console.log("are you " + privateVar);
+                }
+                return {
+                    publicFun: function(){
+                        privateFun();
+                        console.log("hello world 私有方法");
+                    },
+                    publicProperty: "rest"
+                }
+            }
+
+            return {
+                getInstance:function(){
+                    if(!instantiated){
+                        instantiated = init();
+                    }
+                    return instantiated;    //这里可是一个对象
+                }
+            }
+        })();
+
+        /**
+         * 需要调用共有方法的时候，通过下面的方式获取
+         */
+//        singleTon.getInstance().publicFun();
+
+
+        /**
+         * 另外一种应用，主要在于系统间各种模式的通信协调上
+         */
+        var SingletonTester = (function(){
+            //参数，传递给单例的一个参数集合
+            function Singleton(args){
+                var args = args || {};
+                this.name = "SingletonTester";
+                this.pointX = args.pointX || 6;
+                this.ponitY = args.pointY || 10;
+            }
+
+            //实例容器
+            var instance;
+
+            var _static = {
+                name:"singletonTester",
+                getInstance:function(args){
+                    if(!instance){
+                        instance = new Singleton(args); //直接实例化一个Singleton的实例
+                    }
+                    return instance;
+                }
+            };
+            return _static;
+        })();
+
+        var singletonTest = SingletonTester.getInstance({pointX:5});
+        console.log(singletonTest.pointX);
+
+        /**
+         * 实现单例的几种方法
+         */
+        function Universe(){
+            //判断是否存在实例
+            if(typeof Universe.instance === 'object'){
+                return Universe.instance;
+            }
+
+            //否则，创建实例
+            this.start_time = 0;
+            this.bang = "BIg";
+
+            //缓存
+            Universe.instance = this;
+            //隐式的返回 this
+        }
+        //测试
+        var uni = new Universe();
+        var uni2 = new Universe();
+        console.log(uni == uni2);   //true, 这说明new两次，单只创建了一个实例
+
+        //方法2
+        function Universe2(){
+            //缓存实例
+            var instance = this;
+
+            //其他内容
+            this.name = '大神';
+            this.bang = "Big";
+            this.method = function(){
+                console.log("这里是单例的第二种写法");
+            };
+
+            // 重写构造函数   --- 没有这个重构，实例化的每个对象都是不同的。虽然指向的prototype都一样的，但是内部的this是不同的
+            Universe2 = function(){
+                return instance;    //返回的始终是第一次初始化的this对象。第二次在new实例的时候返回的也是instance，而不是this
+            }
+        };
+        //测试
+        var univ = new Universe2();
+        var univ2= new Universe2();
+        console.log(univ2);
+        univ.bang = "hello world";
+        console.log(univ === univ2);
+        console.log(univ2.bang);
+
+        //方法三
+        var Universe3;
+        (function(){
+            var instance;
+            Universe3 = function(){
+                if(!instance){
+                    instance = this;
+                    this.name = "bobo";
+                    this.age = 22;
+                }
+                return instance;
+            };
+        })();
+        //测试
+        var a = new Universe3();
+        var b = new Universe3();
+        console.info(b);
+        console.log(a === b);
+        a.name = "jiangjang";
+        console.log(b.name);
+
+    </script>
+</body>
+</html>

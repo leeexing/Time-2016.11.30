@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>module</title>
+
+</head>
+<body>
+    <div id="content"></div>
+
+    <script type="text/javascript">
+        /**
+         * 这里主要介绍有关module的知识
+         * module的主要特点就是：1.模块化、可重用；2、封装了变量和function，和全局的namespace不接触，松耦合；3、只暴露可用的public方法，其他私有方法全部隐藏
+         *
+         */
+        //第一个例子
+        var calculate = function(id){
+            //这里可以申明私有成员
+            var divEle = document.getElementById(id);
+            return {
+                //这里可以暴露公有成员
+                add:function(a,b){
+                    var sum = a+b;
+                    /**
+                     * 好奇怪的一点，new和不new，返回的这个divEle对象时不一样的。不知道为什么
+                     */
+                    console.log(divEle);
+                    divEle.innerHTML = sum;
+                }
+            };
+        };
+        //如何调用呢？
+//        calculate("content").add(2,6);
+        var calculator = new calculate("content");
+        calculator.add(2,9);
+
+        /**
+         * 不过，有时候可能不仅仅要使用全局变量，而是也想声明全局变量，如何做呢？我们可以通过匿名函数的返回值来返回这个全局变量，这也就是一个基本的Module模式
+         */
+        var blogModule = (function(){
+            var my = {},privateNmae = "博客园";
+            function privateAddTopic(data){
+                //这里是内部处理代码
+            }
+
+            my.name = privateNmae;
+            my.addTopic = function(data){
+                privateAddTopic(data);
+            };
+
+            return my;
+        }());
+
+        /**     扩展
+         * Module模式的一个限制就是所有的代码都要写在一个文件，但是在一些大型项目里，将一个功能分离成多个文件是非常重要的，因为可以多人合作易于开发。
+         * 再回头看看上面的全局参数导入例子，我们能否把blogModule自身传进去呢？答案是肯定的，我们先将blogModule传进去
+         * 添加一个函数属性，然后再返回就达到了我们所说的目的.代码如下
+         */
+        var blogModule = (function(my){
+            my.AddPhoto = function(data){
+                //添加内部代码
+                //这样做的好处是，将外部引进来的同名的blogModule变量进行了扩展
+                //使其获得了一个新的方法——AddPhoto
+                //我们再次使用了它，代码执行以后，blogModule下的AddPhoto就可以使用了，同时匿名函数内部的代码也依然保证了私密性和内部状态。
+            };
+            return my;
+        }(blogModule));
+
+        /**     松耦合扩展
+         * 上面的代码尽管可以执行，但是必须先声明blogModule，然后再执行上面的扩展代码，也就是说步骤不能乱
+         * 我们平时声明变量的都是都是这样的：var cnblogs = cnblogs || {} ;
+         * 所以我们可以这样使用
+         */
+        var blogModule = (function(my){
+
+                //添加一些新的功能方法
+
+            return my;
+        }(blogModule || {}));
+
+        /**     紧耦合扩展
+         *虽然松耦合扩展很牛叉了，但是可能也会存在一些限制，比如你没办法重写你的一些属性或者函数
+         * 也不能在初始化的时候就是用Module的属性。紧耦合扩展限制了加载顺序，但是提供了我们重载的机会
+         */
+        var blogModule = (function(my){
+            //将原有的AddPhoto保存起来
+            var oldAddPhotoMethod = my.AddPhoto;
+
+            my.AddPhoto = function(data){
+
+                //重载方法，但依然可以通过oldAddPhotoMethod调用旧的方法
+            };
+
+            return my;
+        }(blogModule || {}));
+
+        /**     继承和克隆
+         * 这种方式灵活是灵活，但是也需要花费灵活的代价，其实该对象的属性对象或function根本没有被复制，只是对同一个对象多了一种引用而已
+         * 所以如果老对象去改变它，那克隆以后的对象所拥有的属性或function函数也会被改变，解决这个问题
+         * 我们就得是用递归，但递归对function函数的赋值也不好用，所以我们在递归的时候eval相应的function
+         */
+        var blogModule = (function(old){
+            var my = {},key;
+
+            for(key in old){
+                if(old.hasOwnProperty(key)){
+                    my[key] = old[key];
+                }
+            }
+
+            var oldAddPhotoMethod = old.AddPhoto;
+            my.AddPhoto = function(){
+                //克隆以后，重写；当然也还可以调用旧的方法
+            };
+            return my;
+        }());
+
+        /**     子模块
+         *子模块也具有一般模块所有的高级使用方式，也就是说你可以对任意子模块再次使用上面的一些应用方法。
+         */
+        var blogModule = {};
+        blogModule.CommonSubModule = (function(){
+            var my = {
+
+            };
+            return my;
+        }());
+
+
+        /**
+         *  理解增强型的模块模式
+         *  使用场合是：适合那些单例必须是某种类型的实例
+         */
+    </script>
+</body>
+</html>
