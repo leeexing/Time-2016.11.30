@@ -22,6 +22,15 @@
     background-color: #aaa;
     z-index: 99;
 }
+.alert-r {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    right: 0;
+    bottom: 0;
+    background-color: #aaa;
+    z-index: 99;
+}
 
 #demo {
     width: 100px;

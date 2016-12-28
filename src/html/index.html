@@ -43,6 +43,32 @@
                     </address>
                 </div>
             </div>
+            <div class="panel panel-warning">
+                <div class="panel-heading">
+                    <h5 class="panel-title">
+                        把所有的春天 都揉进了一个清晨
+                        <i class="glyphicon glyphicon-apple"></i>
+                    </h5>
+                </div>
+                <div class="panel-body envelope-warp">
+                    <h3 >你是我的唯一<i class="glyphicon glyphicon-heart-empty"></i></h3>
+                    <p>
+                        好想给你写封信。<a class="btn btn-default btn-sm right-single">右边单体</a>
+                        &nbsp;
+                        告诉你这里的天气。<a class="btn btn-success btn-sm right-clear">没有雾霾</a>
+                    </p>
+                    <p>
+                        昨夜的那一场电影。<a class="btn btn-default btn-sm envelope-show">信封</a>
+                        &nbsp;
+                        还有我的心情。<a class="btn btn-success btn-sm envelope-hide"><i class="glyphicon glyphicon-envelope"></i>文字</a>
+                    </p>
+                    <ul class="input-demo">
+                        <li class="list1">好饿</li>
+                        <li class="list2">吃饭</li>
+                        <li class="list3">睡觉</li>
+                    </ul>
+                </div>
+            </div>
         </div>
         <div class="col-md-6">
             <div class="panel panel-success">
@@ -203,6 +229,157 @@
             $(".inherit li div").each(function(){
                 new PlaceAreaEditor($(this).parent().attr("id"), '请留言...', $(this));
             });
+        });
+
+        $(function(){
+            var SingleTon = function(fn){
+                var result;
+                return function(){
+                    return result || (result = fn.call(this,arguments));
+                }
+            };
+            var CreateRightAlertFun = function(){
+                var div = document.createElement("div");
+                    div.className = "alert-r";
+                    var h3 = document.createElement("h3");
+                    h3.style.cssText = "text-align:center;background:#f90;color:#fff";
+                    h3.appendChild(document.createTextNode("说声好久不见，沉默了"));
+                    div.appendChild(h3);
+                    document.body.appendChild(div);
+                return div;
+            };
+            var CreateEnvelope = function(){
+                var envelope = document.createElement("p");
+                envelope.classList = 'bg-success';
+                envelope.style.cssText = "padding:10px 8px;font-size:18px";
+                var spanEle = document.createElement("span");
+                spanEle.classList = "glyphicon glyphicon-earphone";
+                spanEle.style.cssText = "margin-right:10px;";
+                envelope.appendChild(spanEle);
+                envelope.appendChild(document.createTextNode("You are my only one"));
+                document.getElementsByClassName("envelope-warp")[0].appendChild(envelope);
+                return envelope;
+            };
+            //直接可以用的单体，缺点是不能实现通用化
+            var CreateRightAlert = (function(){
+                var Alert_R;
+                return function(){
+                    if(!Alert_R){
+                        Alert_R = document.createElement("div");
+                        Alert_R.className = "alert-r";
+                        var h3 = document.createElement("h3");
+                        h3.style.cssText = "text-align:center;background:#f90;color:#fff";
+                        h3.appendChild(document.createTextNode("说声好久不见，沉默了"));
+                        Alert_R.appendChild(h3);
+                        document.body.appendChild(Alert_R);
+                        console.log(45)
+                    }
+                    return Alert_R;
+                }
+            })();
+            var div_R = SingleTon(CreateRightAlertFun);
+            $(".right-single").on("click",function(){
+                var Alert_R = div_R();
+                Alert_R.style.display = "block";
+            });
+            $(".right-clear").on("click",function(){
+                var Alert_R = div_R();
+                Alert_R.style.display = "none";
+            });
+
+            var Envelope = SingleTon(CreateEnvelope);
+            $(".envelope-show").on("click",function(){
+                var envelope = Envelope();
+                envelope.style.display = "block";
+            });
+            $(".envelope-hide").on("click",function(){
+                var envelope = Envelope();
+                envelope.style.display = "none";
+            });
+
+            var InputField = function(id,value,parentEle){
+                this.element = document.createElement("div");
+                this.element.id = id;
+                this.parent = parentEle;
+                this.value = value;
+                this.originValue = value;
+
+                this.initElement();
+                this.initEvent();
+                this.converToRead();
+            };
+            InputField.prototype = {
+                initElement:function(){
+                    this.spanEle = document.createElement("span");
+                    this.spanEle.style.display = "inline-block";
+                    this.spanEle.appendChild(document.createTextNode(this.value));
+
+                    this.inputEle = document.createElement("input");
+                    this.inputEle.style.display = "inline-block";
+                    this.inputEle.type = "text";
+                    this.inputEle.value = this.value;
+
+                    this.BtnWrap = document.createElement("div");
+                    this.BtnWrap.style.display = "inline-block";
+                    this.saveBtn = document.createElement("a");
+                    this.saveBtn.classList = "btn btn-default btn-sm";
+                    this.saveBtn.appendChild(document.createTextNode("保存"));
+                    this.cancelBtn = document.createElement("a");
+                    this.cancelBtn.classList = "btn btn-default btn-sm";
+                    this.cancelBtn.appendChild(document.createTextNode("取消"));
+                    this.BtnWrap.appendChild(this.saveBtn);
+                    this.BtnWrap.appendChild(this.cancelBtn);
+                    this.parent.append(this.spanEle).append(this.inputEle).append(this.BtnWrap);
+                },
+                initEvent:function(){
+                    var that = this;
+                    this.spanEle.addEventListener("click",function(){
+                        that.converToWrite();
+                    },false);
+                    this.saveBtn.addEventListener("click",function(){
+                        that.save();
+                    },false);
+                    this.cancelBtn.addEventListener("click",function(){
+                        that.cancel();
+                    },false);
+                },
+                converToRead:function(){
+                    this.spanEle.style.display = "block";
+                    this.inputEle.style.display = "none";
+                    this.BtnWrap.style.display = "none";
+                },
+                converToWrite:function(){
+                    this.inputEle.value = this.getValue();
+                    this.spanEle.style.display = "none";
+                    this.inputEle.style.display = "block";
+                    this.BtnWrap.style.display = "block";
+                },
+                save:function(){
+                    this.setValue(this.inputEle.value);
+                    if(this.value == ""){
+                        this.setValue(this.originValue);
+                    }
+                    this.spanEle.innerText = this.getValue();
+                    this.converToRead();
+                },
+                cancel:function(){
+                    this.converToRead();
+                },
+                getValue:function(){
+                    return this.value;
+                },
+                setValue:function(value){
+                    this.value = value;
+                },
+                getElement:function(){
+                    return this.element;
+                }
+            };
+
+            $(".input-demo li").each(function(index,elem){
+                $(this).append(new InputField(index,"哈利路亚",$(this)));
+            })
+
         });
 
     </script>
