@@ -63,9 +63,9 @@
                         还有我的心情。<a class="btn btn-success btn-sm envelope-hide"><i class="glyphicon glyphicon-envelope"></i>文字</a>
                     </p>
                     <ul class="input-demo">
-                        <li class="list1">好饿</li>
-                        <li class="list2">吃饭</li>
-                        <li class="list3">睡觉</li>
+                        <li class="list1">我已经不能肯定：</li>
+                        <li class="list2">你是不是还会关心：</li>
+                        <li class="list3">或许你不相信：</li>
                     </ul>
                 </div>
             </div>
@@ -92,11 +92,11 @@
                     	所有的酒，都不如你
                     	<span class="glyphicon glyphicon-heart pull-right"></span>
                     	<p>
-                    		<a class="btn btn-danger">鹿先生</a>
-                    		<a class="btn btn-danger guan">所有的酒</a>
+                    		<a class="btn btn-danger tantan">鼓楼夜色</a>
+                    		<a class="btn btn-danger guan">车水马龙</a>
                     	</p>
                     	<p>
-                    		<a class="btn btn-warning tantan">ma先生</a>
+                    		<a class="btn btn-warning">千里之外不离开</a>
                     	</p>
                     </div>
                 </div>
@@ -131,6 +131,8 @@
                             <h4>对面的风吹向你 下了雨</h4>
                             <div></div>
                         </li>
+                        <!--tif格式的图片img便签不能显示-->
+                        <img src="../image/trumpet.tif" alt="喇叭"/>
                     </ul>
                 </div>
             </div>
@@ -194,7 +196,7 @@
                         div.style.display = 'none';
                         document.body.appendChild(div);*/
 
-                        div = $('<div class="alert-layer">您好漂亮</div>');
+                        div = $('<div class="alert-layer"><h3 class="bg-success text-center">您好漂亮</h3></div>');
                         //不能简单的写成 div = '<div class="alert-layer">您好漂亮</div>';会影响后面的操作，因为获取不到元素
                         $("body").append(div);
                         return div;
@@ -344,15 +346,16 @@
                     },false);
                 },
                 converToRead:function(){
-                    this.spanEle.style.display = "block";
+                    this.spanEle.style.display = "inline-block";
                     this.inputEle.style.display = "none";
                     this.BtnWrap.style.display = "none";
                 },
                 converToWrite:function(){
                     this.inputEle.value = this.getValue();
                     this.spanEle.style.display = "none";
-                    this.inputEle.style.display = "block";
-                    this.BtnWrap.style.display = "block";
+                    this.inputEle.style.display = "inline-block";
+                    this.inputEle.focus();
+                    this.BtnWrap.style.display = "inline-block";
                 },
                 save:function(){
                     this.setValue(this.inputEle.value);
