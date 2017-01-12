@@ -70,6 +70,17 @@ function addThousands(str){
         }
     }
     console.log(result.join(","));
+
+    var jiang = {
+        "name":"hejiang",
+        "password":"111222",
+        "age":27,
+        "address":{
+            "province":"hunan",
+            "city":"changsha"
+        },
+        "favourate":["basketball","apple","mengmeizhi"]
+    }
 }
 
 /*
