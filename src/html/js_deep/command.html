@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>命令模式</title>
+</head>
+<body>
+
+    <button id="button1">刷新菜单目录</button>
+    <button id="button2">增加子菜单</button>
+    <button id="button3">删除子菜单</button>
+
+    <script>
+        /*
+         命令模式使用的场景有：有时候需要向某些对象发送请求，但是并不知道请求的接收者是谁，也不知道请求的操作是什么，
+         此时希望用一种松耦合的方式来设计程序代码;使得请求发送者和请求接受者消除彼此代码中的耦合关系。
+         */
+
+        /*
+         记得我以前刚做前端的那会儿，也就是刚毕业进的第一家公司，进的是做外包项目的公司，
+         该公司一般外包淘宝活动页面及腾讯的游戏页面，我们那会儿应该叫切页面的前端，负责做一些html和css的工作，
+         所以那会儿做腾讯的游戏页面，经常会帮他们做静态页面，比如在页面放几个按钮，
+         我们只是按照设计稿帮腾讯游戏哪方面的把样式弄好，比如说页面上的按钮等事情，比如说具体说明的按钮要怎么操作，
+         点击按钮后会发生什么事情，我们并不知道，我们不知道他们的业务是什么，当然我们知道的肯定会有点击事件，
+         具体要处理什么业务我们并不知道，这里我们就可以使用命令模式来处理了：点击按钮之后，
+         必须向某些负责具体行为的对象发送请求，这些对象就是请求的接收者。但是目前我们并不知道接收者是什么对象，
+         也不知道接受者究竟会做什么事情，这时候我们可以使用命令模式来消除发送者与接收者的代码耦合关系。
+         */
+
+
+        var b1 = document.getElementById("button1"),
+                b2 = document.getElementById("button2"),
+                b3 = document.getElementById("button3");
+        /*var setCommand = function(button,func) {
+            button.onclick = function(){
+                func();
+            }
+        };
+        var MenuBar = {
+            refersh: function(){
+                alert("刷新菜单界面");
+            }
+        };
+        var SubMenu = {
+            add: function(){
+                alert("增加菜单");
+            }
+        };
+        // 刷新菜单
+        var RefreshMenuBarCommand = function(receiver) {
+            return function(){
+                receiver.refersh();
+            };
+        };
+        // 增加菜单
+        var AddSubMenuCommand = function(receiver) {
+            return function(){
+                receiver.add();
+            };
+        };
+        var refershMenuBarCommand = RefreshMenuBarCommand(MenuBar);
+        // 增加菜单
+        var addSubMenuCommand = AddSubMenuCommand(SubMenu);
+        setCommand(b1,refershMenuBarCommand);
+
+        setCommand(b2,addSubMenuCommand);*/
+
+        /*
+         bindEnv函数负责往按钮上面安装点击命令。点击按钮后，会调用
+         函数
+         */
+        var bindEnv = function(button,func) {
+            button.onclick = function(){
+                func();
+            }
+        };
+        // 现在我们来编写具体处理业务逻辑代码
+        var Todo1 = {
+            test1: function(){
+                alert("我是来做第一个测试的");
+            }
+        };
+        // 实现业务中的增删改操作
+        var Menu = {
+            add: function(){
+                alert("我是来处理一些增加操作的");
+            },
+            del: function(){
+                alert("我是来处理一些删除操作的");
+            },
+            update: function(){
+                alert("我是来处理一些更新操作的");
+            }
+        };
+        // 调用函数
+        bindEnv(b1,Todo1.test1);
+        // 增加按钮
+        bindEnv(b2,Menu.add);
+        // 删除按钮
+        bindEnv(b3,Menu.del);
+    </script>
+</body>
+</html>
