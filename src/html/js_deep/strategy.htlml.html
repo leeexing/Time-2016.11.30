@@ -217,13 +217,33 @@
         Validator.prototype.add = function(dom,rule,errorMsg) {
             var str = rule.split(":");  //没有 ：就忽略，主要是用来考虑minLength:6 这种情况的
             this.cache.push(function(){
-                // str 返回的是 minLength:6
+                //获取数组的第一个元素.这里题主处理得很好啊。我都没有很好理解。dom用于获取哪个元素的值
+                // str 已经是一个数组，已经很好的处理了 minLength 是三个参数的问题了。自己没有很好理解
                 var strategy = str.shift();
+                // str 返回的是 minLength:6
                 str.unshift(dom.value); // 把input的value添加进参数列表
                 str.push(errorMsg);  // 把errorMsg添加进参数列表
                 return strategys[strategy].apply(dom,str);
             });
         };
+        // 如果想对同一个input做多重验证，需要多上面的add方法做相应的更改
+        Validator.prototype.addMore = function(dom, rules){     //rules 是一个 [strategy:'',errorMsg:'wohenhao']
+            var that = this;
+            for(var i=0;i<rules.length;i++){
+                (function(i){
+                    var rule = rules[i];
+                    var errorMsg = rule.errorMsg;
+                    var str = rule.strategy.split(":");
+                    that.cache.push(function(){
+                        var strategy = str.shift();
+                        str.unshift(dom.value);
+                        str.push(errorMsg);
+                        return strategys[strategy].apply(dom,str);
+                    })
+                })(i)
+            }
+        };
+
         Validator.prototype.start = function(){
             for(var i = 0, validatorFunc; validatorFunc = this.cache[i++]; ) {
                 var msg = validatorFunc(); // 开始效验 并取得效验后的返回信息
@@ -239,7 +259,7 @@
             /* 添加一些效验规则 */
             validator.add(registerForm.userName,'isNotEmpty','用户名不能为空');
             validator.add(registerForm.password,'minLength:6','密码长度不能小于6位');
-            validator.add(registerForm.userName,'mobileFormat','手机号码格式不正确');
+            validator.add(registerForm.phoneNumber,'mobileFormat','手机号码格式不正确');
 
             var errorMsg = validator.start(); // 获得效验结果
             return errorMsg; // 返回效验结果
