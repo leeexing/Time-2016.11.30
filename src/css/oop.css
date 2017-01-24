@@ -1,3 +1,19 @@
+fieldset {
+    margin: 10px 0 20px;
+    padding: 0;
+    height: 30px;
+    border: none;
+    border-top: 1px solid #f90;
+}
+legend {
+    display: block;
+    border: none;
+    width: inherit;
+    margin-left: 20px;
+    padding: 0 10px;
+    color: #20b959;
+}
+
 .oop li {
     height: 36px;
     margin: 5px 0;
@@ -7,6 +23,7 @@
 }
 .inherit li input[type='button'] {
     margin-left: 5px;
+    border-radius: 1px;
 }
 .inherit li h4 {
     color:#f90;
