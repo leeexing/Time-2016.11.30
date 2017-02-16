@@ -1,0 +1,140 @@
+* {
+    box-sizing: border-box;
+}
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Barrio', 'cursive';
+}
+.site {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+.content {
+    flex: 1;
+}
+.gutter {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 100px;
+    background-color: #eee;
+}
+.cell {
+    /*flex-grow: 1;*/
+}
+.cell2 {
+    order: 2;
+    /*flex-grow: 2;*/
+    /*align-self: flex-end;*/
+}
+
+.content1 {
+    float: left;
+    width: 100%;
+}
+.main {
+    height: 200px;
+    margin-left: 110px;
+    margin-right: 220px;
+    background-color: green;
+}
+.left {
+    float: left;
+    height: 200px;
+    width: 100px;
+    margin-left: -100%;
+    background-color: red;
+}
+.right {
+    width: 200px;
+    height: 200px;
+    float: right;
+    margin-left: -200px;
+    background-color: blue;
+}
+
+/*
+*  tree 内容样式显示
+*/
+.gray-section {
+    float: left;
+}
+#tree {
+    margin: 20px;
+}
+.tree-contain {
+    width: 400px;
+}
+.tree-node, .tree-icon {
+    background-image: url(../image/tree.png);
+    background-color: transparent;
+}
+.tree-node {
+    display: block;
+    min-width: 24px;
+    line-height: 24px;
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    list-style-image: none;
+    white-space: nowrap;
+    background-position: -292px -4px;
+    background-repeat: repeat-y;
+}
+.tree-node.tree-last {
+    background-image: none;
+}
+.tree-icon:empty {
+    background-image: url(../image/tree.png);
+    display: inline-block;
+    text-align: center;
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+}
+.tree-open > .tree-ocl {
+    background-position: -132px -4px;
+}
+.tree-close > .tree-ocl {
+    background-position: -100px -4px;
+}
+.tree-leaf > .tree-ocl {
+    background-position: -68px -4px;
+}
+.tree-last > .tree-ocl {
+    background-position: -68px -4px;
+}
+.tree-anchor {
+    display: inline-block;
+    line-height: 24px;
+    height: 24px;
+    padding: 0 4px 0 1px;
+    margin: 0;
+    vertical-align: top;
+    cursor: pointer;
+}
+.tree-anchor .fa {
+    display: inline-block;
+    font-size: 18px;
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    margin-right: 2px;
+}
+.warning {
+    color: #f9c922;
+}
+.green {
+    color: #36c6d3;
+}
+.danger {
+    color: #ed6b75;
+}
+.disabled {
+    color: #666;
+}
+.tree-node > .tree-children .tree-node {
+    margin-left: 24px;
+}

@@ -3,29 +3,183 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Document</title>
+	<!--特殊字体导入-->
+	<link href="https://fonts.googleapis.com/css?family=Barrio" rel="stylesheet">
+	<!--字体图标-->
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="../css/the-Icons/css/font-awesome.min.css"/>
+	<link rel="stylesheet" href="../css/reset.css"/>
+	<link rel="stylesheet" href="../css/baba.css"/>
+	<style>
+
+	</style>
 </head>
 <body>
-	<header>
-		<nav></nav>
-	</header>
-	<div class="content">
-		<div class="green-section">
-			<div>
-				<h2>一个标题</h2>
-				<div class="hr"></div>
-				<p></p>
+	<div class="site">
+		<header>
+			<nav>Hello World</nav>
+		</header>
+		<div class="content">
+			<div class="green-section">
+				<div>
+					<h2>一个标题</h2>
+					<div class="hr"></div>
+					<p></p>
+				</div>
+				<div>
+					<span>item1 gogog</span>
+					<span>item2 gogog</span>
+					<span>item3 gogog</span>
+				</div>
 			</div>
-			<div>
-				<span>item1 gogog</span>
-				<span>item2 gogog</span>
-				<span>item3 gogog</span>
+			<div class="content1">
+				<div class="main"></div>
 			</div>
+			<div class="left"></div>
+			<div class="right"></div>
+
+			<div class="gray-section clearfix">
+				<div id="tree">
+					<ul class="tree-container tree-children">
+						<li class="tree-node tree-open">
+							<i class="tree-icon tree-ocl"></i>
+							<a href="#" class="tree-anchor">
+								<i class="fa fa-folder-open warning"></i>
+								Parent Node
+							</a>
+							<ul class="tree-children">
+								<li class="tree-node tree-leaf">
+									<i class="tree-icon tree-ocl"></i>
+									<a href="#" class="tree-anchor">
+										<i class="fa fa-gift warning"></i>
+										情人节玫瑰花
+									</a>
+								</li>
+								<li class="tree-node tree-leaf">
+									<i class="tree-icon tree-ocl"></i>
+									<a href="#" class="tree-anchor">
+										<i class="fa fa-folder warning"></i>
+										愚人节水仙花
+									</a>
+								</li>
+								<li class="tree-node tree-close">
+									<i class="tree-icon tree-ocl"></i>
+									<a href="#" class="tree-anchor">
+										<i class="fa fa-bug danger"></i>
+										劳动节太阳花
+									</a>
+									<ul class="tree-children">
+										<li class="tree-node tree-leaf">
+											<i class="tree-icon tree-ocl"></i>
+											<a href="#" class="tree-anchor disabled">
+												<i class="fa fa-folder"></i>
+												国庆前牡丹花
+											</a>
+										</li>
+										<li class="tree-node tree-last">
+											<i class="tree-icon tree-ocl"></i>
+											<a href="#" class="tree-anchor">
+												<i class="fa fa-folder warning"></i>
+												元旦节太阳花
+											</a>
+										</li>
+									</ul>
+								</li>
+								<li class="tree-node tree-last">
+									<i class="tree-icon tree-ocl"></i>
+									<a href="#" class="tree-anchor">
+										<i class="fa fa-bell green"></i>
+										儿童节风信子
+									</a>
+								</li>
+							</ul>
+						</li>
+						<li class="tree-node tree-last">
+							<i class="tree-icon tree-ocl"></i>
+							<a href="#" class="tree-anchor">
+								<i class="fa fa-file warning"></i>
+								Parent Node
+							</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+			<div class="purple-section"></div>
 		</div>
-		<div class="gray-section"></div>
-		<div class="purple-section"></div>
+		<footer class="foot">
+			<div class="gutter" data-flex="gutter">
+				<div class="cell" data-cell><div class="item">auto1 阿娇搜房啊</div></div>
+				<div class="cell" data-cell><div class="item">auto2 阿斯蒂芬</div></div>
+				<div class="cell cell2" data-cell><div class="item">auto3 gerry<br>发顺丰解耦<br>sdf asdf sf </div></div>
+				<div class="cell" data-cell><div class="item">auto4 个电饭锅</div></div>
+				<div class="cell" data-cell><div class="item">auto5 发给第三方个</div></div>
+			</div>
+		</footer>
 	</div>
-	<footer>
-		
-	</footer>
+
+	<script style="javaScript/text" src="../lib/jquery-1.12.1.min.js"></script>
+	<script>
+		/**
+		 * 学习理解闭包的用处
+		 * 这样的小例子真他么有趣
+		 * @param node
+		 */
+		var foo = function(node){
+			var level = 1;
+			function step(){
+				var hex = level.toString(16);
+				node.style.backgroundColor = "#FFFF" + hex + hex;
+				if(level < 15){
+					level++;
+					setTimeout(step,300);
+				}
+			}
+			setTimeout(step, 300);
+		};
+		//foo(document.body);
+
+		var memoizer = function(memo, fundamental){
+			var shell = function(n){
+				var result = memo[n];
+				if(typeof result !== 'number'){
+					result = fundamental(shell, n);
+					memo[n] = result;
+				}
+				return result;
+			};
+			return shell;
+		};
+		var fibonacci = memoizer([0, 1],function(shell, n){
+			return n*shell(n-1);//这里需要将函数的基本公式提供出来
+		});
+		fibonacci(5);
+
+		function dateFormat(){
+			var date = new Date();
+			var newDate = (date.getTime() + (5)*3600*24*1000);
+
+			console.log(date.toLocaleString());
+			console.log(date.toLocaleTimeString());
+			console.log(date.toLocaleDateString());
+			console.log(date.toUTCString());
+			console.log(date.getFullYear());
+			console.log(date.getMonth());
+			console.log(date.getDay());
+			console.log(date.getDate());
+			console.log(date.getTime());
+			console.info(new Date(newDate));
+			console.info(new Date(newDate).getDay())
+		}
+		dateFormat();
+
+		function Tree(){
+			$("#tree .tree-open").on("click", ".tree-ocl", function(){
+				$(this).next().find(".fa-folder-open").removeClass("fa-folder-open").addClass("fa-folder");
+				$(this).parent().removeClass("tree-open").addClass("tree-close");
+			})
+		}
+		Tree()
+	</script>
+
 </body>
 </html>

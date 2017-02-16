@@ -25,3 +25,4 @@ Interface.checkImplements = function(obj){
         }
     }
 };
+
