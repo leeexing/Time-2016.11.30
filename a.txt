@@ -1,7 +1,0 @@
-﻿aaaaaaaaaaa
-echo $HOME
-就是用户的主目录
-
-asfdjoasdj fiasdj df
-
-dsdsd
