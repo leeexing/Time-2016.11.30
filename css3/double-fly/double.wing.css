@@ -1,0 +1,54 @@
+.double {
+  margin-bottom: 10px; }
+  .double header {
+    padding: 15px;
+    background: #222;
+    text-align: center;
+    color: #fff; }
+    .double header h1 {
+      color: #f5222d;
+      font-size: 22px; }
+  .double .main-1 {
+    padding: 0 200px;
+    height: 350px; }
+    .double .main-1 .left, .double .main-1 .main, .double .main-1 .right {
+      position: relative;
+      float: left; }
+    .double .main-1 .left {
+      margin-left: -100%;
+      left: -200px;
+      width: 200px;
+      height: 230px;
+      background: #ddd; }
+    .double .main-1 .main {
+      width: 100%;
+      background: #f90;
+      height: 300px; }
+    .double .main-1 .right {
+      margin-left: -200px;
+      right: -200px;
+      width: 200px;
+      padding: 10px;
+      background: #fadb14; }
+  .double.grail main, .double.grail aside {
+    float: left; }
+  .double.grail .main-2 {
+    width: 100%; }
+  .double.grail .left-side {
+    margin-left: -100%;
+    width: 200px;
+    height: 150px;
+    background: #1890ff;
+    color: #eee; }
+  .double.grail .right-side {
+    margin-left: -200px;
+    width: 200px;
+    height: 250px;
+    background: #7cb305; }
+  .double.grail .main-inner {
+    margin-left: 200px;
+    margin-right: 200px;
+    background: #ff9c6e;
+    height: 200px; }
+
+/*# sourceMappingURL=double.wing.css.map */

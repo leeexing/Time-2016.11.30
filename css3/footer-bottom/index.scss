@@ -1,0 +1,49 @@
+@import '../variable.scss';
+
+html, body {
+	height: 100%;
+}
+.container {
+	position: relative;
+	min-height: 100%;
+	height: auto;
+	header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 20px;
+		background: #333;
+		color: #fff;
+	}
+	main {
+		padding: 10px 10px 65px;
+		h1 {
+			padding: 15px 10px;
+			color: $red;
+		}
+		h3 {
+			padding: 10px;
+			color: $gold;
+		}
+		.jay {
+			padding: 20px 10px;
+			color: #666;
+		}
+	}
+	footer {
+			@extend header;
+		position: absolute;
+		bottom: 0;
+		width: 100%;
+		height: 60px;
+		color: $volcano * 0.9;
+	}
+}
+
+.container2 {
+		@extend .container;
+		height: 100%;
+		footer {
+			position: fixed;
+		}
+}

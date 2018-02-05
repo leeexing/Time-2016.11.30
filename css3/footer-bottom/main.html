@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>让底部栏始终在屏幕底部</title>
+	<link rel="stylesheet" type="text/css" href="../reset.css">
+	<link rel="stylesheet" type="text/css" href="../base.css">
+	<link rel="stylesheet" type="text/css" href="./index.css">
+</head>
+<body>
+	<div class="container2">
+		<header class="header">
+			<h1>我的头部</h1>
+			<section>
+				<a href="#" class="btn primary add">吃饭喝酒</a>
+				<a href="#" class="btn success delete">结账埋单</a>
+			</section>
+		</header>
+		<main class="main">
+			<h1>我是中心</h1>
+			<h3>目标：页脚footer永远固定在页面的底部，而不是永远固定在显示器屏幕的底部</h3>
+			<h3>
+				如果只需要固定在 屏幕 的下方。那么使用 <strong>fixed</strong> 就可以了
+			</h3>
+		</main>
+		<footer class="footer">
+			<h1>我是底部</h1>
+		</footer>
+	</div>
+
+	<!-- script -->
+	<script type="text/javascript">
+		let main = document.querySelector('.main')
+		let add = document.querySelector('.add')
+		let deleteBtn = document.querySelector('.delete')
+		add.onclick = function() {
+			main.appendChild(getFragment())
+		}
+		deleteBtn.onclick = () => {
+			let op = document.querySelector('main p')
+			let oa = document.querySelector('main a')
+			if (op) {
+				main.removeChild(op)
+				main.removeChild(oa)
+			}
+		}
+		function getFragment() {
+			let oFrag = document.createDocumentFragment()
+			let p = document.createElement('p')
+			p.className = 'jay'
+			let text = document.createTextNode('还有考卷的答案 我刚好都不会算没关系 再继续努力 没关系为什么上课时举手很难 为什么拿线上宝物简单为什么女生不喜欢太胖 为什么都别人手机在响')
+			p.appendChild(text)
+			let oA = document.createElement('a')
+			oA.innerHTML = '周杰伦'
+			oFrag.appendChild(p)
+			oFrag.appendChild(oA)
+			return oFrag
+		}
+	</script>
+</body>
+</html>
