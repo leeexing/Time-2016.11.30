@@ -1,4 +1,9 @@
 @charset "UTF-8";
+.hei {
+  padding: 20px 10px;
+  background: #262626;
+  color: #fff; }
+
 /*
 * 常用的样式
 */

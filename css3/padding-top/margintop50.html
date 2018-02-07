@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Padding-TOP 黑科技</title>
+	<link rel="stylesheet" href="../reset.css">
+	<link rel="stylesheet" href="../base.css">
+	<style>
+		.container {
+			display: flex;
+			flex-wrap: wrap;
+			margin-top: 10px;
+			padding: 10px;
+		}
+		.container .img-out {
+			width: 12.5%;
+			padding: 10px;
+		}
+		.container .img-item {
+			position: relative;
+			padding-top: 50%;
+			background: #e8e8e8;
+			border-radius: 2px;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+		.container .img-item img {
+			position: absolute;
+			top:50%;
+			left:50%;
+			transform: translate(-50%,-50%);
+			max-width: 100%;
+			max-height: 100%;
+		}
+	</style>
+</head>
+<body>
+	<header class="hei">
+		<h1>自适应的精髓在于宽度，margin/padding设置百分比弥补了元素高度无法自适应地与元素宽度保持一致的缺陷。</h1>
+	</header>
+	<div class="container">
+		<div class="img-out">
+			<div class="img-item">
+					<img src="../../src/image/item1.jpg" alt="">
+			</div>
+		</div>
+		<div class="img-out">
+			<div class="img-item">
+					<img src="../../src/image/item2.jpg" alt="">
+			</div>
+		</div>
+		<div class="img-out">
+			<div class="img-item">
+					<img src="../../src/image/bg_member.jpg" alt="">
+			</div>
+		</div>
+		<div class="img-out">
+			<div class="img-item">
+					<img src="../../src/image/QQ48等.png" alt="">
+			</div>
+		</div>
+		<div class="img-out">
+			<div class="img-item">
+					<img src="../../src/image/logo.png" alt="">
+			</div>
+		</div>
+		<div class="img-out">
+			<div class="img-item">
+					<img src="../../src/image/tree.png" alt="">
+			</div>
+		</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>右侧自适应宽度</title>
+	<link rel="stylesheet" href="../reset.css">
+	<link rel="stylesheet" href="../base.css">
+	<style>
+		header {
+			height: 60px;
+			color: #fff;
+			background: #333;
+		}
+		main {
+			padding: 10px;
+		}
+		.main .left {
+			float: left;
+			width: 200px;
+			height: 100px;
+			background: #f90;
+		}
+		.main .right {
+			height: 120px;
+			background: #fa541c;
+			overflow: hidden;
+		}
+		.main-2 {
+			display: flex;
+		}
+		.main-2 .left {
+			flex: 1;
+			height: 100px;
+			background: #1890ff;
+		}
+		.main-2 .right {
+			width: 200px;
+			height: 100px;
+			background: #fa541c;
+		}
+	</style>
+</head>
+<body>
+	<header>
+		<h1>左侧固定宽度，右侧宽度自适应</h1>
+	</header>
+	<main class="main">
+		<div class="left">
+			float:left
+		</div>
+		<div class="right">
+			overflow: hidden
+		</div>
+	</main>
+	<br>
+	<main class="main-2">
+		<div class="left">
+			flex: 1
+		</div>
+		<div class="right"></div>
+	</main>
+
+</body>
+</html>
