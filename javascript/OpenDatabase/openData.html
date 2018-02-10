@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>OpenDataBase API</title>
+	<link rel="stylesheet" type="text/css" href="../../lib/reset.css">
+	<link rel="stylesheet" type="text/css" href="../../lib/base.css">
+	<style type="text/css">
+		
+	</style>
+</head>
+<body>
+	<header class="hei">
+		<h1>学习新的API</h1>
+	</header>
+	
+	<script type="text/javascript" src="../../lib/sqlite.js"></script>
+	<script type="text/javascript" src="./webSql.js"></script>
+	<script type="text/javascript">
+		let db = new SQL.Database()
+		console.log(db)
+
+		let webDb = new WebSql()
+		webDb.createTable('create table if not exists account (id REAL UNIQUE, name TEXT)')
+		webDb.insertData('insert into account (id, name) values(?, ?)', [[1, 'leeing'], [2, 'nana']])
+		webDb.fetchall('select * from account')
+	</script>
+</body>
+</html>
