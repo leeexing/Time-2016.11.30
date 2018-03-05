@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="../reset.css">
+  <link rel="stylesheet" href="../base.css">
+  <link rel="stylesheet" href="./css.var.css">
+  <title>CSS 变量使用</title>
+</head>
+<body>
+  <header class="header">
+    <h1>正确使用css变量这把利器</h1>
+  </header>
+  <main class="main">
+    <a href="#" class="button"><span>Hover me I'm awesome</span></a>
+    <a href="#" class="putton"><span>Hover me I'm test</span></a>
+  </main>
+
+  <script>
+    document.querySelector('.button').onmousemove = e => {
+      // console.log(e.pageX, e.pageY)
+      // console.log(e.target.offsetLeft)
+      // console.log(e.target)
+      const x = e.pageX - e.target.offsetLeft
+      const y = e.pageY - e.target.offsetTop
+      e.target.style.setProperty('--x', `${ x }px`)
+      e.target.style.setProperty('--y', `${ y }px`)
+    }
+
+    document.querySelector('.putton').onclick = e => {
+      e.target.style.setProperty('--bgColor', '#fa8c16')
+    }
+  </script>
+</body>
+</html>

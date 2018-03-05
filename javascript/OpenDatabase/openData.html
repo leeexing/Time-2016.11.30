@@ -21,9 +21,14 @@
 		console.log(db)
 
 		let webDb = new WebSql()
-		webDb.createTable('create table if not exists account (id REAL UNIQUE, name TEXT)')
-		webDb.insertData('insert into account (id, name) values(?, ?)', [[1, 'leeing'], [2, 'nana']])
-		webDb.fetchall('select * from account')
+		// webDb.createTable('create table if not exists account (id REAL UNIQUE, name TEXT)')
+		// webDb.insertData('insert into account (id, name) values(?, ?)', [[1, 'leeing'], [2, 'nana']])
+		// webDb.fetchall('select * from account').then(data => {
+		// 	console.log(data)
+		// })
+		// webDb.deleteData('delete from account where id = ?', [[1]])
+		// webDb.dropTable('account')
+		// webDb.updateData('update account set name = ? where id = ?', [['leejingajjsdfio ', 1], ['spring festval', 4]])
 	</script>
 </body>
 </html>
