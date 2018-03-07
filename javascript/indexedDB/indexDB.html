@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>indexedDB</title>
+  <link rel="stylesheet" href="../../css3/reset.css">
+  <link rel="stylesheet" href="../../css3/base.css">
+</head>
+<body>
+  <header class="header">
+    <h1>练习使用 indexedDB</h1>
+  </header>
+  <main class="main">
+    <a href="#" class="btn success">IndexDB</a>
+  </main>
+
+  <script>
+    const request = window.indexedDB.open('leeing')
+    request.onupgradeneeded = event => {
+      console.log('数据库创建或者版本更新')
+      // 只能在onupgradeneeded回调函数中创建存储空间，而不能在数据库打开后的success回调函数中创建。
+      let db = event.target.result
+      // createObjectStore(databaseName, options)
+      let objectStore = db.createObjectStore('table1', {KeyPath: 'id', autoIncresement: true})
+      // 能够给当前的存储空间设置一个索引 (索引的名称, 指定根据存储数据的哪一个属性来构建索引, options对象)
+      objectStore.createIndex('nameIndex', 'name', {unique: false})
+
+    }
+    request.onsuccess = event => {
+      console.log('数据库建立成功')
+      // 第一个参数为需要关联的存储空间，第二个可选参数为事务模式
+      // 事务： 模式：readOnly、readwrite、versionchange
+      let db = event.target.result
+      console.log(db)
+      let transaction = db.transaction(['table1'], 'readwrite')
+      let objectStore = transaction.objectStore('table1')
+      let index = objectStore.index('name')
+
+      // add方法中的第二个参数key值是指定存储空间中的keyPath值，如果data中包含keyPath值或者此值为自增值，那么可以略去此参数
+      let value = {'name': 'leeing', 'age': 24}
+      let str = '123456789'
+      str.split('').forEach(item => {
+        let data = {
+          name: 'leeing-' + item,
+          age: 24 + item 
+        }
+        let req = objectStore.add(data, +item)
+        req.onsuccess = function() {
+          console.log(this.result)
+        }
+        // objectStore.delete(+item)
+      })
+      // let req = objectStore.add(value, 4)
+      // req.onsuccess = function() {
+      //   console.log(this.result)
+      // }
+
+      let req2 = objectStore.get(2)
+      req2.onsuccess = function() {
+        console.log(this.result)
+      }
+
+      // let req3 = objectStore.delete(4)
+      // req3.onsuccess = function() {
+      //   console.log(this.result)
+      // }
+
+      let boundRange = IDBKeyRange.bound(1, 10)
+      let req4 = objectStore.openCursor(boundRange, 'next')
+      req4.onsuccess = function() {
+        let cursor = this.result
+        if (cursor) {
+          console.log(cursor)
+          cursor.continue()
+        } else {
+          console.log('检索结束')
+        }
+      }
+    }
+    request.onerror = event => {
+      console.log('数据库建立失败')
+      console.log("Why didn't you allow my web app to use IndexedDB?!")
+    }
+  </script>
+
+</body>
+</html>
