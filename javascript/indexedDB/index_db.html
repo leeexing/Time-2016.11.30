@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>indexedDB</title>
+  <link rel="stylesheet" href="../../css3/reset.css">
+  <link rel="stylesheet" href="../../css3/base.css">
+  <style>
+    .search {
+      padding-bottom: 10px;
+    }
+    .search input {
+      width: 40%;
+      padding: 8px;
+      border: 1px solid #1890ff;
+      border-radius: 4px;
+      font-size: 16px;
+      box-shadow: 0 0 2px #1890ff;
+    }
+    .search input:hover {
+      border-color: #f90;
+    }
+    .search input:focus {
+      box-shadow: 0 0 2px #fa8c16;
+    }
+    .img-wrap {
+      margin-top: 10px;
+    }
+    .img-wrap img {
+      width: 500px;
+      border: 1px solid #fa8c16;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>练习使用 indexedDB</h1>
+  </header>
+  <main class="main pad10">
+    <div class="search">
+      <input type="text" placeholder="please input your search words ~">
+      <input type="text" placeholder="please input your search range ~">
+    </div>
+    <a href="#" class="btn success add">add</a>
+    <a href="#" class="btn warning put">put</a>
+    <a href="#" class="btn success get">get_by_key</a>
+    <a href="#" class="btn primary getIndex">get_by_index</a>
+    <a href="#" class="btn success range">get_by_range</a>
+    <a href="#" class="btn danger delete">delete</a>
+
+    <div class="img-wrap">
+      <!-- <img src="" alt="" srcset=""> -->
+      <img src="" alt="" >
+    </div>
+  </main>
+
+  <script src="../../lib/jquery-1.12.1.min.js"></script>
+  <script src="./indexDB.js"></script>
+  <script>
+    let options = {
+      version: 4,
+      tableName: 'customers',
+      createIndexName: ['name', 'age', 'email']
+    }    
+    const request = new IndexedDB(options)
+
+    let str = '123456789545478'
+    let dataArr = []
+    str.split('').forEach((item, index) => {
+      let data = {
+        id: index + 1,
+        name: 'leeing-' + index,
+        age: 24 + (+item),
+        email: `674023427${item}@qq.com`
+      }
+      dataArr.push(data)
+    })
+
+    let search = {}
+    let searchInput = document.querySelector('.search input')
+    let imgElem = document.querySelector('.img-wrap img')
+    Object.defineProperty(search, 'key', {
+      enumerable: true,
+      configurable: false,
+      get() {
+        return searchInput.value.trim()
+      },
+      set(newValue) {
+        if (newValue !== '') {
+          searchInput.value = newValue
+        }
+      }
+    })
+    searchInput.addEventListener('keyup', e => {
+      search.key = e.target.value
+    })
+
+    $('.add').click(() => {
+      request.add(dataArr)
+    })
+
+    $('.get').click(() => {
+      request.get_by_key(search.key || 1)
+        .then(data => {
+          console.log(data)
+          imgElem.src = data.image
+        })
+    })
+    $('.getIndex').click(() => {
+      // request.get_by_index(+search.key, 'age')
+      request.get_all(search.key, 'name')
+        .then(data => {
+          console.log(data)
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    })
+
+    $('.range').click(() => {
+      let store = request.db.transaction('customers', 'readwrite').objectStore('customers')
+      let index = store.index('name')
+      let boundRange = IDBKeyRange.bound(1, 10)
+      // let singleKeyRange = IDBKeyRange.only('dr')
+      let arr = []
+      store.openCursor(boundRange).onsuccess = e => {
+        let cursor = e.target.result
+        if (cursor) {
+          console.log(cursor.value)
+          arr.push(cursor.value)
+          cursor.continue()
+        } else {
+          console.log(arr)
+          console.log('End~')
+        }
+      }
+    })
+
+    $('.delete').click(e => {
+      request.delete(+search.key)
+    })
+
+    // $.ajax({
+    //   url: 'http://10.13.62.25:8070/api/DR/Query?types=None&PageNO=1&Limit=11&Offset=1',
+    //   // url: 'http://10.13.62.25:8072/fileroot//Image/CT10hx/CT/gunbarrel000025/0.png',
+    //   headers: {
+    //     Authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI3NUVEMjkyQTkwQUNFQkNGNUZCNTYxOTNBMzMxQ0NDMiIsImlhdCI6MTUxNjg0NjI0MCwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9leHBpcmF0aW9uIjoiMjYwMDY0MDAiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjM2MDgwNzkyMzkzMzA1MzMzMDAiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoi6LaF57qn566h55CG5ZGYIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiU3VwZXJBZG1pbiIsIk9yZ0lEIjoiMzYwODA3OTIzOTMzMDUzMzM3NiIsIkVudGVycHJpc2VDb2RlIjoiIiwibmJmIjoxNTE2ODQ2MjM5LCJleHAiOjE1NDI4NTI2MzksImlzcyI6Ik5TVFMuTlVDVEVDSC5DT00iLCJhdWQiOiJOU1RTX1VTRVIifQ.3_aYso892uDawzGIh46EKx8t2cYuk6i01t9EZmUD2uw'
+    //   },
+    //   success (data) {
+    //     console.log(data)
+    //     // request.add(data.package)
+    //   }
+    // })
+
+    function getData(url) {
+      return new Promise((resolve, reject) => {
+        let reader = new FileReader()
+        let xhr = new XMLHttpRequest()
+        // xhr.responseType = 'arraybuffer'
+        xhr.responseType = 'blob'
+        xhr.open('GET', url)
+        xhr.onload = function(res) {
+          console.log(this)
+          if (this.status === 200) {
+            reader.readAsDataURL(this.response)
+            // reader.readAsArrayBuffer(this.response)
+          }
+        }
+        xhr.send()
+        reader.onload = e => {
+          // console.log(e.target)
+          resolve(e.target.result)
+        }
+        reader.onerror = e => {
+          reject(e)
+        }
+      })
+    }
+    let url = 'http://10.13.62.25:8072/fileroot//Image/CT10hx/CT/gunbarrel000025/0.png'
+    // getData(url).then(data => {
+    //   // imgElem.src = data
+    //   let obj = {
+    //     id: 1,
+    //     name: 'dr-img',
+    //     image: data
+    //   }
+    //   request.add([obj])
+    // })
+
+    $('.put').click(() => {
+      testPerf()
+    })
+
+    function testPerf() {
+      let store = request.db.transaction('customers', 'readwrite').objectStore('customers')
+      let upperBoundOpenKeyRange = IDBKeyRange.bound('3612549444408442882', '3612549444941119490')
+      let arr = []
+      let pfn = []
+      store.openCursor(upperBoundOpenKeyRange).onsuccess = e => {
+        let cursor = e.target.result
+        if (cursor) {
+          arr.push(cursor.value)
+          cursor.continue()
+        } else {
+          console.log(arr)
+          let data = arr.reduce((pre, cur) => {console.log(pre);cur.dr.concat(pre.dr); return cur.dr})
+          console.log(data)
+          // arr.forEach(item => {
+          //   item
+          //   pfn.push(getData(item.dr))
+          // })
+        }
+        // console.log(e.target)
+      }
+    }
+    
+  </script>
+
+</body>
+</html>

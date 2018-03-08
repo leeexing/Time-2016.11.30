@@ -1,5 +1,9 @@
 /*
 * Web SQL 封装类
+*
+* Attention：
+* Firefox 不支持啊。这就有点吓人了
+* W3C 已经不维护这个 API 了
 */
 class WebSql {
 	constructor(options={}) {
