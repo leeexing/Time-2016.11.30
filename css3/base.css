@@ -5,6 +5,22 @@
   color: #fff;
 }
 
+input {
+  padding: 8px;
+  border: 1px solid #1890ff;
+  border-radius: 4px;
+  font-size: 16px;
+  box-shadow: 0 0 2px #1890ff;
+}
+
+input:hover {
+  border-color: #f90;
+}
+
+input:focus {
+  box-shadow: 0 0 2px #fa8c16;
+}
+
 /*
 * <常用的样式>
 */

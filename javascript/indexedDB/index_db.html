@@ -190,10 +190,26 @@
     // })
 
     $('.put').click(() => {
-      testPerf()
+      // getDrImage()
+      modifyData()
     })
 
-    function testPerf() {
+    function modifyData() {
+      let store = request.db.transaction('customers', 'readwrite').objectStore('customers')
+      // let upperBoundOpenKeyRange = IDBKeyRange.bound('3612549444408442882', '3612549444941119490')
+      let arr = []
+      let pfn = []
+      store.get(2).onsuccess = e => {
+        console.log(e.target.result)
+        let data = e.target.result
+        data.age += 2
+        // store.put(data, 2).onsuccess = e => {
+        //   console.log(e)
+        // }
+      }
+    }
+
+    function getDrImage() {
       let store = request.db.transaction('customers', 'readwrite').objectStore('customers')
       let upperBoundOpenKeyRange = IDBKeyRange.bound('3612549444408442882', '3612549444941119490')
       let arr = []
