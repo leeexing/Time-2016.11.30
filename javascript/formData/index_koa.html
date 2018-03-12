@@ -93,25 +93,26 @@
       let reader = new FileReader()
       let xhr = new XMLHttpRequest()
       xhr.open('GET', '/getimg?name=leeing', true)
-      xhr.responseType = 'blob'
+      xhr.responseType = 'text'
       xhr.onload = function() {
         if (this.status === 200) {
           console.log(this.response)
           if (this.response.size !== 0) {
-            reader.readAsDataURL(this.response)
+            // reader.readAsDataURL(this.response)
           }
         }
       }
       xhr.send({name: 'leeing'})
-      reader.onload = function() {
-        // console.log(this)
-        imgElem.src = this.result
-      }
+      // reader.onload = function() {
+      //   // console.log(this)
+      //   imgElem.src = this.result
+      // }
     }
 
     function delete_img() {
       let xhr = new XMLHttpRequest()
-      xhr.open('delete', '/clearimg', true)
+      // xhr.open('delete', '/clearimg', true)
+      xhr.open('get', '/test/upload', true)
       xhr.onload = function() {
         if (this.status == 200) {
           console.log(this.response)
