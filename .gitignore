@@ -2,3 +2,4 @@
 *.map
 *.min.css
 node_modules/
+uploads/
