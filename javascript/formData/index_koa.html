@@ -22,11 +22,15 @@
     <h1>学习FormData</h1>
   </header>
   <main class="pad10">
-    <input id="file" type="file" class="file" style="display:none" multiple="multiple" accept="image/png, image/jpeg">
+      <!-- <form action="http://127.0.0.1:8002/api/upload" method="post" enctype="multipart/form-data">
+        <input type="file" multiple="multiple" accept="image/png, image/jpeg">
+        <input type="submit" value="ok"/>
+      </form> -->
+      <input id="file" type="file" class="file" style="display:none" multiple="multiple" accept="image/png, image/jpeg">
     <a href="#" class="btn success upload">upload</a>
     <a href="#" class="btn primary getimg">读取数据</a>
-    <a href="#" class="btn danger getdata">读取数据总数</a>
-    <a href="#" class="btn warning delete">删除数据</a>
+    <a href="#" class="btn warning getimgs">读取数据总数</a>
+    <a href="#" class="btn danger delete">删除数据</a>
     <div class="pad10 img-wrap">
       <img src="" alt="">
     </div>
@@ -35,112 +39,7 @@
   <script src="/main.js"></script>
 
   <script>
-    let btn = document.querySelector('.upload')
-    let getImg = document.querySelector('.getimg')
-    let getdata = document.querySelector('.getdata')
-    let deleteImg = document.querySelector('.delete')
-    let file = document.querySelector('#file')
-    let imgWrap = document.querySelector('.img-wrap')
-    let imgElem = document.querySelector('.img-wrap img')
-
-    btn.onclick = () => {
-      file.click()
-    }
-
-    file.onchange = e => {
-      console.info(e.target.files)
-      let files = Array.from(e.target.files)
-      upload(files)
-      // if (files.length > 1) {
-      // } else {
-      //   upload(files[0])
-      // }
-    }
-
-    getImg.onclick = () => {
-      getImage()
-    }
-
-    getdata.onclick = () => {
-      getImgList()
-    }
-
-    function getImgList() {
-      let xhr = new XMLHttpRequest()
-      xhr.open('get', '/imglist', true)
-      xhr.responseType = 'json'
-      xhr.onload = function() {
-        if (this.status == 200) {
-          console.log(this.response)
-          // console.log(JSON.parse(this.response))
-          let oFrag = document.createDocumentFragment()
-          this.response.data.forEach(item => {
-            let img = new Image()
-            img.src = item
-            oFrag.appendChild(img)
-          })
-          imgWrap.appendChild(oFrag)
-        }
-      }
-      xhr.send()
-    }
-
-    deleteImg.onclick = () => {
-      delete_img()
-    }
-
-    function getImage() {
-      let reader = new FileReader()
-      let xhr = new XMLHttpRequest()
-      xhr.open('GET', '/getimg?name=leeing', true)
-      xhr.responseType = 'text'
-      xhr.onload = function() {
-        if (this.status === 200) {
-          console.log(this.response)
-          if (this.response.size !== 0) {
-            // reader.readAsDataURL(this.response)
-          }
-        }
-      }
-      xhr.send({name: 'leeing'})
-      // reader.onload = function() {
-      //   // console.log(this)
-      //   imgElem.src = this.result
-      // }
-    }
-
-    function delete_img() {
-      let xhr = new XMLHttpRequest()
-      // xhr.open('delete', '/clearimg', true)
-      xhr.open('get', '/test/upload', true)
-      xhr.onload = function() {
-        if (this.status == 200) {
-          console.log(this.response)
-        }
-      }
-      xhr.send()
-    }
-
-
-    function upload(files) {
-      console.log(files)
-      let formData = new FormData()
-      let xhr = new XMLHttpRequest()
-      Array.from(files).forEach(file => {
-        formData.append('fileName', file)
-      })
-      // formData.set('fileName', files)
-      xhr.open('POST', '/upload', true)
-      xhr.onreadystatechange =function() {
-        if (xhr.readyState == 4 && xhr.status === 200) {
-          console.log(this.response)
-        }
-      }
-      xhr.onerror = e => {
-        console.error(e)
-      }
-      xhr.send(formData)
-    }
+    
   </script>
 </body>
 </html>
