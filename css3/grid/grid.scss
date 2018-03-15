@@ -1,7 +1,7 @@
-.main {
+.test1 {
   display: grid;
   grid-template-columns: 1fr 6fr 2fr;
-  grid-template-rows: 100px 200px 300px;
+  grid-template-rows: 100px 150px 200px;
   grid-gap: 1rem;
   > div {
     background: #1890ff;
