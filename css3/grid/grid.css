@@ -1,3 +1,25 @@
+nav {
+  display: grid;
+  grid-template-columns: 150px 1fr 2fr;
+}
+
+nav > div {
+  height: 50px;
+  background: #f90;
+}
+
+nav div:first-child {
+  width: 200px;
+}
+
+nav div:nth-child(2) {
+  background: #1890ff;
+}
+
+nav div:last-child {
+  width: 1fr;
+}
+
 .test1 {
   display: grid;
   grid-template-columns: 1fr 6fr 2fr;
@@ -7,4 +29,37 @@
 
 .test1 > div {
   background: #1890ff;
+}
+
+.test2 {
+  display: grid;
+  grid-template-areas: "header header header" "left main ads" "footer footer footer";
+  grid-template-rows: 100px 2fr 1fr;
+  grid-template-columns: 250px 4fr 1fr;
+  grid-gap: 1rem;
+  min-height: 500px;
+}
+
+.test2 > div {
+  background: #1890ff;
+}
+
+.test2 .item1 {
+  grid-area: header;
+}
+
+.test2 .item2 {
+  grid-area: left;
+}
+
+.test2 .item3 {
+  grid-area: main;
+}
+
+.test2 .item4 {
+  grid-area: ads;
+}
+
+.test2 .item5 {
+  grid-area: footer;
 }

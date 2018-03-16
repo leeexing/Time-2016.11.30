@@ -21,6 +21,12 @@ input:focus {
   box-shadow: 0 0 2px #fa8c16;
 }
 
+.code {
+  padding: 4px;
+  background: #fa8c16;
+  border-radius: 4px;
+}
+
 /*
 * <常用的样式>
 */
