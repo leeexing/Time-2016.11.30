@@ -43,14 +43,136 @@ nav {
   }
   .item2 {
     grid-area: left;
+    .demo {
+      width: 250px;
+      height: 100px;
+      display: table-cell;
+      vertical-align: middle;
+      // text-align: center;
+      > p {
+        margin: 0 auto;
+      }
+    }
   }
   .item3 {
     grid-area: main;
+    .demo {
+      display: flex;
+      min-height: 100px;
+      background: #f90;
+      // align-items: center;
+      > p {
+        // align-self: center;
+        margin: auto 0;
+      }
+    }
   }
   .item4 {
     grid-area: ads;
   }
   .item5 {
     grid-area: footer;
+  }
+}
+
+.test3 {
+  display: grid;
+  min-height: 600px;
+  grid-template-areas: "header header header"
+                        "left main right"
+                        "footer footer footer";
+  grid-template-columns: 200px 1fr 300px;
+  grid-template-rows: 60px 1fr 50px;
+  justify-content: center;
+  // justify-items: center;
+
+  > div {
+    background: #1890ff;
+    margin: 2px;
+  }
+  .item1 {
+    grid-area: header;
+    display: grid;
+    justify-content: center;
+    align-items: center;
+  }
+  .item2 {
+    grid-area: left;
+  }
+  .item3 {
+    grid-area: right;
+  }
+  // .item4 {
+  //   grid-area: main;
+  // }
+  .item5 {
+    grid-area: footer;
+  }
+  .item6 {
+    grid-area: main
+  }
+}
+
+
+
+
+
+/*
+* 测试
+*/
+section {
+  height: 100px;
+  margin: 10px;
+  border: 1px silver solid;
+  // padding-left: 100px;
+  padding: 0 200px 0 100px;
+  > div {
+    height: 100px;
+    float: left;
+  }
+  .center {
+    background: #eee;
+    width: 100%;
+    .inner {
+      height: 80px;
+      background: #777;
+      margin: 0 200px 0 100px;
+    }
+  }
+  .left {
+    background: #f90;
+    // overflow: hidden;
+    width: 100px;
+    // float: left;
+    margin-left: -100%;
+    left: -100px;
+    position: relative;
+  }
+  .right {
+    background: #0f0;
+    // margin-left: 0px;
+    height: 120px;
+    width: 200px;
+    float: left;
+    margin-left: -200px;
+    right: -200px;
+    position: relative;
+    // margin-right: -100px;
+    // float: right;
+  }
+}
+
+footer {
+  display: none;
+  margin-top: 50px;
+  padding: 25px;
+  // border: 1px solid #f90;
+  background: #666;
+  color: #eee;
+  .footer {
+    padding: 5px;
+    background: lightcoral;
+    left: -15px;
+    position: relative;
   }
 }
