@@ -46,7 +46,7 @@ numericDataStore.count = 333
 
 
 // Define a validator that takes custom validators and returns a proxy
-function createValidator(target, validator) {  
+function createValidator(target, validator) {
   return new Proxy(target, {
     _validator: validator,
     set(target, key, value, proxy) {
@@ -210,4 +210,4 @@ dataObj.oldMethod();
         return Reflect.apply(target[key], target, args);  // 用的是 Reflect.apply
       }
     }
-  });
+   });

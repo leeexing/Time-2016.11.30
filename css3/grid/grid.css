@@ -227,7 +227,6 @@ nav div:last-child {
 * 测试
 */
 section {
-  display: none;
   height: 100px;
   margin: 10px;
   border: 1px silver solid;
