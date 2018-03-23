@@ -1,3 +1,5 @@
+@charset "utf-8";
+
 $white: #fff;
 $lightwhite: #fafafa;
 $red: #f5222d;
@@ -18,3 +20,13 @@ $grey: #595959;
 $lightdark: #262626;
 $deepdark: #000000;
 $warning: #fa8c16;
+
+
+@mixin keyframes($name){
+  @keyframes #{$name} {
+      @content;
+  }
+  @-webkit-keyframes #{$name} {
+      @content;
+  }
+}
