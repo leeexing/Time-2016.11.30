@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>WebSocket Test</title>
+  <link rel="stylesheet" href="../../css3/reset.css">
+  <link rel="stylesheet" href="../../css3/base.css">
+</head>
+<body>
+  <header class="header">
+    h1{WebSocket Test}
+  </header>
+  <main class="main pad20">
+    <a class="btn primary">通信</a>
+  </main>
+
+  <script src="https://cdn.bootcss.com/jquery/3.3.0/jquery.min.js"></script>
+  <script>
+    $(() => {
+      console.log(12)
+      if (typeof WebSocket === 'function') {
+        let ws = new WebSocket('ws://localhost:5006/test?client_name=KD_35')
+
+        ws.onopen = evt => {
+          ws.send('Hello WebSocket')
+        }
+
+        ws.onmessage = evt => {
+          console.log(evt.data)
+        }
+      }
+    })
+  </script>
+</body>
+</html>
