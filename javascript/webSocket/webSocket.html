@@ -30,6 +30,9 @@
         ws.onmessage = evt => {
           console.log(evt.data)
         }
+        ws.onclose = () => {
+          ws.close()
+        }
       }
     })
   </script>

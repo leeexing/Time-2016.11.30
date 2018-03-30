@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Fetch</title>
+  <link rel="stylesheet" href="../../css3/reset.css">
+  <link rel="stylesheet" href="../../css3/base.css">
+</head>
+<body>
+  <header class="header">
+    <h1>Fetch</h1>
+  </header>
+  <main class="main pad10">
+    <a class="btn primary fetch">Fetch</a>
+
+  </main>
+
+  <script>
+    // 一个fetch()请求的响应为一个Stream对象，这表示当我们调用json()方法，将返回一个Promise对象，因为流的读取将为一个异步过程
+
+    fetch('http://v3.wufazhuce.com:8000/api/channel/reading/more/0', {
+      method: 'get', // post
+      headers: {
+        //'Content-Type': 'application:/x-www-form-urlencoded:sharset=utf-8', // 指定提交方式为表单提交
+        'Accept': 'application/json'
+      },
+      mode: 'cors',
+      body: 'name=leeing&age=23',
+      credentials: 'include' // 强制加入凭据头 cookie
+    })
+      .then(res => {
+        console.log(res)  
+        return res.json()
+      })
+      .then(data => {
+        console.log(data)
+      })
+  </script>
+</body>
+</html>
