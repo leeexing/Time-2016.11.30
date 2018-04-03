@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>SetTimeout</title>
+</head>
+<body>
+  <header class="header">
+    <h1>setInterval 定时机制 不准确的问题</h1>
+  </header>
+  <main class="main">
+    <a class="btn primary">计时</a>
+  </main>
+
+  <script>
+    setInterval(function(){
+      var i = 0;
+      while(i++ < 100000000);
+    }, 0);
+    let my_interval = () => {
+      let oldTime = new Date().getTime()
+      let id = setTimeout(function run() {
+        let newTime = new Date().getTime()
+        console.log(newTime - oldTime)
+        oldTime = newTime
+        if (newTime - oldTime > 1000) {
+          console.log('有点不对')
+        }
+        setTimeout(run, 1000)
+      })
+    }
+  </script>
+</body>
+</html>
