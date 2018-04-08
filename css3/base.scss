@@ -6,7 +6,10 @@
 	color: $white;
 }
 .header {
-	@extend .hei
+	@extend .hei;
+	h1 {
+		margin-bottom: 15px;
+	}
 }
 
 input {

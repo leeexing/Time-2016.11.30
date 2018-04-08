@@ -8,6 +8,7 @@ from time import sleep
 from random import randint, sample, random
 import json
 from operator import itemgetter
+from functools import reduce
 
 STRING_FORSELECT = string.ascii_letters + '0123456789' + '加几个中国汉字也挺好'
 
@@ -42,6 +43,17 @@ def save_mongo():
     content = sorted(obj, key=lambda x: len(x['likes']), reverse=True)
     print(content)
     print('+='*20)
-    print(sorted(obj, key=itemgetter('likes')))
+    # print(sorted(obj, key=itemgetter('likes')))
+    # print(list(filter(lambda x: x['age'] > 20, obj)))
+    def addAge(item):
+        item['age'] += 5
+        return item
+    def reduce_fn(cur, pre):
+        return cur['age'] + pre['age']
+    # d = map(addAge, obj)
+    # print(list(d))
+    # print(obj)
+    # print(reduce(reduce_fn, obj))
+    # print(list(map(lambda x,y: (x, y), range(0,10), 'leexing')))
 
 save_mongo()

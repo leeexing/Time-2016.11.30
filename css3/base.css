@@ -5,6 +5,10 @@
   color: #fff;
 }
 
+.header h1 {
+  margin-bottom: 15px;
+}
+
 input {
   padding: 8px;
   border: 1px solid #1890ff;
