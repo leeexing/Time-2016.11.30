@@ -1,0 +1,47 @@
+html, body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1;
+  background: #f90;
+  display: flex;
+  overflow: hidden;
+}
+
+.main .left {
+  display: flex;
+  flex-direction: column;
+  width: 60%;
+  background: skyblue;
+}
+
+.main .left section {
+  flex: 1;
+  overflow: auto;
+}
+
+.main .left section .content {
+  background: #888;
+  height: 800px;
+}
+
+.main .right {
+  width: 40%;
+  background: seagreen;
+}
+
+.main .right p {
+  line-height: 15;
+}
+
+footer {
+  flex-basis: 50px;
+  flex-shrink: 0;
+  background: #ccc;
+}
