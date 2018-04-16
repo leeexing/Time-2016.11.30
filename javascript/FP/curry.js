@@ -54,8 +54,9 @@ function Partial(fn, ...argsBound) {
 
  /*==================== 栗子🍊 ==============================*/
 function log(date, important, message) {
-  console.log(`[${data.getHours()}: ${data.getMinutes()}] [${important}] ${message}`)
+  console.log(`[${date.getHours()}: ${date.getMinutes()}] [${important}] ${message}`)
 }
+log = Curry(log)
 // 是时候展现真正的技术了
 let todayLog = log(new Date())
 todayLog('INFO', 'message') // [HH;mm] INFO message
@@ -63,3 +64,6 @@ todayLog('INFO', 'message') // [HH;mm] INFO message
 let todayDebug = todayLog('DEBUG')
 todayDebug('message') // [HH:mm] DEBUG message
 
+
+
+const compose = (...fns) => fns.reduce((f, g) => (...args) => f(g(...args)))

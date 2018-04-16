@@ -1,0 +1,6 @@
+/*
+* 主样式文件
+* 集合 reset 和 base
+*/
+@import url('./reset.css');
+@import url('./base.css');
