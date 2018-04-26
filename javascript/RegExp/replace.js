@@ -90,3 +90,38 @@ let arr = [1,2,3,4,5,6,7,8,9,0]
 template.replace(/x/g, m => arr.shift())
 // "(123) 456-7890"
 
+
+/** 
+ * 分类
+ * 将版本区间和版本号区分出来 
+*/
+let str_ver = `"VerCmp(ota.ver, "5.2.3.6") == 0 && VerCmp(ota.ver, "8.2.3.6") = 0 
+                && (VerCmp(ota.ver, "5.1.2.3") >= 0 && VerCmp(ota.ver, "5.4.3.6") <= 0) 
+                && (VerCmp(ota.ver, "2.5.6.9") >= 0 && VerCmp(ota.ver, "2.6.1.5") <= 0) 
+                && IPIn("city", "呼和浩特") && IPIn("city", "南京")"`
+
+// 版本区间
+str.match(/(\d(\.\d)+)\W+=/g).filter(item => !item.endsWith(') =')).map(item => item.match(/(\d(\.\d)+)/g)[0])
+// 版本号
+str.match(/(\d(\.\d)+)\W+=/g).filter(item => item.endsWith(') =')).map(item => item.match(/(\d(\.\d)+)/g)[0])
+
+str.match(/(\d(\.\d)+)\W+=/g).filter(item => /\)\s*=+$/.test(item)).map(item => item.match(/(\d(\.\d)+)/g)[0])
+
+
+/** 
+ * 将汉字每隔两个加一个逗号
+*/
+let str_zn = "用户处理业务类"
+
+// 方法一
+str.replace(/[\u4e00-\u9fa5]{2}\B/g, m => m+',')
+// "用户,处理,业务,类"
+
+// 方法二
+str.split('').reduce((p,c,i) => {
+  console.log(i)  // 没有初始值，index 从1开始
+  if((i+1) % 2 == 0) {
+   return p + c + ','
+  }
+  return p + c
+})
