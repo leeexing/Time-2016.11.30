@@ -10,8 +10,10 @@ $gold: #faad14;
 $sunrise: #fadb14;
 $lime: #a0d911;
 $green: #52c41a;
+$green1: $green * 0.8;
 $cyan: #13c2c2;
 $blue: #1890ff;
+$blue-4: #69c0ff;
 $geekblue: #2f54eb; // 极客蓝
 $purple: #722ed1;
 $magenta: #eb2f96;// 法式洋红
@@ -20,6 +22,9 @@ $grey: #595959;
 $lightdark: #262626;
 $deepdark: #000000;
 $warning: #fa8c16;
+
+$cyan-4: #5cdbd3;
+$cyan-8: #006d75;
 
 
 @mixin keyframes($name){

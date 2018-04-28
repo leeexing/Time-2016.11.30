@@ -6,6 +6,28 @@ IndexedDB是HTML5规范里新出现的浏览器里内置的数据库.
 
 IndexedDB里数据以对象的形式存储，每个对象都有一个key值索引。IndexedDB里的操作都是事务性的。一种对象存储在一个objectStore里，objectStore就相当于关系数据库里的表。IndexedDB可以有很多objectStore，objectStore里可以有很多对象。每个对象可以用key值获取。
 
+## 很重要的一点
+
+IndexedDB 是`异步操作`。尤其是获取 db （e.target.result）这个变量的时候
+如果初始化后不急着立即调用接口获取数据，那还是可以的
+如果在初始化后立即就想调用相关api 那么就会报一个
+`Cannot read property 'transaction' of undefined`的错
+
+所以
+要么提前做好初始化，要么，别那么急着获取数据
+
+## keyPath
+
+设置了这个，add 的时候必须要输入第二个字段
+
+## put
+
+put 的时候，同样需要添加第二个参数
+
+## 先初始化
+
+能确保初始化后再调用db的时候没有问题
+
 ## 相关概念
 
 ### 数据存储的不同类型

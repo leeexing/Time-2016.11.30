@@ -85,7 +85,7 @@
       enumerable: true,
       configurable: false,
       get() {
-        return searchInput.value.trim()
+        return +searchInput.value.trim()
       },
       set(newValue) {
         if (newValue !== '') {
@@ -102,7 +102,7 @@
     })
 
     $('.get').click(() => {
-      request.get_by_key(search.key || 1)
+      request.get_by_key(search.key || 2)
         .then(data => {
           console.log(data)
           imgElem.src = data.image
