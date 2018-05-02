@@ -14,7 +14,6 @@ class DBQuery {
       console.groupEnd()
 
       this.dbHelper = DB_INSTANCE
-      this.tableName = this.dbHelper.options.tableName // 'imgIndexDB'
   }
   getData_CT(imgInfo, callback) {
       let that = this
@@ -222,12 +221,13 @@ class IndexedDB {
     this.init()
   }
   init() {
+    this.tableName = this.options.tableName
     this.request = window.indexedDB.open(this.options.dbName, this.options.version)
     this.request.onupgradeneeded = event => {
       console.log('%c 数据库创建或者版本更新 ', 'backround:#f5222d;color:#fff;')
       let db = event.target.result
-      let objectStore = db.createObjectStore(this.options.tableName, {KeyPath: 'FileID'})
-      if (this.options.createIndexName && Array.isArray(this.options.createIndexName)) {
+      let objectStore = db.createObjectStore(this.tableName, {KeyPath: 'FileID'})
+      if (this.options.createIndexName) {
         this.options.createIndexName.forEach((name, index) => {
           objectStore.createIndex(name, name, {unique: index === 0})
         })
@@ -244,126 +244,138 @@ class IndexedDB {
   }
   insert(data) {
     return new Promise((resolve, reject) => {
-      let store = this.db.transaction(this.options.tableName, 'readwrite')
-                      .objectStore(this.options.tableName)
+      let store = this.db.transaction(this.tableName, 'readwrite')
+                      .objectStore(this.tableName)
       let req = store.add(data, data.FileID)
       req.onsuccess = function() {
-          console.log(`%c ${data.FileID} 数据存储 `, 'background:#52c41a;color:#fff;')
-          resolve(this.result)
+        console.log(`%c ${data.FileID} 数据存储 `, 'background:#52c41a;color:#fff;')
+        resolve(this.result)
       }
       req.onerror = function() {
-          reject(this.result)
+        reject(this.result)
       }
     })
   }
   insert_many(data) {
-      return new Promise((resolve, reject) => {
-        if (!Array.isArray(data)) {
-          reject('data must be array')
+    return new Promise((resolve, reject) => {
+      if (!Array.isArray(data)) {
+        reject('data must be array')
+      }
+      let store = this.db.transaction(this.tableName, 'readwrite')
+                      .objectStore(this.tableName)
+      data.forEach(item => {
+        let req = store.add(item, item.FileID)
+        req.onsuccess = function() {
+          resolve(this.result)
         }
-        let store = this.db.transaction(this.options.tableName, 'readwrite')
-                        .objectStore(this.options.tableName)
-        data.forEach(item => {
-          let req = store.add(item, item.FileID)
-          req.onsuccess = function() {
-            resolve(this.result)
-          }
-          req.onerror = function() {
-              console.log(this)
-            reject(this.result)
-          }
-        })
+        req.onerror = function() {
+          console.log(this)
+          reject(this.result)
+        }
       })
+    })
   }
   update(data) {
-      return new Promise((resolve, reject) => {
-          let store = this.db.transaction(this.options.tableName, 'readwrite')
-                          .objectStore(this.options.tableName)
-          let req = store.put(data, data.FileID)
-          req.onsuccess = function() {
-              console.log(`%c ${data.FileID} 数据更新 `, 'background:#722ed1;color:#fff;')
-              resolve(this.result)
-          }
-          req.onerror = function() {
-              reject(this.result)
-          }
-      })
+    return new Promise((resolve, reject) => {
+      let store = this.db.transaction(this.tableName, 'readwrite')
+                      .objectStore(this.tableName)
+      let req = store.put(data, data.FileID)
+      req.onsuccess = function() {
+        console.log(`%c ${data.FileID} 数据更新 `, 'background:#722ed1;color:#fff;')
+        resolve(this.result)
+      }
+      req.onerror = function() {
+        reject(this.result)
+      }
+    })
   }
   get_by_key(key) {
-      return new Promise((resolve, reject) => {
-          if (!key) {
-              resolve(null)
-          }
-          let store = this.db.transaction(this.options.tableName, 'readwrite')
-                          .objectStore(this.options.tableName)
-          let req = store.get(key)
-          req.onsuccess = function() {
-              resolve(this.result)
-          }
-          req.onerror = function() {
-              reject(this.result)
-          }
-      })
+    return new Promise((resolve, reject) => {
+      if (!key) {
+        resolve(null)
+      }
+      let store = this.db.transaction(this.tableName, 'readwrite')
+                      .objectStore(this.tableName)
+      let req = store.get(key)
+      req.onsuccess = function() {
+        resolve(this.result)
+      }
+      req.onerror = function() {
+        reject(this.result)
+      }
+    })
   }
   get_by_index(value, indexName='name') {
-      if (!value) {
-          console.error('索引不能为空')
-          return Promise.reject('索引不能为空!!!')
+    if (!value) {
+      console.error('索引不能为空')
+      return Promise.reject('索引不能为空!!!')
+    }
+    if (!this.options.createIndexName.includes(indexName)) {
+      console.error('没有这个索引')
+      return Promise.reject('没有这个indexName!!!')
+    }
+    let store = this.db.transaction(this.tableName, 'readwrite')
+                    .objectStore(this.tableName)
+    let index = store.index(indexName)
+    return new Promise((resolve, reject) => {
+      let req = index.get(value)
+      req.onsuccess = e => {
+      resolve(e.target.result)
       }
-      if (!this.options.createIndexName.includes(indexName)) {
-          console.error('没有这个索引')
-          return Promise.reject('没有这个indexName!!!')
+      req.onerror = e => {
+      reject(e.target)
       }
-      let store = this.db.transaction(this.options.tableName, 'readwrite')
-                      .objectStore(this.options.tableName)
-      let index = store.index(indexName)
-      return new Promise((resolve, reject) => {
-          let req = index.get(value)
-          req.onsuccess = e => {
-          resolve(e.target.result)
-          }
-          req.onerror = e => {
-          reject(e.target)
-          }
-      })
+    })
   }
   get_all(value, indexName='name') {
-      if (!value) {
-          console.error('索引不能为空')
-          return Promise.reject('索引不能为空!!!')
-      }
-      if (!this.options.createIndexName.includes(indexName)) {
-          console.error('没有这个索引')
-          return Promise.reject('没有这个indexName!!!')
-      }
+    if (!value) {
+      console.error('索引不能为空')
+      return Promise.reject('索引不能为空!!!')
+    }
+    if (!this.options.createIndexName.includes(indexName)) {
+      console.error('没有这个索引')
+      return Promise.reject('没有这个indexName!!!')
+    }
 
-      let store = this.db.transaction(this.options.tableName, 'readwrite')
-                      .objectStore(this.options.tableName)
-      let index = store.index(indexName)
-      return new Promise((resolve, reject) => {
-          let req = index.getAll(value)
-          req.onsuccess = e => {
-          resolve(e.target.result)
-          }
-          req.onerror = e => {
-          reject(e.target)
-          }
-      })
-  }
-  get_by_range() {
+    let store = this.db.transaction(this.tableName, 'readwrite')
+                    .objectStore(this.tableName)
+    let index = store.index(indexName)
     return new Promise((resolve, reject) => {
-      let store = this.db.transaction(this.options.tableName, 'readwrite')
-                  .objectStore(this.options.tableName)
+      let req = index.getAll(value)
+      req.onsuccess = e => {
+      resolve(e.target.result)
+      }
+      req.onerror = e => {
+      reject(e.target)
+      }
+    })
+  }
+  get_by_range(startKey, endKey) {
+    return new Promise((resolve, reject) => {
+      let store = this.db.transaction(this.tableName, 'readwrite')
+                  .objectStore(this.tableName)
       let index = store.index(indexName)
+      const singleKeyRange = IDBKeyRange.only(startKey) // key === startKey
+      const lowerBoundKeyRange = IDBKeyRange.lowerBound(startKey) // key <= startKey
+      const lowerBoundOpenKeyRange = IDBKeyRange.lowerBound(startKey, true) // key < startKey
+      const upperBoundOpenKeyRange = IDBKeyRange.upperBound(startKey, true)
+      const boundKeyRange = IDBKeyRange.bound(startKey, endKey, false, true)
+      index.openCursor(boundKeyRange).onsuccess = e => {
+        let cursor = e.target.result
+        if (cursor) {
+          // Do something with the matches
+          cursor.continue()
+        }
+      }
     })
   }
   delete(key) {
-      if (!key) {
-          return
-      }
-      let store = this.db.transaction(this.options.tableName, 'readwrite')
-                      .objectStore(this.options.tableName)
-      store.delete(key)
+    if (!key) {
+      return
+    }
+    let store = this.db.transaction(this.tableName, 'readwrite')
+                    .objectStore(this.tableName)
+    store.delete(key)
   }
 
 }
@@ -373,11 +385,6 @@ const DB_INSTANCE = new IndexedDB()
 
 /**
  * IndexedDB
- * 
- * add
- * put
- * get
- * delete
  * 
  * created by leeing on 2018/3/7
  */
