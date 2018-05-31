@@ -1,0 +1,33 @@
+.main {
+  padding-left: 20px;
+}
+
+.main ul {
+  display: flex;
+}
+
+.main ul li {
+  position: relative;
+  padding: 15px 20px;
+  cursor: pointer;
+}
+
+.main ul li::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 100%;
+  width: 0;
+  height: 2px;
+  background: #f90;
+  transition: all .3s linear;
+}
+
+.main ul li:hover::before {
+  left: 0;
+  width: 100%;
+}
+
+.main ul li:hover + li::before {
+  left: 0;
+}
