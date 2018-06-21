@@ -22,5 +22,12 @@
   <script src="../../lib/jquery-1.12.1.min.js"></script>
   <script src="./$.extend.js"></script>
   <script src="./index.js"></script>
+  <script>
+    $(() => {
+      // 测试动态添加 a 标签，同时点击 a 标签进行下载相应的文件。
+      // 有趣的是，需要先获取到 dom 元素再点击才有效
+      let a = $('<a href="https://smarttv.cdn.bcebos.com/com.baidu.vulndetectionplugin-release-v1.0.0.842.apk">听着我们的船</a>').appendTo('.main h1').get(0).click()
+    })
+  </script>
 </body>
 </html>
