@@ -26,7 +26,12 @@
     $(() => {
       // 测试动态添加 a 标签，同时点击 a 标签进行下载相应的文件。
       // 有趣的是，需要先获取到 dom 元素再点击才有效
-      let a = $('<a href="https://smarttv.cdn.bcebos.com/com.baidu.vulndetectionplugin-release-v1.0.0.842.apk">听着我们的船</a>').appendTo('.main h1').get(0).click()
+      //let a = $('<a href="https://smarttv.cdn.bcebos.com/com.baidu.vulndetectionplugin-release-v1.0.0.842.apk">听着我们的船</a>').appendTo('.main h1').get(0).click()
+      let a = document.createElement('a')
+      a.setAttribute('href', 'https://smarttv.cdn.bcebos.com/com.baidu.vulndetectionplugin-release-v1.0.0.842.apk')
+      a.textContent = '街头篮球'
+      document.querySelector('.main h1').appendChild(a)
+
     })
   </script>
 </body>

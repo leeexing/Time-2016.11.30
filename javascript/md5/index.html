@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" type="text/css" href="../../lib/reset.css">
+	<link rel="stylesheet" type="text/css" href="../../lib/base.css">
+  <title>MD5</title>
+</head>
+<body>
+  <header class="header">
+    <h1>练习使用 md5 进行必要的加密</h1>
+  </header>
+
+  <main class="main">
+    <a href="#" class="btn success">TEST $.fn</a>
+    <a href="#" class="btn primary">TEST $.extend</a>
+  </main>
+
+  <script src="https://cdn.bootcss.com/Base64/1.0.1/base64.min.js"></script>
+  <script src="https://cdn.bootcss.com/crypto-js/3.1.9/crypto-js.js"></script>
+  <script src="../../lib/jquery-1.12.1.min.js"></script>
+  <script src="./$.extend.js"></script>
+  <script src="./index.js"></script>
+  <script>
+    $(() => {
+      const SECRET_KEY = 'amFtZXNuaXViaQ=='
+      class Md5 {
+        static genMd5 () {
+            let timeStamp = Md5.genTimeStamp()
+            let randomCode = Md5.genRandomSelect(6)
+            let key = atob(SECRET_KEY)
+            let str = `${timeStamp}|${randomCode}|${key}`
+            let salt = CryptoJS.MD5(str)
+            console.log(salt)
+            //let salt = md5.digest('hex')
+            return `${salt}${randomCode}${timeStamp}`
+        }
+        static genRandomSelect (n) {
+            let STRING_SELECT = 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890'
+            let str = ''
+            for (let i = 0, len = STRING_SELECT.length; i < n; i++) {
+                str += STRING_SELECT[Math.floor(Math.random() * len)]
+            }
+            return str
+        }
+        static genTimeStamp () {
+            return Math.floor(new Date().getTime() / 1000)
+            // return Math.floor(new Date(new Date().toUTCString().replace(' GMT', '')).getTime() / 1000)
+        }
+      }
+      console.log(Md5.genMd5())
+    })
+  </script>
+</body>
+</html>
