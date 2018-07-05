@@ -115,14 +115,18 @@ code {
 		background: #eee;
 	}
 	// 滑块
-	&::webkit-scrollbar-thumb {
+	&::-webkit-scrollbar-thumb {
 		border-radius: 5px;
 		background-color: #f90;
 	}
 	// 轨道
-	&::webkit-scrollbar-track {
+	&::-webkit-scrollbar-track {
 		border-radius: 5px;
 		background-color: #f5f5f5;
+	}
+	// 边角，即两个滚动条的交汇处
+	&::-webkit-scrollbar-corner {
+		// 
 	}
 	// 两侧按钮 | 后面可以添加 :start、:end
 	&::-webkit-scrollbar-button {

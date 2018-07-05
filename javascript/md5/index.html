@@ -13,6 +13,8 @@
     <h1>练习使用 md5 进行必要的加密</h1>
   </header>
 
+  <input type="text" name="goodgoal" id="" value="23132">
+
   <main class="main">
     <a href="#" class="btn success">TEST $.fn</a>
     <a href="#" class="btn primary">TEST $.extend</a>
@@ -24,6 +26,11 @@
   <script src="./$.extend.js"></script>
   <script src="./index.js"></script>
   <script>
+    console.log(document.getElementsByName('goodgoal'))
+    function goal() {
+      console.log(8888)
+    }
+    document.getElementsByName('goodgoal')[0].addEventListener('click', goal, false)
     $(() => {
       const SECRET_KEY = 'amFtZXNuaXViaQ=='
       class Md5 {
