@@ -28,6 +28,16 @@ function Curry(fn) {
 
 }
 
+
+/**
+ * 不考虑 this 的绑定
+ */
+function _curry(fn) {
+  return g = (...allArgs) => allArgs.length >= fn.length ? fn(...allArgs) : (...args) => fn(...allArgs, ...args)
+}
+
+const __curry = fn => (...allArgs) => allArgs.length >= fn.length ? fn(...allArgs) : (...args) => fn(...allArgs, ...args)
+
 /**
  * 偏函数
  * 
@@ -67,3 +77,33 @@ todayDebug('message') // [HH:mm] DEBUG message
 
 
 const compose = (...fns) => fns.reduce((f, g) => (...args) => f(g(...args)))
+
+
+/**
+ * 惰性加载
+*/
+const addEvent = function(ele, type, fn) {
+  if (window.addEventListener) {
+    return ele.addEventListener(type, fn, false)
+  } else if (window.attachEvent) {
+    return ele.attachEvent('on' + type, function() {
+      fn.call(ele)
+    })
+  }
+}
+// 缺点：每次调用都会执行一边判断
+
+const addEvent = function(ele, type, fn) {
+  if (window.addEventListener) {
+    addEvent = function(el, type, fn) {
+      ele.addEventListener(type, fn, false)
+    }
+  } else if (window.attachEvent) {
+    addEvent = function (ele, type, fn) {
+      ele.attachEvent('on' + type, function() {
+        fn.call(ele)
+      })
+    }
+  }
+}
+// 就是一个内部重写
