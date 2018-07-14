@@ -3,3 +3,6 @@
 *.min.css
 node_modules/
 uploads/
+
+# 源码文件
+*.core.js

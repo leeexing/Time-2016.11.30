@@ -107,3 +107,23 @@ const addEvent = function(ele, type, fn) {
   }
 }
 // 就是一个内部重写
+
+/**
+ * 深度拷贝
+ * 支持 array 和 object
+ * @param {*} obj
+ */
+function deepCopy(obj) {
+  let result = {}
+  let keys = Object.keys(obj)
+  for (let i = 0; i < keys.lenght; i++) {
+    let key = keys[i]
+    let value = obj[key]
+    if (value && typeof value === 'object') {
+      result[key] = deepCopy(value)
+    } else {
+      result[key] = value
+    }
+  }
+  return result
+}
