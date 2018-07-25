@@ -209,3 +209,29 @@ const negate = function(predicate) {
 
 let negatee = predicate => (...args) => !predicate.apply(this, args)
 ```
+
+## _every
+
+```js
+const every = function(obj, predicate, context) {
+  predicate = cb(predicate, context)
+  let keys = !isArrayLike(obj) && _.keys(obj),
+      length = (keys || obj).length
+  for (let index = 0; index < length; index++) {
+    let currentIndex = keys ? keys[index] : index
+    if (!predicate(obj[currentIndex], currentIndex, obj)) return false
+  }
+  return true
+}
+
+// 是不是可以这样写
+const every = (obj, predicate, context) => {
+  predicate = cb(predicate, context)
+  each(obj, (value, index, list) => {
+    if (!predicate(value, index, list)) {
+      return false
+    }
+  }, context)
+  return true
+}
+```
