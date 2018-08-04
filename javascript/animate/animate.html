@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>AMD前端模块化</title>
+  <link rel="stylesheet" type="text/css" href="../../css3/reset.css">
+  <link rel="stylesheet" type="text/css" href="../../css3/base.css">
+  <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script>
+  <style>
+    .main img {
+      width: 400px;
+      position: relative;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>Animate</h1>
+  </header>
+  <main class="main">
+    <img class="runner" src="https://cn.bing.com/az/hprichbg/rb/FringeFireworks_ZH-CN10750567003_1920x1080.jpg" alt="">
+  </main>
+
+  <script>
+    $(() => {
+      //anime({
+      //  targets: '.runner',
+      //  translateX: '1000px',
+      //  duration: 10000,
+      //  delay: 2000,
+      //  easing: 'linear'
+      //})
+      $('.runner').animate({transform: 'translateX(500px)'}, 5000)
+    })
+  </script>
+</body>
+</html>

@@ -7,9 +7,10 @@
 }
 .header {
 	@extend .hei;
-	h1 {
-		margin-bottom: 15px;
-	}
+}
+
+.main {
+	padding: 10px;
 }
 
 input {
