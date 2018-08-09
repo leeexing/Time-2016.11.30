@@ -11,6 +11,10 @@
 <body>
   <header class="header">
     <h1>web worker 练习使用</h1>
+    <hr style="margin: 5px 0">
+    <p>Web Worker 无法访问DOM节点</p>
+    <p>Web Worker 无法访问全局变量或是全局函数</p>
+    <p>Web Worker 无法访问window，document之类的浏览器全局变量、方法</p>
   </header>
 
   <main class="pad10">
@@ -23,8 +27,8 @@
 
   </main>
 
-  <script src="../../lib/jquery-1.12.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script src="./index.js"></script>
-  <script src="./worker.js"></script>
+  <!-- <script src="./worker.js"></script> -->
 </body>
 </html>
