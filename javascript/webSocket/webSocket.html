@@ -21,7 +21,7 @@
     $(() => {
       console.log(12)
       if (typeof WebSocket === 'function') {
-        let ws = new WebSocket('ws://localhost:5006/test?client_name=KD_35')
+        let ws = new WebSocket('ws://localhost:5281/MESSAGE?client_name=KD_35')
 
         ws.onopen = evt => {
           ws.send('Hello WebSocket')

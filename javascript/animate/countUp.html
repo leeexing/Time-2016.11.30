@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>计数特效小</title>
+  <link rel="stylesheet" type="text/css" href="../../css3/reset.css">
+  <link rel="stylesheet" type="text/css" href="../../css3/base.css">
+  <script src="https://cdn.bootcss.com/countup.js/1.9.3/countUp.min.js"></script>
+  <style>
+    .main {
+      color: #f0f;
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>CountUp</h1>
+  </header>
+  <main class="main">
+    <p class="countup"></p>
+  </main>
+  <script>
+    /**
+    * target = 目标元素的 ID；
+      startVal = 开始值；
+      endVal = 结束值；
+      decimals = 小数位数，默认值是0；
+      duration = 动画延迟秒数，默认值是2；
+    */
+    window.onload = () => {
+      let countupDom = document.querySelector('.countup')
+      let demo = new CountUp(countupDom, 12.21, 100.72, 2, 2.5)
+      demo.start()
+    }
+  </script>
+</body>
+</html>
