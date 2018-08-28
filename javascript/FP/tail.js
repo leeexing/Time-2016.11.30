@@ -10,7 +10,7 @@
  * 当一个函数尾调用自身，就叫做尾递归
  */
 
- // 1、尾调用
+ // !1、尾调用
 function foo() {
   console.log(log)
 }
@@ -23,7 +23,7 @@ function baz() {
 // 这种没有尾调用。会形成一个调用栈
 // 只要函数后面增加一个 return 就可以了
 
-// 2、尾递归
+// !2、尾递归
 function factorial(n) {
   if (n === 1) {
     return 1

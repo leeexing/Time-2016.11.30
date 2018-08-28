@@ -21,3 +21,43 @@
 ```js
 <script src="http://test.com/a.js?version=0.0.1"></script>
 ```
+
+### if-modified-since
+
+小计
+
+2018-08-28
+
+```js
+XMLHttpRequestProgressEvent
+    bubbles: false
+    cancelBubble: false
+    cancelable: true
+    clipboardData: undefined
+    currentTarget: undefined
+    defaultPrevented: false
+    eventPhase: 2
+    lengthComputable: false
+    loaded: 4982035
+    position: 4982035
+    returnValue: true
+    srcElement: undefined
+    target: undefined
+    timeStamp: 1323097256269
+    total: 18446744073709552000
+    totalSize: 18446744073709552000
+    type: "progress"
+    __proto__: XMLHttpRequestProgressEvent
+```
+
+之前遇到的一个问题，就是直接通过 xhr get nginx 配置的图像地址时，报了一个 `XMLHttpRequestProgressEvent` 错误
+
+问题出在
+
+```js
+xhr.setRequestHeader('If-Modified-Since','0')
+```
+
+这里是为了清除缓存才加上这么一句代码，没想到会给自己挖了一个大坑。调试了很久才发现问题出现在这里
+
+早知道就用 时间戳 来清除缓存了

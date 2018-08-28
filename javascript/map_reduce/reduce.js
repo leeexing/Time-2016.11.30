@@ -20,7 +20,15 @@
   Tip: 不要讲参数的位置记反了。prev 这个值很有意思
   */
 
-  // 使用 reduce 可以 替代 map 和 filter
+// !不借助原生高阶函数，定义reduce
+const reduce = (f, acc, arr) => {
+  if (arr.length === 0) return acc
+  let [head, ...tail] = arr
+  return reduce(f, f(head, acc), tail)
+}
+// 点评：有点深奥啊
+
+// !使用 reduce 可以 替代 map 和 filter
 var arr = [10, 45, 36, 67]
 arr.map(item => item + 15).filter(item => item > 50)
 
@@ -33,7 +41,7 @@ arr.reduce((pre, cur) => {
   return pre
 },[])
 
-// 使用reduce 模仿 map 函数
+// !使用reduce 模仿 map 函数
 function map(arr, iterator) {
   return arr.reduce((pre, cur, index) => {
     let newItem = iterator(cur, index)
@@ -42,7 +50,7 @@ function map(arr, iterator) {
   }, [])
 }
 
-// 使用 reduce 模仿 filter 函数
+// !使用 reduce 模仿 filter 函数
 function filter(arr, iterator) {
   return arr.reduce((pre, cur, index) => {
     let flag = iterator(cur, index)
