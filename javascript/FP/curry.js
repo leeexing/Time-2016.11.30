@@ -7,13 +7,19 @@
  * CurryAdd = x => y => z => x + y + z    | CurryAdd(a)(b)(c)
  */
 
-/*==================== 正文开始 ==============================*/
+// ! 阅读参考文献
+// https://fr.umio.us/favoring-curry/
+
+// ! 阅读参考文献
+
+/!*==================== 正文开始 ==============================*!/
 
 /**
  * return 包装器curried
  * 
  * 可以包装一次，两次，或者更多次。取决于函数的 fn.length
  */
+
 function Curry(fn) {
 
   return function curried(...args) {
