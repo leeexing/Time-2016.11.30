@@ -10,7 +10,8 @@ uploads/
 
 # 备份文件
 *.1.*
-test*.*
+*v*.*
+test.js
 
 # others
 .vscode

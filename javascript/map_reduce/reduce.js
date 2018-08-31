@@ -60,3 +60,33 @@ function filter(arr, iterator) {
     return pre
   }, [])
 }
+
+// !reduce扁平化数组
+const nestedArr = [1, 2, [3, 4, [5, 6]]]
+const flatten = arr =>
+  arr.reduce(
+    (flat, next) => flat.concat(Array.isArray(next) ? flatten(next) : next),
+    []
+  )
+// 点评：好厉害啊！递归运用得很好
+
+// !取出对象深层次的熟悉
+const deepAttr = { a: { b: { c: 15 } } }
+const pluckDeep = path => obj =>
+  path.split('.').reduce((val, attr) => val[attr], obj)
+// 点评：reduce 的两个参数要根据具体的场景合适的命名。这样比较好理解
+
+// !对数组里面的属性进行分组
+const users = [
+  { name: "Adam", age: 30, sex: "male" },
+  { name: "Helen", age: 27, sex: "female" },
+  { name: "Amy", age: 25, sex: "female" },
+  { name: "Anthony", age: 23, sex: "male" },
+]
+const isMale = person => person.sex === 'male'
+const grouping = (isValid, arr) =>
+  arr.reduce(
+    ([pass, fail], next) =>
+      isValid(next) ? [[...pass, next], fail] : [pass, [...fail, next]]
+  )
+// 点评：太强悍了
