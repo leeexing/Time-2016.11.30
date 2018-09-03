@@ -17,16 +17,16 @@
     initialValue （作为第一次调用 callback 的第一个参数。）
   * 
 
-  Tip: 不要讲参数的位置记反了。prev 这个值很有意思
+  Tip: 不要将参数的位置记反了。prev 这个值很有意思
   */
 
 // !不借助原生高阶函数，定义reduce
-const reduce = (f, acc, arr) => {
+const reduce = (f, acc=0, arr) => {
   if (arr.length === 0) return acc
   let [head, ...tail] = arr
   return reduce(f, f(head, acc), tail)
 }
-// 点评：有点深奥啊
+// 点评：有点深奥啊.感觉有点错误啊
 
 // !使用 reduce 可以 替代 map 和 filter
 var arr = [10, 45, 36, 67]
@@ -131,21 +131,23 @@ console.log(takeFirst(4, isOdd, numList))
 // 点评：使用递归可以很好的控制函数的执行情况
 
 // !pipe.辅助函数
-// const pipe = (...fns) => (...args) => fns.reduce((fx, fy) => fy(fx), ...args)
+const pipe = (...fns) => (...args) => fns.reduce((fx, fy) => fy(fx), ...args)
+
 const numList1 = [1, 3, 11, 4, 2, 5, 6, 7]
 const add = x => x + 2
 const mul = y => y * 2
-const pipe = (...fns) => (...args) => fns.reduce((fx, fy) => fy(fx), ...args)
+// const pipe = (...fns) => (...args) => fns.reduce((fx, fy) => fy(fx), ...args)
 let ret = numList1.map(pipe(add, mul))
 console.log(ret)
 // 点评：需要好好理解并适应且使用这种 -- 函数没有直接显示参数的表达方式
+// TODO: 需要花点时间好好理解这里的 pipe 函数
 
 // !一个高级一些的概念 -- Transduce
 const filter = (f, arr) =>
   arr.reduce((acc, val) => (f(val) && acc.push(val), acc), [])
 
 const map = (f, arr) =>
-  arr.reduce((arr, val) => (arr.push(f(val)), acc), [])
+  arr.reduce((acc, val) => (acc.push(f(val)), acc), [])
 // 点评一：使用reduce来定义 filter 和 map。他们都有一定的共性
 
 filter = f => reducer => (acc, val) => {

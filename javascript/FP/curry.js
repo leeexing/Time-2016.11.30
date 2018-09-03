@@ -55,7 +55,7 @@ const __curry = fn => (...allArgs) => allArgs.length >= fn.length ? fn(...allArg
 function Partial(fn, ...argsBound) {
 
   return function(...args) {
-    return fn.apply(this, ...argsBound, ...args)
+    return fn.apply(this, [...argsBound, ...args])
   }
 
 }

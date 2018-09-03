@@ -50,7 +50,7 @@ let dispatchEvent = (event, eventMap) => {
 //4、currying 化处理
 let addEventListener = fn => event => newMap => 
                                     newMap.has(event) ? 
-                                      new Map(newMap.set(event, [...newMap.get(event), fn])) : 
+                                      new Map(newMap.set(event, [...newMap.get(event), fn])) :
                                       new Map(newMap.set(event, [fn]))
 
 let dispatchEvent = event => eventsMap => (eventsMap.has(event) && eventsMap.get(event).forEach(fn => fn())) || event
