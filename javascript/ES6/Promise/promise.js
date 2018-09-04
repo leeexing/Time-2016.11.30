@@ -2,8 +2,14 @@
  * 手写版的 promise
  * 了解promise的具体实现机理
  * 
- * 1、promise的核心是 then。该方法接收两个参数 【onFulfilled, onRejected】，都是可选的参数
+ * ! 1、promise的核心是 then。该方法接收两个参数 【onFulfilled, onRejected】，都是可选的参数
  *      返回值必须是一个 新的 promise 对象❗，这样才支持链式调用
+ * 
+ * ! 2、比较迷惑的地方。promise.then().then(),后面的then依旧可以得到之前then返回的值
+ *      * then有返回值，then了之后还能再then，那就说明之前的then返回的必然是个promise
+ *      * 所以另外一种写法是在 then 里面包裹一层 setTimeout。因为promise本身是一个异步方法，属于微任务一列，必须
+ **        得在执行栈执行完了去取他的值，所以所有的返回值都需要包一层异步setTimeout。
+ * ! 3、
  */
 const isFunction = fn => typeof fn === 'function'
 const PENDING = 'PENDING'

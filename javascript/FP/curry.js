@@ -86,8 +86,9 @@ const compose = (...fns) => fns.reduce((f, g) => (...args) => f(g(...args)))
 
 
 /**
- * 惰性加载
+ * # 惰性加载
 */
+// ^ 45646
 const addEvent = function(ele, type, fn) {
   if (window.addEventListener) {
     return ele.addEventListener(type, fn, false)
