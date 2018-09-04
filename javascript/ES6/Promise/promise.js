@@ -9,12 +9,14 @@ const isFunction = fn => typeof fn === 'function'
 const PENDING = 'PENDING'
 const FULLFILLED = 'FULLFILLED'
 const REJECTED = 'REJECTED'
+let n = 0
 
 class MyPromise {
   constructor (handle) {
     if (!isFunction(handle)) {
       throw new Error('MyPromise must accept a function as a parameter')
     }
+    this.signature = `leeing-${++n}`
     this._status = PENDING // 状态
     this._value = undefined // 返回值
     this._fullfilledQueues = [] // 成功回调函数队列
@@ -28,13 +30,15 @@ class MyPromise {
   _resolve (val) {
     const run = () => {
       if (this._status !== PENDING) return
-      this._status = FULLFILLED
+      // 依次执行成功队列中的函数，并清空队列
       const runFullfilled = value => {
+        console.log(value, '++++')
         let cb
         while (cb = this._fullfilledQueues.shift()) {
           cb(value)
         }
       }
+      // 依次执行失败队列中的函数，并清空队列
       const runRejected = err => {
         let cb
         while (cb = this._rejectedQueues.shift()) {
@@ -60,7 +64,7 @@ class MyPromise {
       }
     }
     // !为了支持同步的promise，这里采用异步调用
-    setTimeout(() => run(), 0)
+    setTimeout(run, 0)
   }
   _reject (err) {
     if (this._status !== PENDING) return
@@ -102,7 +106,7 @@ class MyPromise {
           if (!isFunction(onRejected)) {
             onRejectedNext(error)
           } else {
-            let res = onRejected(value)
+            let res = onRejected(error)
             if (res instanceof MyPromise) {
               res.then(onFullfilledNext, onRejectedNext)
             } else {
@@ -114,10 +118,12 @@ class MyPromise {
         }
       }
       switch (_status) {
-        case PEDING:
+        // 当状态为pending时，将then方法回调函数加入执行队列等待执行
+        case PENDING:
           this._fullfilledQueues.push(fullfilled)
           this._rejectedQueues.push(rejected)
           break
+        // 当状态已经改变，立即执行对应的回调函数
         case FULLFILLED:
           fullfilled(_value)
           break
@@ -178,3 +184,16 @@ class MyPromise {
 }
 
 // !参考【https://juejin.im/post/5b83cb5ae51d4538cc3ec354】
+
+// todo test
+let p = new MyPromise((resolve, reject) => {
+  resolve('well done')
+  // setTimeout(() => {
+  // }, 2000)
+  console.log('hi, darling')
+}).then(function foo (res) {
+  console.log(res)
+  return 89
+}).then(function bar (data){
+  console.log(data)
+})
