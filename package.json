@@ -27,6 +27,7 @@
     "gulp-livereload": "^3.8.1",
     "gulp-rename": "^1.4.0",
     "gulp-uglify": "^3.0.1",
-    "ramda": "^0.25.0"
+    "ramda": "^0.25.0",
+    "redux": "^4.0.0"
   }
 }
