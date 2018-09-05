@@ -8,12 +8,9 @@ uploads/
 # 源码文件
 *.core.js
 
-# 备份文件
-*.1.*
-*v*.*
+# 测试文件
 test.js
 
-# others
+# 配置相关
 .vscode
-.editorconfig
 lib/
