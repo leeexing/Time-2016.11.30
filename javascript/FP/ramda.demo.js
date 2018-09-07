@@ -48,3 +48,22 @@ function example4 () {
     R.tail
   )
 }
+
+// !demo5
+function example5 () {
+  const alice = {name: 'ALICE', age: 101}
+  const bob = {name: 'Bob', age: -12}
+  const clark = {name: 'clack', age: 31.1415}
+  
+  const sortByName = R.sortBy(
+    R.compose(R.toLower, R.prop('name'))
+  )
+
+  const sortByAge = R.sortBy(
+    R.compose(Math.abs, R.prop('age'))
+  )
+
+  const arr = [clark, alice, bob]
+  console.log(sortByName(arr))
+  console.log(sortByAge(arr))
+}
