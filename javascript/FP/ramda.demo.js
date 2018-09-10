@@ -77,6 +77,47 @@ R.union([1,2,3],[2,3,4]) // [1,2,3,4]
 R.invertObj({first: 'Lucy', second: 'Tom', third: 'Lucy'}) // {Lucy: 'Third', Tom: 'second'}
 R.invert({first: 'Lucy', second: 'Tom', third: 'Lucy'}) // {Lucy: ['first', 'Third'], Tom: ['second']}
 
+// !逻辑运算
+R.allPass([gt10, even])(arr)
+R.T() // true 永远返回 true 的函数
+
+// !柯里化
+const productOfArr = arr => {
+  let product = 1
+  arr.forEach(item => product *= item)
+  return product
+}
+let count = 0
+R.memoize( n => {
+  count += 1
+  return productOfArr(R.range(1, n + 1))
+})
+
+
+// !函数的执行
+R.tap(x => console.log('x is', x))(100) // 100；将一个值传入指定函数，并返回该值
+R.pipe(
+  R.assoc('a', 2),
+  R.tap(console.log),
+  R.assoc('a', 3)
+)({a: 1}) // {a: 3}
+const zipFn = (x, y) => console.log(x, y)
+R.zipWith(f, [1,2,3])(['a', 'b', 'c']) // !将两个数组对应位置的值，一起作为参数传入某个函数。[f(1, 'a'), f(2, 'b'), f(3, 'c')]
+R.ascend(R.prop('age')) // 返回一个升序排列的比较函数，主要用于排序
+R.sort(
+  R.ascend(R.prop('age'))
+)(peopleArr)
+R.sort(
+  R.descend(R.prop('score')) // 返回一个降序排列的比较函数，主要还是用于排序
+)(studentScores)
+R.sortBy() // !这个不需要使用 descend 或者 ascend
+R.sortWith(
+  [
+    R.descend(R.prop('age')),
+    R.descend(R.prop('name'))
+  ]
+)(people) // 依据比较函数列表对输入列表进行排序
+
 // !数组的截取和添加
 R.head(['hi', 'hanna', 'beautiful']) // hi
 R.last(['hi', 'hanna', 'beautiful']) // beautiful
