@@ -67,3 +67,97 @@ function example5 () {
   console.log(sortByName(arr))
   console.log(sortByAge(arr))
 }
+
+R.type([])
+R.uniq([1,2,2,3,1,1])
+R.pipe(R.multiply(2), R.add(2), R.divide(2))
+R.contains({name:'leeing'})([{name: 'leeing'}, {name:'hanna'}])
+R.flatten([1,2,[3,[4,5,6]]])
+R.union([1,2,3],[2,3,4]) // [1,2,3,4]
+R.invertObj({first: 'Lucy', second: 'Tom', third: 'Lucy'}) // {Lucy: 'Third', Tom: 'second'}
+R.invert({first: 'Lucy', second: 'Tom', third: 'Lucy'}) // {Lucy: ['first', 'Third'], Tom: ['second']}
+
+// !数组的截取和添加
+R.head(['hi', 'hanna', 'beautiful']) // hi
+R.last(['hi', 'hanna', 'beautiful']) // beautiful
+R.tail(['hi', 'hanna', 'beautiful']) // ['hanna', 'beautiful']
+R.tail('beautiful') // eautiful
+R.init(['hi', 'hanna', 'beautiful']) // ['hi', 'hanna']
+
+// !数组的过滤
+const isNotFour = n => n !== 4
+const isLtTwo = n => x <= 2
+R.takeWhile(isNotFour)([1,2,5,4,1,2,3]) // !一旦条件满足，后面的成员都会被过滤。[1,2,5]
+R.dropWhile(isLtTwo) // !一旦【不】满足条件，取出剩余的所有值
+R.without([1,2])([1,4,7,8,5,2]) // [4,7,8,5] 返回指定值以外的成员
+
+// ! 但数组运算
+R.countBy(Math.floor)([1.0, 1.1, 1.2, 2.0, 3.0, 2.2]) // {'1': 3, '2': 2, '3': 1}
+R.splitEvery
+R.splitWhen(R.equals(2))([1,4,7,8,5,2]) // 以第一个满足指定函数的成员为界，将数组分成两个部分
+
+
+// !符合数组
+R.find(R.propEq('a', 2))([{a: 1}, {b:2},{a:2}]) // {a:2}
+R.findLastIndex(R.propEq('a', 2))([{a: 1}, {b:2},{a:2}, {a: 2, c:3}]) // *多出也可以
+R.pluck('a')([{a:2}, {a:3}]) // [2,3] 取出数组成员的某个属性，组成一个新的数组
+R.project(['a', 'b'])([{a: 1, b: 2, c:3}, {a:45, b: 63, c: 89}]) // [ { a: 1, b: 2 }, { a: 45, b: 63 } ] 取出多个属性
+R.transpose([[1, 'a'], [2, 'b'], [3, 'c']]) // 将每个成员相同位置的值，组成一个新数组
+R.fromPairs([['a', 1], ['b', 2], ['c', 3]]) // !将嵌套数组转为一个对象。{a: 1, b: 2, c: 3}
+const byGrade = R.groupBy(function(student) { // !将数组成员按照指定条件分组
+  const score = student.score;
+  return score < 65 ? 'F' : // todo：这种写法可以尝试一下
+         score < 70 ? 'D' :
+         score < 80 ? 'C' :
+         score < 90 ? 'B' : 'A';
+});
+const students = [{name: 'Abby', score: 84},
+                {name: 'Eddy', score: 58},
+                // ...
+                {name: 'Jack', score: 69}];
+byGrade(students);
+// {
+//   'A': [{name: 'Dianne', score: 99}],
+//   'B': [{name: 'Abby', score: 84}]
+//   // ...,
+//   'F': [{name: 'Eddy', score: 58}]
+// }
+
+// !对象的特征判断
+R.whereEq({a:1, b: 2})({a:1}) // false.如果属性等于给定值（少了不行，多了可以）
+
+
+// !对象的过滤
+R.pick(['a', 'd'])({a:1, b:2, c:3, d:4}) // {a:1, d:4}
+R.omit(['a', 'd'])({a:1, b:2, c:3, d:4}) //! 过滤指定属性。这个看看起来比较好 {b: 2, c: 3} 
+const testArr = [{a: 1, b:2, c:3, d:4}, {a:2,b:3,c:4,d:5}]
+console.log(
+  R.map(R.omit(['a','c']))(testArr)
+)
+// * reject 返回所有不满足条件的属性。和filter相反
+const isEven = n => n % 2 === 0
+console.log(
+  R.map(R.reject(isEven))(testArr)
+)
+
+// !对象的截取
+R.dissoc('b')({a:1, b:2, c:3}) // {a:1, c:3}
+R.assoc('c', 4)({a:1, b:2}) // {a:1, b:2, c:4} 添加或改写某个属性
+R.partition(R.contains('e'))({a: 'leeing', b: 'nanam', c:'goddess'}) // [{a: 'leeing', c:'goddess'}, { b: 'nanam'}] 根据属性值是否满足给定条件，将属性区分
+R.pick(['a', 'e'])({a:2,b:2,c:3}) // {a:1}
+R.pickAll(['a', 'e'])({a:2,b:2,c:3}) // {a:1, e: undefined} pickAll会包含不存在的属性
+const isUpperCase = (val, key) => key.toUpperCase() === key
+R.pickBy(isUpperCase)({a:1, B:2, c:3, D:4}) // {B:2, D:4}
+
+// !对象的运算
+R.prop('name')({name: 'leeing'}) // leeing
+R.mapObjIndexed((val, key, obj) => console.log(val, key, obj)) // 显示的多一个键和值的参数
+R.merge({name: 'leeing', age: 23})({age: 24}) // * 合并对象，有同名属性，后面的值会覆盖前面的值
+R.mergeWith(
+  R.concat,
+  {a: 1, name: 'leeing'},
+  {b: 2, name: 'hanna'}
+) // {a: 1, b: 2, name: ['leeing', 'hanna']};有同名的属性，会使用给定的函数处理
+
+// !复合对象
+R.path(['a', 'b'])({a: {b: 2}}) // 2
