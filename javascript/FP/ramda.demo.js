@@ -77,6 +77,8 @@ R.union([1,2,3],[2,3,4]) // [1,2,3,4]
 R.invertObj({first: 'Lucy', second: 'Tom', third: 'Lucy'}) // {Lucy: 'Third', Tom: 'second'}
 R.invert({first: 'Lucy', second: 'Tom', third: 'Lucy'}) // {Lucy: ['first', 'Third'], Tom: ['second']}
 
+
+
 // !逻辑运算
 R.allPass([gt10, even])(arr)
 R.T() // true 永远返回 true 的函数
@@ -92,6 +94,7 @@ R.memoize( n => {
   count += 1
   return productOfArr(R.range(1, n + 1))
 })
+R.replace('{name}', R.__, 'Hello, {name}')('leeing') // Hello, leeing; * 特别注意 R.__ == _. 是ramda中柯里化函数的参数占位符
 
 
 // !函数的执行
@@ -101,8 +104,8 @@ R.pipe(
   R.tap(console.log),
   R.assoc('a', 3)
 )({a: 1}) // {a: 3}
-const zipFn = (x, y) => console.log(x, y)
-R.zipWith(f, [1,2,3])(['a', 'b', 'c']) // !将两个数组对应位置的值，一起作为参数传入某个函数。[f(1, 'a'), f(2, 'b'), f(3, 'c')]
+const zipFn = (x, y) => x + y
+R.zipWith(zipFn, [1,2,3])(['a', 'b', 'c']) // !将两个数组对应位置的值，一起作为参数传入某个函数。[f(1, 'a'), f(2, 'b'), f(3, 'c')]
 R.ascend(R.prop('age')) // 返回一个升序排列的比较函数，主要用于排序
 R.sort(
   R.ascend(R.prop('age'))
@@ -202,3 +205,10 @@ R.mergeWith(
 
 // !复合对象
 R.path(['a', 'b'])({a: {b: 2}}) // 2
+
+// ! lens 比较新颖。 相当于封装了 getter 和 setter 方法
+const aLens = R.lens(R.prop('a'), R.assoc('a')) // * assoc 相当于 setters
+const obj = [{a: 12, b: 'dd'}, {a: 45, c: 'c:c'}, {a: 20, d: 'leing'}]
+R.view(aLens,obj[0])
+R.set(aLens, 5, obj[1])
+R.over(aLens, R.add(8), obj[2])
