@@ -9,7 +9,7 @@ uploads/
 *.core.js
 
 # 测试文件
-test.js
+test.*
 
 # 配置相关
 .vscode
