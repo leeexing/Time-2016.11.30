@@ -77,7 +77,8 @@ R.union([1,2,3],[2,3,4]) // [1,2,3,4]
 R.invertObj({first: 'Lucy', second: 'Tom', third: 'Lucy'}) // {Lucy: 'Third', Tom: 'second'}
 R.invert({first: 'Lucy', second: 'Tom', third: 'Lucy'}) // {Lucy: ['first', 'Third'], Tom: ['second']}
 
-
+// ! 有趣
+R.both(R.gt(R.__, 10), R.lt(R.__, 20))(15) // -true  R.__ 是一个参数的占位符
 
 // !逻辑运算
 R.allPass([gt10, even])(arr)
@@ -104,6 +105,8 @@ R.pipe(
   R.tap(console.log),
   R.assoc('a', 3)
 )({a: 1}) // {a: 3}
+R.zip(a, b) // 将两个列表对应位置的元素组合，生成一个新的【元素对】列表，生成的列表长度取决于较短的输入列表的长度。[a] → [b] → [[a,b]]
+R.zipObj(a, b) // 将两个列表对应位置的元素作为键值对组合，生成一个新的【键值对】的列表。
 const zipFn = (x, y) => x + y
 R.zipWith(zipFn, [1,2,3])(['a', 'b', 'c']) // !将两个数组对应位置的值，一起作为参数传入某个函数。[f(1, 'a'), f(2, 'b'), f(3, 'c')]
 R.ascend(R.prop('age')) // 返回一个升序排列的比较函数，主要用于排序
@@ -130,23 +133,23 @@ R.init(['hi', 'hanna', 'beautiful']) // ['hi', 'hanna']
 
 // !数组的过滤
 const isNotFour = n => n !== 4
-const isLtTwo = n => x <= 2
+const isLtTwo = n => n <= 2
 R.takeWhile(isNotFour)([1,2,5,4,1,2,3]) // !一旦条件满足，后面的成员都会被过滤。[1,2,5]
 R.dropWhile(isLtTwo) // !一旦【不】满足条件，取出剩余的所有值
 R.without([1,2])([1,4,7,8,5,2]) // [4,7,8,5] 返回指定值以外的成员
 
-// ! 但数组运算
+// ! 单数组运算
 R.countBy(Math.floor)([1.0, 1.1, 1.2, 2.0, 3.0, 2.2]) // {'1': 3, '2': 2, '3': 1}
 R.splitEvery
 R.splitWhen(R.equals(2))([1,4,7,8,5,2]) // 以第一个满足指定函数的成员为界，将数组分成两个部分
 
 
-// !符合数组
+// !复合数组
 R.find(R.propEq('a', 2))([{a: 1}, {b:2},{a:2}]) // {a:2}
 R.findLastIndex(R.propEq('a', 2))([{a: 1}, {b:2},{a:2}, {a: 2, c:3}]) // *多出也可以
-R.pluck('a')([{a:2}, {a:3}]) // [2,3] 取出数组成员的某个属性，组成一个新的数组
-R.project(['a', 'b'])([{a: 1, b: 2, c:3}, {a:45, b: 63, c: 89}]) // [ { a: 1, b: 2 }, { a: 45, b: 63 } ] 取出多个属性
-R.transpose([[1, 'a'], [2, 'b'], [3, 'c']]) // 将每个成员相同位置的值，组成一个新数组
+R.pluck('a')([{a:2}, {a:3}]) // ^[2,3] 取出数组成员的某个属性，组成一个新的数组. 有点类似 map(prop('a')) 这个组合函数。等价于 R.map(R.prop(k), f)
+R.project(['a', 'b'])([{a: 1, b: 2, c:3}, {a:45, b: 63, c: 89}]) // [ { a: 1, b: 2 }, { a: 45, b: 63 } ] 取出多个属性.[k] → [{k: v}] → [{k: v}]
+R.transpose([[1, 'a'], [2, 'b'], [3, 'c']]) // [ [ 1, 2, 3 ], [ 'a', 'b', 'c' ] ] 将每个成员相同位置的值，组成一个新数组
 R.fromPairs([['a', 1], ['b', 2], ['c', 3]]) // !将嵌套数组转为一个对象。{a: 1, b: 2, c: 3}
 const byGrade = R.groupBy(function(student) { // !将数组成员按照指定条件分组
   const score = student.score;
@@ -163,7 +166,7 @@ byGrade(students);
 // {
 //   'A': [{name: 'Dianne', score: 99}],
 //   'B': [{name: 'Abby', score: 84}]
-//   // ...,
+//   ...,
 //   'F': [{name: 'Eddy', score: 58}]
 // }
 
@@ -186,7 +189,7 @@ console.log(
 
 // !对象的截取
 R.dissoc('b')({a:1, b:2, c:3}) // {a:1, c:3}
-R.assoc('c', 4)({a:1, b:2}) // {a:1, b:2, c:4} 添加或改写某个属性
+R.assoc('c', 4)({a:1, b:2}) // {a:1, b:2, c:4} 浅复制对象，然后设置或者覆盖对象的指定属性
 R.partition(R.contains('e'))({a: 'leeing', b: 'nanam', c:'goddess'}) // [{a: 'leeing', c:'goddess'}, { b: 'nanam'}] 根据属性值是否满足给定条件，将属性区分
 R.pick(['a', 'e'])({a:2,b:2,c:3}) // {a:1}
 R.pickAll(['a', 'e'])({a:2,b:2,c:3}) // {a:1, e: undefined} pickAll会包含不存在的属性
