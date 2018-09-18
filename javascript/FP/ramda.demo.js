@@ -1,5 +1,7 @@
 /**
  * ramda学习的一些小例子。希望能在平时的工作中用上
+ * 
+ * 后面几个例子（第八个开始），参考http://reactivex.io/learnrx/ 网上的需求，通过Ramda实现
  */
 const R = require('ramda')
 
@@ -26,6 +28,7 @@ function example2 () {
     R.split(' '),
     R.map(R.length),
     R.reduce(R.max, 0)
+    // R.apply(Math.max)
   )
   console.log(getLonggestWordLength(str))
 }
@@ -34,10 +37,12 @@ function example2 () {
 function example3 () {
   const obj = [{a: 12, b: 'dd'}, {a: 45, c: 'c:c'}, {a: 20}]
 
-  console.log(R.map(R.pick('a')(obj)))
+  console.log( R.map(R.pick('a')(obj)) )
+
+  console.log( R.project(['a'])(obj) ) // 得到的结果是一样的。说明：project本身就是一个包含map方法的prop方法
 }
 
-// !demo4
+// !例子四
 function example4 () {
   const queryString = "?page=2&pageSize=10&total=203";
 
@@ -49,7 +54,7 @@ function example4 () {
   )
 }
 
-// !demo5
+// !例子五
 function example5 () {
   const alice = {name: 'ALICE', age: 101}
   const bob = {name: 'Bob', age: -12}
@@ -66,6 +71,93 @@ function example5 () {
   const arr = [clark, alice, bob]
   console.log(sortByName(arr))
   console.log(sortByAge(arr))
+}
+
+// !例子六
+function example6 () {
+  const teams = [
+    {name: 'Lions', score: 5},
+    {name: 'Tigers', score: 4},
+    {name: 'Bears', score: 6},
+    {name: 'Monkeys', score: 2},
+  ]
+  
+  console.log(
+    R.pipe(
+      R.sort(
+        R.ascend(R.prop('score')),
+      ),
+      R.head
+    )(teams)
+  )
+}
+
+// !例子七
+function example7 () {
+  const user = {
+    id: 1,
+    name: "Joe"
+  }
+  
+  console.log(
+    R.converge(
+      R.assoc('avatar'),
+      [
+        R.pipe(
+          R.prop('id'),
+          id => `leeing/anjianba/avatar/${id}.jpg`
+        ),
+        R.identity
+      ]
+    )(user)
+  )
+
+  const generateUrl = id => `https://img.socialnetwork.com/avatar/${id || 'default'}.png`
+  const getUpdatedUser = user => ({ ...user, avatar: generateUrl(user.id) })
+
+  console.log(
+    getUpdatedUser(user)
+  )
+  // 得到的结果一样。但是，使用Ramda函数实现了 point free 的要求。
+  // 后面的使用es6虽然实现了，但是数据 user 提前出线了
+  // -我们期待的是在函数组合时不关系数据，哪怕是作为参数
+  // ^coverge 函数实现了数据使用两次的功能
+}
+
+// !例子八
+function example8 () {
+  const {Data8} = require('./testData')
+  const smallBox = R.pipe(
+    R.prop('boxarts'),
+    R.reduce((pre, cur) => (pre.width*pre.height < cur.width*cur.height ? pre : cur), {}),
+    R.prop('url')
+  )
+  const interestingTime = R.pipe(
+    R.prop('interestingMoments'),
+    R.reduce((pre, cur) => (pre.type == 'Middle' ? pre : cur), {}),
+    // R.filter(R.propEq('type','Middle')),
+    // R.head,
+    R.prop('time')
+  )
+  const resultFn = (id, title, time, url) => ({id, title, time, url})
+  console.log(
+    R.pipe(
+      R.chain(R.prop('videos')),
+      R.map(
+        R.converge(
+          resultFn,
+          [
+            R.prop('id'),
+            R.prop('title'),
+            interestingTime,
+            smallBox
+          ]
+        )
+      )
+    )(Data8)
+  )
+
+  // ^reduce依旧很强大。R.recude需要一个初始值。
 }
 
 R.type([])
@@ -193,7 +285,7 @@ R.whereEq({a:1, b: 2})({a:1}) // - 👍👍这个方法比较好。可以使用�
 
 
 // !对象的过滤
-R.pick(['a', 'd'])({a:1, b:2, c:3, d:4}) // {a:1, d:4}
+R.pick(['a', 'd'])({a:1, b:2, c:3, d:4}) // {a:1, d:4}.返回对象的部分拷贝。其中仅包含指定键对应的属性
 R.omit(['a', 'd'])({a:1, b:2, c:3, d:4}) //! 过滤指定属性。这个看看起来比较好 {b: 2, c: 3} 
 const testArr = [{a: 1, b:2, c:3, d:4}, {a:2,b:3,c:4,d:5}]
 console.log(
