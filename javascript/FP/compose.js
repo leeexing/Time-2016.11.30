@@ -23,3 +23,14 @@ export default function compose (...fns) {
   return fns.reduce((f, g) => (...args) => f(g(...args)))
 }
 // 点评：做了一些容错处理，还是很不错的
+
+// !underscore版本
+function compose(...fns) {
+  var start = fns.length - 1
+  return function (args) {
+    var i = start
+    var result = fn[start].apply(this, args)
+    while(i--) result = fn[i].call(this, result)
+    return result
+  }
+}

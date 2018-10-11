@@ -44,3 +44,6 @@ function deepCopy(obj) {
   return result
 }
 // 点评：合理的使用递归
+
+// !去反函数
+const negative = fn => (...args) => !fn.apply(this, args)

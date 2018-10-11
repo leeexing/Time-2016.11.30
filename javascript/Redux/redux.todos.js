@@ -34,6 +34,7 @@ const todosReducer = (state = State.todos, action) => {
   }
 }
 const visibilityFilterReducer = (state = 'SHOW_ALL', action) => {
+  console.log('测试二', state)
   const {type} = action
   switch (type) {
     case 'SET_VISIBLE_FILTER':
