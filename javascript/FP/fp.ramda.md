@@ -49,3 +49,25 @@ const propRole = R.curry(prop)('role)
 上面的代码中，prop函数封装了读取操作。它需要两个参数p（属性名）和obj（对象）。这时，要把数据obj放在最后一个参数，这是为了方便柯里化。函数propRole则是指定读取role属性
 
 ### 
+
+and
+还没有
+both
+好用
+```js
+const numbers = [4,10,0,27,42,17,15,-6,58]
+
+console.log(
+  R.pipe(
+    R.filter(
+      R.both(
+        R.gt(R.__, 10),
+        R.lt(R.__, 20)
+      )
+    )
+  )(numbers)
+)
+
+之前一直使用and
+结果始终没能得到预期中的效果
+```
