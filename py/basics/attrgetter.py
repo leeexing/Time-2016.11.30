@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
-# from operator import en
-from operator import attrgetter
+"""
+``operator`` 模块为 Python 提供了一个 "功能性" 的标准操作符接口. 当使用 ``map`` 以及
+``filter`` 一类的函数的时候, ``operator`` 模块中的函数可以替换一些 ``lambda`` 函式.
+而且这些函数在一些喜欢写晦涩代码的程序员中很流行. [Example 1-62 #eg-1-62] 展示了
+``operator`` 模块的一般用法.
+"""
+from operator import attrgetter, itemgetter
 arr = [1, 5, 2, 1, 9, 1, 5, 10]
 a = [ {'x':1, 'y':2}, {'x':1, 'y':3}, {'x':1, 'y':2}, {'x':2, 'y':4}]
 rows = [

@@ -1,0 +1,88 @@
+* {
+  box-sizing: border-box;
+}
+
+header {
+  padding: 10px;
+  background: #222;
+  color: #fff;
+}
+
+.start {
+  display: inline-block;
+  padding: 2px 10px;
+  color: #f90;
+  border: 1px solid #ddd;
+  cursor: pointer;
+}
+
+main {
+  min-height: 500px;
+  overflow: hidden;
+}
+
+main .wrap {
+  display: inline-block;
+  width: 2000px;
+  transform: translateX(-100%);
+  animation: track 4s linear;
+  animation-fill-mode: forwards;
+  animation-play-state: paused;
+  will-change: transform;
+}
+
+.wrap.run {
+  animation-play-state: running;
+}
+
+main .wrap img {
+  position: relative;
+  float: right;
+  max-width: 400px;
+  max-height: 400px;
+  padding: 10px;
+  animation-fill-mode: forwards;
+  animation-play-state: paused;
+  will-change: transform;
+}
+
+main .wrap img.paused {
+  animation-play-state: paused;
+}
+
+main .wrap img.run {
+  animation-play-state: running;
+}
+
+.animate {
+  animation: track0 1s linear;
+}
+
+@keyframes track {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(-20%);
+  }
+}
+
+@keyframes track0 {
+  from {
+    transform: translateX(0%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+footer {
+  height: 150px;
+  padding: 5px;
+  border-top: 1px solid #f90;
+}
+
+footer img {
+  width: 20%;
+  max-height: 100%;
+}
