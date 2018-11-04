@@ -6,13 +6,19 @@ The first repository in github
 
 1. javascript
 2. css3
-3. project
+3. vue
+4. react
+5. python/flask
 
 there are the modules in this repository.
 
 ## Why
 
-sometimes I will worry about my css is not master very well.
+first, sometimes I will worry about my css is not master very well.
 so, I need spend some time to review it.
 
-also, I need learn some new characters of js and new frames
+second, learning is interesting.
+so, I need learn some new characters of js and new frames.
+
+third, learning is endless.
+
