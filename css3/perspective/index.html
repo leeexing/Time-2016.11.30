@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="./main.css">
+  <title>Leeing</title>
+</head>
+<body>
+  <header class="header">
+    <h1 class="title">SEEKING☘<span class="start-cards">🤗</span></h1>
+  </header>
+  <main class="main">
+    <section class="test1">
+      <div class="pers">
+        <div class="p1"><img src="https://cn.bing.com/az/hprichbg/rb/AutumnNeuschwanstein_ZH-CN11491134791_1920x1080.jpg" alt=""></div>
+        <div class="p2"><img src="https://cn.bing.com/az/hprichbg/rb/DeadPhotographer_ZH-CN9480942912_1920x1080.jpg" alt=""></div>
+      </div>
+    </section>
+    <section class="test2">
+      <div class="inner">
+        <div class="side left">
+          <img src="https://cn.bing.com/az/hprichbg/rb/AutumnNeuschwanstein_ZH-CN11491134791_1920x1080.jpg" alt="">
+        </div>
+        <div class="side right">
+          <img src="https://cn.bing.com/az/hprichbg/rb/DeadPhotographer_ZH-CN9480942912_1920x1080.jpg" alt="">
+        </div>
+      </div>
+      <div class="btn-wrap">
+        <span class="btn-left">left</span>
+        <span class="btn-right">right</span>
+      </div>
+    </section>
+  </main>
+  <!-- <footer class="footer">
+    <div class="change-bg"><span>🎈</span></div>
+  </footer> -->
+
+  <script>
+    let left = document.querySelector('.btn-left')
+    let right = document.querySelector('.btn-right')
+    let inner = document.querySelector('.inner')
+    left.onclick = e => {
+      inner.classList.remove('right-inverse')
+      inner.classList.add('left-inverse')
+    }
+    right.onclick = e => {
+      inner.classList.remove('left-inverse')
+      inner.classList.add('right-inverse')
+    }
+
+  </script>
+</body>
+</html>

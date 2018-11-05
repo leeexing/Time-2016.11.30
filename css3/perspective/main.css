@@ -1,0 +1,115 @@
+* {
+  box-sizing: border-box;
+}
+
+main {
+  display: flex;
+}
+
+.test1 {
+  position: relative;
+  display: flex;
+  width: 500px;
+  height: 300px;
+  margin: 10px auto;
+}
+
+.test1:hover .pers {
+  transform: rotateY(90deg);
+  perspective: 10000px;
+}
+
+.test1 .pers {
+  font-size: 4em;
+  width: 200px;
+  margin: 1.5em auto;
+  transform-style: preserve-3d;
+  transform: rotateY(0deg);
+  perspective: 1000px;
+  transition: .3s;
+}
+
+.test1 .pers > div {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+}
+
+.test1 .pers > div img {
+  width: 100%;
+}
+
+.test1 .pers .p1 {
+  transform: rotateY(-90deg) translateZ(100px);
+}
+
+.test1 .pers .p2 {
+  transform: translateZ(100px);
+}
+
+.test2 {
+  width: 400px;
+  height: 300px;
+  margin-left: 20px;
+}
+
+.test2 .inner {
+  width: 300px;
+  height: 200px;
+  margin: 20px auto;
+  transform-style: preserve-3d;
+  perspective: 1800px;
+}
+
+.test2 .inner:hover .left {
+  transform: rotateY(0deg) translateZ(100px);
+}
+
+.test2 .inner:hover .right {
+  transform: rotateY(90deg) translateZ(100px);
+}
+
+.test2 .inner.left-inverse .left {
+  transform: rotateY(0deg) translateZ(100px);
+}
+
+.test2 .inner.left-inverse .right {
+  transform: rotateY(90deg) translateZ(100px);
+}
+
+.test2 .inner.right-inverse .left {
+  transform: rotateY(-90deg) translateZ(100px);
+}
+
+.test2 .inner.right-inverse .right {
+  transform: rotateY(0deg) translateZ(100px);
+}
+
+.test2 .inner .side {
+  position: absolute;
+  width: 200px;
+  height: 100px;
+  background: #eee;
+  transition: .5s ease-in-out;
+}
+
+.test2 .inner .side img {
+  width: 100%;
+}
+
+.test2 .inner .left {
+  transform: rotateY(-45deg) translateZ(100px);
+}
+
+.test2 .inner .right {
+  transform: rotateY(45deg) translateZ(100px);
+}
+
+.test2 .btn-wrap span {
+  padding: 5px 7px;
+  background: #2196f3;
+  margin-right: 5px;
+  border-radius: 3px;
+  color: #eee;
+  cursor: pointer;
+}
