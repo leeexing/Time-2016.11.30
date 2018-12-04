@@ -25,8 +25,9 @@ threading 模块提供的常量：
 6 threading.enumerate()        返回一个包含正在运行线程的列表；
 7 threading.activeCount()      返回正在运行的线程数量；
 8 threading.Semaphore(5)       限制最大连接数为5，semaphore是一个acquire,release的计数器；
-9 t.setDaemon(True)            将线程声明为守护线程，必须在start() 方法调用之前设置，如果不设置为守护线程程序会被无限挂起。子线程启动后，
-                                父线程也继续执行下去，当父线程执行完最后一条语句print "all over %s" %ctime()后，没有等待子线程，直接就退出了，同时子线程也一同结束。
+9 t.setDaemon(True)            将线程声明为守护线程，必须在start() 方法调用之前设置.默认是 false （前台进程）
+                                如果是后台线程，主线程执行过程中，后台线程也在进行，主线程执行完毕后，后台线程不论成功与否，主线程和后台线程均停止
+                            　　如果是前台线程，主线程执行过程中，前台线程也在进行，主线程执行完毕后，等待前台线程也执行完成后，程序停止
 
 三、
 多线程用于IO密集型，如socket，爬虫，web
@@ -44,6 +45,8 @@ threading 模块提供的常量：
 使用RLock()代替Lock()可解决，因为RLock()使资源可以被多次acquire,但只有直到一个线程所有的acquire都被release之后其他线程才能获得资源。
 
 而使用Semaphore(n)则可限制资源的同时最大可访问线程数；
+
+- Lock 对象和 with 语句块一起使用可以保证互斥执行，就是每次只有一个线程可以执行 with 语句包含的代码块。with 语句会在这个代码块执行前自动获取锁，在执行结束后自动释放锁。
 
 六、
 Event对象

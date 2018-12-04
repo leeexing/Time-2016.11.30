@@ -1,5 +1,6 @@
 html, body {
   height: 100%;
+  overflow: hidden;
 }
 
 body {
@@ -7,41 +8,53 @@ body {
   flex-direction: column;
 }
 
-.main {
-  flex: 1;
-  background: #f90;
+main {
   display: flex;
+  justify-content: center;
+  height: 400px;
+}
+
+main .wrap {
+  position: relative;
+  width: 600px;
+  border: 1px solid #f90;
   overflow: hidden;
 }
 
-.main .left {
+main .view {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: url(https://cn.bing.com/az/hprichbg/rb/VarennaSnow_ZH-CN7673479242_1920x1080.jpg) no-repeat;
+  background-size: 100% 100%;
+}
+
+.test {
+  width: 400px;
+  height: 200px;
+  padding: 20px;
+  background: #a20;
+  border-radius: 8px;
+  outline: 5px solid #f90;
+  box-shadow: 0 0 0 3px #f90;
+}
+
+.test > span {
+  width: 100px;
+  height: 100px;
   display: flex;
-  flex-direction: column;
-  width: 60%;
-  background: skyblue;
+  justify-content: center;
+  align-items: center;
+  margin: 8px;
+  border-radius: 50%;
+  font-weight: 600;
+  transform: translate3d(0, 0, 0);
+  transition: all .3s ease-in-out;
+  background: #eee url("data:image/svg+xml,            <svg xmlns='http://www.w3.org/2000/svg' width='90' height='9'>                <rect width='90' height='8' fill='#f2f2f2'/>                <rect width='90' height='2' fill='#e7e7e7'/>                <rect y='2' width='90' height='3' fill='#ececec'/>            </svg>");
+  background-size: 12px 12px;
 }
 
-.main .left section {
-  flex: 1;
-  overflow: auto;
-}
-
-.main .left section .content {
-  background: #888;
-  height: 800px;
-}
-
-.main .right {
-  width: 40%;
-  background: seagreen;
-}
-
-.main .right p {
-  line-height: 15;
-}
-
-footer {
-  flex-basis: 50px;
-  flex-shrink: 0;
-  background: #ccc;
+.test > span:hover {
+  transform: translate3d(-1px, -1px, 0) scale(1.05);
+  box-shadow: -2px -2px 6px 2px rgba(108, 108, 108, 0.1) inset, 0 0 0 5px rgba(255, 255, 255, 0.6) inset, 0 0 0 1px rgba(139, 139, 139, 0.1), 2px 2px 10px rgba(0, 0, 0, 0.2);
 }

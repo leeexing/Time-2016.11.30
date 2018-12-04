@@ -5,37 +5,54 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Flex</title>
-  <link rel="stylesheet" type="text/css" href="../reset.css">
-  <link rel="stylesheet" type="text/css" href="../base.css">
+  <!-- <link rel="stylesheet" type="text/css" href="../reset.css">
+  <link rel="stylesheet" type="text/css" href="../base.css"> -->
   <link rel="stylesheet" type="text/css" href="./flex.css">
+  <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.slim.js"></script>
+  <style>
+    ul li {
+      display: table-cell;
+      text-align: center;
+      vertical-align: middle;
+      width: 25%;
+      height: 40px;
+      border: 1px solid #eee;
+      list-style: none;
+    }
+    .demo {
+      display: table-cell;
+      width: 300px;
+      height: 50px;
+      border: 1px solid #ddd;
+      text-align: center;
+      vertical-align: middle;
+    }
+    .demo span {
+    }
+  </style>
 </head>
 <body>
   <header class="header">
     <h1>Flex</h1>
   </header>
-  <main class="main pad10">
-    <div class="left">
-      <header class="header">
-        <h1>left</h1>
-      </header>
-      <section>
-
-        <div class="content">456465</div>
-      </section>
-    </div>
-    <div class="right">
-      <p>45</p>
-      <p>45</p>
-      <p>45</p>
-      <p>45</p>
-      <p>45</p>
-      <p>45</p>
-      <p>45</p>
-      <p>45</p>
+  <div class="demo">
+    <span>
+      惊悚的发动机哦撒旦解放
+    </span>
+  </div>
+  <ul>
+    <li><span>案说法撒旦佛撒旦佛</span></li>
+    <li>方式多发</li>
+    <li>法撒旦</li>
+  </ul>
+  <main>
+    <div class="wrap">
+      <div class="view">
+        <span>Just a test</span>
+      </div>
     </div>
   </main>
-  <footer>
-    footer
-  </footer>
+
+  <script src="./main.js"></script>
 </body>
 </html>
