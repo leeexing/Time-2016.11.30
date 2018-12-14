@@ -10,7 +10,7 @@
  *      * 所以另外一种写法是在 then 里面包裹一层 setTimeout。因为promise本身是一个异步方法，属于微任务一列，必须
  *      * 得在执行栈执行完了去取他的值，所以所有的返回值都需要包一层异步setTimeout。
  *
- * ! 3、重点还是在于理解啊
+ * ! 3、重点还是在于理解
  *      - 2018/09/12
  */
 const isFunction = fn => typeof fn === 'function'
