@@ -13,14 +13,90 @@ body {
   padding: 10px;
 }
 
+.clearfix {
+  zoom: 1;
+}
+
+.clearfix:after {
+  display: block;
+  content: "";
+  height: 0;
+  visibility: hidden;
+  clear: both;
+  font-size: 0;
+}
+
+.test {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 50px;
+  background: cadetblue;
+}
+
+.test::after {
+  position: absolute;
+  content: 'haha';
+  display: inline-block;
+  top: 0;
+  right: -100%;
+  pointer-events: none;
+}
+
 main {
   margin-top: 15px;
 }
 
-main .sec-image {
+main.fusion .sec-image {
   margin-top: 15px;
   padding: 5px;
   border: 1px solid #eee;
+}
+
+main.doutu .doutu-canvas {
+  display: flex;
+  justify-content: space-between;
+}
+
+main.doutu .doutu-canvas .doutu-wrapper {
+  position: relative;
+  width: 400px;
+  height: 600px;
+  border: 1px solid seagreen;
+}
+
+main.doutu .doutu-canvas .doutu-wrapper canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 9;
+}
+
+main.doutu .doutu-canvas .doutu-ret {
+  width: 400px;
+  height: 600px;
+  border: 1px solid sienna;
+}
+
+main.doutu .doutu-image {
+  min-height: 300px;
+  margin-top: 40px;
+  margin-bottom: 20px;
+  padding: 10px;
+  border: 1px solid blueviolet;
+  border-radius: 4px;
+}
+
+main.doutu .doutu-image .btns {
+  margin-bottom: 10px;
+}
+
+main.doutu .doutu-image a {
+  display: inline-block;
+  padding: 4px 6px;
+  background: #ccc;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 canvas {

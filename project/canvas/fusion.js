@@ -1,3 +1,41 @@
+/**
+ * 抖图：图像tip位置标记
+ * author： leeing
+ * time： 2018-12-19 08:59
+ */
+class MarkTipOfDoutuImage {
+  constructor (options) {
+    let defaultOpts = {
+      mode: 'image', // or canvas
+      cacheMemory: true,
+      cacheCount: 100,
+      containerClass: ''
+    }
+    this.options = Object.assign(defaultOpts, options)
+    this.container = document.querySelector(this.options.containerClass)
+    this.imageUrls = []
+    this.imageDatas = []
+    this.width = 500
+    this.height = 600
+    this.index = 0
+    this.init()
+  }
+  init () {
+    this.canvas = document.createElement('canvas')
+    this.canvas.id = 'doutu'
+    this.container.appendChild(this.canvas)
+    this.doutuCtx = this.canvas.getContext('2d')
+    
+  }
+  canvas2Image () {
+
+  }
+  getDoutuImage (index) {
+    return this.imageUrls[index]
+  }
+}
+
+
 onload = function() {
   console.log(78)
   let ops = {
@@ -36,5 +74,8 @@ onload = function() {
   // packageCtx.globalCompositeOperation = 'lighter'
   packageCtx.globalCompositeOperation = 'destination-over'
   packageCtx.drawImage(imgPackage, 0, 0, imgPackage.naturalWidth * 0.5, imgPackage.naturalHeight * 0.5)
-  // packageCtx.globalCompositeOperation = 'destination-in'
+
+  document.querySelector('.test').onclick = () => {
+    console.log(9999)
+  }
 }

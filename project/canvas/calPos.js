@@ -14,7 +14,7 @@ function calculatePos(imgInfo) {
   let zoom
   let retW
   let retH
-  
+
   // 竖着的矩形
   // 分两种情况：图像宽高大于/小于容器
   if (W2 < H2) {
