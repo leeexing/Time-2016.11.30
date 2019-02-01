@@ -4,7 +4,7 @@
 
 function calculatePos(imgInfo) {
   let W1 = 350
-  let H1 = 660
+  let H1 = 670
   let W2 = imgInfo.width
   let H2 = imgInfo.height
   let ratioW = W2 / W1
@@ -30,7 +30,7 @@ function calculatePos(imgInfo) {
   console.log(`宽：${retW}, 高：${retH}`)
 }
 
-let data1 = {width: 200, height: 500}
+let data1 = {width: 220, height: 500}
 let data2 = {width: 300, height: 800}
 let data3 = {width: 400, height: 800}
 let data4 = {width: 400, height: 1000}
@@ -40,4 +40,4 @@ let data6 = {width: 500, height: 200}
 let data7 = {width: 800, height: 300}
 let data8 = {width: 800, height: 400}
 
-calculatePos(data3)
+calculatePos(data1)
