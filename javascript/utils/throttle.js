@@ -1,10 +1,10 @@
 /**
  * 防抖动函数
- * 
+ *
  * 节流函数
  */
 // !节流 -- 时间戳
-const _throttle = function(f, wait) {
+const throttle = function(f, wait) {
   let context, previous = 0
   return function(...args) {
     let now = +Date.now()
@@ -17,7 +17,7 @@ const _throttle = function(f, wait) {
 }
 
 // !节流 -- 定时器
-const __throttle = function (f, wait) {
+const throttle = function (f, wait) {
   let context, timer
   return function(...args) {
     context = this
@@ -74,4 +74,54 @@ const throttle = (f, wait, options) => {
   }
 
   return throttled
+}
+
+// 为了不忘记，只能多练习
+
+// 2019-02-20
+const throttle = (fn, wait=500) => {
+  let timer
+  return function (...args) {
+    if (timer) return
+    timer = setTimeout(() => {
+      fn.apply(this, args)
+      timer = null
+    }, wait)
+  }
+}
+
+const throttle = (fn, wait, options={}) => {
+  let timer, args, context,result
+  let previous = 0
+
+  let later = () => {
+    previous = options.leading === false ? 0 : Date.now()
+    timer = null
+    result = fn.apply(context, args)
+    if (!timer) {
+      args = context = null
+    }
+  }
+
+  return function (...params) {
+    let now = Date.now()
+    if (!previous && options.leading === false) {
+      previous = now
+    }
+    let remaining = wait - (now - previous)
+    context = this
+    args = params
+    if (remaining < 0 || remaining > wait) {
+      if (timer) {
+        clearTimeout(timer)
+        timer = null
+      }
+      previous = now
+      result = fn.apply(this, args)
+      if (!timer) args = context = null
+    } else if (!timer && options.trailing !== false) {
+      timer = setTimeout(later, remaining)
+    }
+    return result
+  }
 }

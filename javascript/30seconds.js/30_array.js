@@ -127,3 +127,112 @@ const filterNonUnique = arr => arr.filter(item => arr.indexOf(item) === item.las
 const findLast = (arr, fn) => arr.filter(fn).slice(-1)
 
 // TIP:  其实都是为了写得简便。上面这种写法最后有可能得到的是一个空数组
+
+
+/**
+ * 平铺数组
+ * 将数组平铺到指定的深度
+*/
+const flatten = (arr, depth = 1) =>
+  depth != 1
+    ? arr.reduce((pre, cur) => pre.concat(Array.isArray(cur) ? flatten(cur, depth - 1) : cur), [])
+    : arr.reduce((pre, cur) => pre.concat(cur), [])
+
+// TIP:  使用递归，为每个深度级别 depth 递减 1
+
+
+/**
+ * 从数组的最后一个元素开始遍历数组
+ * 从数组的最后一个元素开始，为每个数组元素执行一次提供的函数
+*/
+const forEachRight = (arr, cb) =>
+  arr
+    .slice(0)
+    .reverse()
+    .forEach(cb)
+
+// TIP:  使用 Array.slice(0) 克隆给定的数组，Array.reverse() 反转数组，Array.forEach() 遍历这个反向数组
+
+
+/**
+ * 数组分组
+ * 根据给定的函数对数组元素进行分组
+*/
+const group = (arr, fn) =>
+  arr.map(typeof fn === 'function' ? fn : item => item[fn])
+    .reduce((acc, key, i) => {
+      acc[key] = (acc[key] || []).concat(arr[i])
+      return acc
+    }, {})
+
+// TIP:  使用 Array.map() 将数组的值映射到函数或属性名称。使用 Array.reduce() 来创建一个对象，其中的 key 是从映射结果中产生
+
+
+/**
+ * 获取数组的第一个元素
+*/
+const head = arr => arr[0]
+
+// TIP:  该考虑的是怎么使用
+
+
+/**
+ * 返回指定元素的所有索引
+*/
+const indexOfAll = (arr, val) => {
+  const indices = []
+  arr.forEach((item, i) => item === val && indices.push(i))
+  return indices
+}
+
+// TIP:  使用 Array.forEach() 循环元素和 Array.push() 来存储匹配元素的索引
+
+
+/**
+ * 排除数组中最后一个元素
+*/
+const initial = arr => arr.slice(0, -1)
+
+
+/**
+ * 初始化一个二维数组
+*/
+const initialize2DArray = (w, h, initV = null) =>
+  Array.from({length: w}).map(() => Array.from({length: h})).fill(initV)
+
+// TIP:  很简练。使用 Array.map() 生成 h 行，其中每个行都是一个长度为 w 的新数组。 如果未提供值 val ，则默认为 null
+
+
+/**
+ * 初始化特定范围的数字数组
+ * 初始化一个数组，该数组包含指定范围内的数字，包括 start 和 end ，数字间隔为 step
+*/
+const initializeArrayWithRange = (end, start = 0, step = 1) =>
+  Array.from({length: Math.ceil((end + 1 - start) / step)}).map((item, i) => i * step + start)
+
+// TIP:  慢慢惊叹于，人家只是用一些基本的原始方法就可以实现很多的功能
+
+
+/**
+ * 初始化特定范围和值的数组
+ * 使用指定的值初始化和填充数组。
+*/
+initializeArrayWithValues = (n, initV = 0) => Array.from({length: n}).fill(initV)
+
+// TIP:  现在就是这样简单的功能函数也不能小视
+
+
+/**
+ * 数组交集
+ * 返回两个数组中都存在的元素列表
+*/
+intersection = (arrA, arrB) => {
+  const sb = new Set(ArrB)
+  return a.filter(item => sb.has(item))
+}
+
+/**
+ * 获取数组的最后一个元素
+*/
+const last = arr => arr[arr.length - 1]
+const last_ = arr => arr.slice(-1)
