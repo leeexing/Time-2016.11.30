@@ -4,6 +4,63 @@
 
 ## vue
 
+### 虚拟DOM
+
+> 把DOM树做了一个“DOM-数据 ”映射成虚拟DOM，这个映射的效率比操作dom要高
+
+Virtual DOM 算法。包括几个步骤
+
+1. 用 JavaScript 对象结构表示 DOM 树的结构；然后用这个树构建一个真正的 DOM 树，插到文档当中
+2. 当状态变更的时候，重新构造一棵新的对象树。然后用新的树和旧的树进行比较，记录两棵树差异
+3. 把2所记录的差异应用到步骤1所构建的真正的DOM树上，视图就更新了
+
+第二步
+树的`diff`，同层对比，输出patchs(listDiff/diffChildren/diffProps)
+
+  没有新的节点，返回
+
+  新的节点tagName与key不变， 对比props，继续递归遍历子树
+    对比属性(对比新旧属性列表):
+      旧属性是否存在与新属性列表中
+      都存在的是否有变化
+      是否出现旧列表中没有的新属性.
+
+  tagName和key值变化了，则直接替换成新节点
+第三步
+渲染差异
+  遍历patchs， 把需要更改的节点取出来
+  局部更新dom
+
+Virtual DOM 本质上就是在 JS 和 DOM 之间做了一个缓存. 既然 DOM 这么慢，我们就在它们 JS 和 DOM 之间加个缓存。CPU（JS）只操作内存（Virtual DOM），最后的时候再把变更写入硬盘（DOM）。
+
+Virtual DOM 算法主要是实现上面步骤的三个函数：`element，diff，patch`
+
+```js
+// 1. 构建虚拟DOM
+var tree = el('div', {'id': 'container'}, [
+    el('h1', {style: 'color: blue'}, ['simple virtal dom']),
+    el('p', ['Hello, virtual-dom']),
+    el('ul', [el('li')])
+])
+
+// 2. 通过虚拟DOM构建真正的DOM
+var root = tree.render()
+document.body.appendChild(root)
+
+// 3. 生成新的虚拟DOM
+var newTree = el('div', {'id': 'container'}, [
+    el('h1', {style: 'color: red'}, ['simple virtal dom']),
+    el('p', ['Hello, virtual-dom']),
+    el('ul', [el('li'), el('li')])
+])
+
+// 4. 比较两棵虚拟DOM树的不同
+var patches = diff(tree, newTree)
+
+// 5. 在真正的DOM元素上应用变更
+patch(root, patches)
+```
+
 **1** 传入一个对象的所有属性
 
 如果想要将一个对象的所有属性都作为 prop 传入，你可以使用不带参数的 v-bind （取代 v-bind：prop-name）。例如
