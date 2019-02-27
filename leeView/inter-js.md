@@ -5,6 +5,111 @@
 1. 数组变化也能监听到
 2. 不需要深度遍历监听
 
+## 解构
+
+> 从数组和对象中提取值，对变量进行赋值，这被称为解构
+
+### 数组的解构
+
+```js
+var [a, b, c] = [1, 2, 3]
+a // 1
+b // 2
+c // 3
+
+var [a, ...tail] = [1, 2, 3]
+tail // [2, 3]
+```
+
+2. 如果解构不成功，变量值就是 undefined
+
+```js
+let [foo] = []
+or
+let [bar, foo] = [1]
+foo // undefined
+```
+
+3. 对于 Set 结构，也可以使用数组的解构赋值
+
+```js
+let [x, y, z] = new Set(['a', 'b', 'c']);
+x // "a"
+```
+
+4. 默认值
+
+```js
+let [foo = true] = [];
+foo // true
+```
+
+### 对象的解构
+
+// - 之前忽略的点
+1. 对象的解构也可以指定默认值
+
+```js
+var {x = 3} = {}
+x // 3
+
+var {x: y = 3} = {}
+y // 3
+
+var {x: y = 3} = {x: 5}
+y // 5
+
+```
+
+2. 默认值生效的条件是，对象的属性值严格等于 undefined
+
+```js
+var {x = 3} = {x: undefined}
+x // 3
+
+var {x = 3} = {x: null}
+x // null
+```
+
+3. 如果解构失败，变量的值等于 undefined
+
+```js
+var {foo} = {bar: 'baz'}
+foo // undefined
+```
+
+### 函数参数的解构
+
+1. 函数参数的解构可以使用默认值
+
+```js
+function move({x = 0, y = 0} = {}) {
+  return [x, y];
+}
+move({x: 3, y: 8}); // [3, 8]
+move({x: 3}); // [3, 0]
+move({}); // [0, 0]
+move(); // [0, 0]
+
+// - 两个的结果是不一样的
+
+function move({x, y} = { x: 0, y: 0 }) {
+  return [x, y];
+}
+
+move({x: 3, y: 8}); // [3, 8]
+move({x: 3}); // [3, undefined]
+move({}); // [undefined, undefined]
+move(); // [0, 0]
+```
+
+2. undefined就会触发函数参数的默认值。
+
+```js
+[1, undefined, 3].map((x = 'yes') => x);
+// [ 1, 'yes', 3 ]
+```
+
 ## js函数高级
 
 ![高级函数包含的知识点](https://user-gold-cdn.xitu.io/2019/2/22/1691328a8afdf60b?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
