@@ -4,6 +4,105 @@
 
 ## vue
 
+### 全局事件
+
+详情页绑定了一个全局事件，当我在详情页面中滚动，这个样写没有问题，但是当我去到其他页面，在滚动时，你就会发现，刚刚你绑定在详情页中的滚动事件，在这个页面也被执行了，这肯定是有问题的。
+其实在我们使用了keep-alive标签后，会有两个生命周期函数分别是：activated、deactivated
+> activated：页面展示的时候被执行
+> deactivated：页面被隐藏或者页面即将被替换成新的页面时被执行
+
+```js
+activated () {
+    window.addEventListener('scroll', this.handleScroll)
+},
+deactivated () {
+    window.removeEventListener('scroll', this.handleScroll)
+}
+
+```
+
+### 递归组件
+
+> 递归组件就是在我组件的自身去调用组件的自身
+在写组件的时候，都会写一个name的属性，它其中一个用途就是——递归组件
+
+```html
+<div
+    class="item"
+    v-for="(item, index) of categoryList"
+    :key="index"
+>
+    <div class="item-title">
+      <span class="item-title-icon"></span>
+      {{item.title}}
+    </div>
+    <div class="item-title-children" v-if="item.children">  //判断是否有数据中是否有 children 这个属性，如果有就使用递归组件
+      <detail-list :categoryList="item.children"></detail-list>     //把 children 传给递归组件
+    </div>
+ </div>
+```
+
+:categoryList 就是组件的 name 值
+
+### 组件中name名字的用途
+
+* 递归组件可以用到
+* 当你相对某个页面想取消缓存的时候会用到
+* 在 Vue 的开发调试工具中会用到
+
+### 路径分配
+
+```js
+axios.get('/api/detail.json', {
+    params: {
+      id: this.$route.params.id
+    }
+}).then(this.getDetailInfoSucc)
+
+// 这样写路径是访问不到自己mock的数据的，那应该怎么写呢？
+
+axios.get('/static/mock/detail.json', {
+    params: {
+      id: this.$route.params.id
+    }
+}).then(this.getDetailInfoSucc)
+
+// 把/api改成/static/mock/这样访问到我们本地的数据了，但是这样有风险的，上线前你需要改回/api，很容易出错，造成bug
+
+module.exports = {
+  dev: {
+    ...
+    proxyTable: {
+      '/api':{
+        target: 'http://localhost:8080',
+        pathRewrite: {
+          '^/api':'/static/mock'
+        }
+      }
+    }
+ }
+
+// 在config/index.js文件中找到dev下的proxyTable，它可以代理路径，我们在项目中写/api，通过proxyTable可以自动找到/static/mock这个目录。
+```
+
+### 移动端可以访问
+
+当手机上用本地的ip地址访问项目时被拒绝了，这是因为前端项目是通过`webpack-dev-server`启动的，`webpack-dev-server`默认不支持ip的形式访问页面，这就需要把它默认的配置项做一个修改
+
+```js
+"scripts": {
+    "dev": "webpack-dev-server --host 0.0.0.0 --inline --progress --config build/webpack.dev.conf.js",
+    "start": "npm run dev",
+    "lint": "eslint --ext .js,.vue src",
+    "build": "node build/build.js"
+}
+
+// 当每次运行npm run start或者npm run dev时，都是在运行scripts下dev指令，只需要在它上面加上--host 0.0.0.0就可以了
+```
+
+**注意**
+这样的话，其他同事就可以使用我电脑的ip进行访问了
+
 ### 虚拟DOM
 
 > 把DOM树做了一个“DOM-数据 ”映射成虚拟DOM，这个映射的效率比操作dom要高
@@ -108,22 +207,23 @@ this.$emit('update:title', newTitle)
 这样会把 doc 对象中的每一个属性 (如 title) 都作为一个独立的 prop 传进去，然后各自添加用于更新的 v-on 监听器。
 
 ### 注意
+
 将 v-bind.sync 用在一个字面量的对象上，例如 v-bind.sync=”{ title: doc.title }”，是无法正常工作的，因为在解析一个像这样的复杂表达式的时候，有很多边缘情况需要考虑。
 
 ### 使用
 
-```
+```vue
 <comp :foo.sync="bar"></comp>
 
 会被扩展为：
 
 <comp :foo="bar" @update:foo="val => bar = val"></comp>
 ```
+
 当子组件需要更新 foo 的值时，它需要显式地触发一个更新事件：
 `this.$emit('update:foo', newValue)`
 
 // TIP:  语法糖。还是需要使用 `$emit` 这个方法
-
 
 **处理加载状态**
 这里的异步组件工厂函数也可以返回一个如下格式的对象
@@ -145,7 +245,6 @@ const AsyncComponent = () => ({
 ```
 
 **依赖注入**
-
 vue中的依赖注入 provide 和 inject
 provide 选项允许我们指定我们想要提供给后代组件的数据/方法。
 inject 选项来接收指定的我们想要添加在这个实例上的属性
@@ -178,6 +277,7 @@ var Child = {
   // ...
 }
 ```
+
 // TIP:  依赖注入所提供的属性是非响应式
 
 相比 $parent 来说，这个用法可以让我们在任意后代组件中访问 getMap，而不需要暴露整个 <google-map> 实例。这允许我们更好的持续研发该组件，而不需要担心我们可能会改变/移除一些子组件依赖的东西。同时这些组件之间的接口是始终明确定义的，就和 props 一样。
@@ -195,7 +295,6 @@ var Child = {
 通过 $once(eventName, eventHandler) 一次性侦听一个事件
 通过 $off(eventName, eventHandler) 停止侦听一个事件
 
-
 ```js
 mounted: function () {
   var picker = new Pikaday({
@@ -208,6 +307,7 @@ mounted: function () {
   })
 }
 ```
+
 // TIP:  这个方法用得很好
 
 之前的方法存在两个问题：
@@ -217,6 +317,7 @@ mounted: function () {
 
 // NOTE:
 使用了这个策略，我甚至可以让多个输入框元素同时使用不同的 Pikaday，每个新的实例都程序化地在后期清理它自己：
+
 ```js
 mounted: function () {
   this.attachDatepicker('startDateInput')
@@ -248,7 +349,6 @@ vm.$forceUpdate()
 
 迫使 Vue 实例重新渲染。注意它仅仅影响实例本身和插入插槽内容的子组件，而不是所有子组件
 
-
 ### 注意事项
 
 由于 JavaScript 的限制，Vue 不能检测以下变动的数组
@@ -265,8 +365,8 @@ Vue.set(vm.items, indexOfItem, newValue)
 // Array.prototype.splice
 vm.items.splice(indexOfItem, 1, newValue)
 ```
-为了解决第二类问题，你可以使用 splice: `vm.items.splice(newLength)`
 
+为了解决第二类问题，你可以使用 splice: `vm.items.splice(newLength)`
 
 ### 对象更改检测注意事项
 
@@ -369,7 +469,6 @@ enter: function (el, done) {
 
 **全局混入**
 一旦使用全局混入对象，将会影响到 所有 之后创建的 Vue 实例。使用恰当时，可以为自定义对象注入处理逻辑。
-
 
 ### 自定义指令
 
@@ -478,7 +577,6 @@ grid 系列
 grid-auto-columns
 grid-auto-rows
 grid-auto-flow
-
 
 ## question
 
