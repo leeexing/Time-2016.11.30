@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link href="https://cdn.bootcss.com/minireset.css/0.0.2/minireset.min.css" rel="stylesheet">
+  <title>Clip</title>
+  <style>
+    main {
+      padding: 10px;
+    }
+    .test {
+      width: 200px;
+      height: 200px;
+      box-shadow: 0 0 5px #b04;
+      background: #f90;
+      transition: all .3s;
+      background-image: linear-gradient(to right, #f76b71, #a41058 60%);
+    }
+    .test:hover {
+      clip-path: inset(30px 10px 10px 5px round 10px);
+    }
+  </style>
+</head>
+<body>
+  <header>Clip</header>
+  <main>
+    <div class="test">
+
+    </div>
+  </main>
+</body>
+</html>

@@ -32,7 +32,7 @@ ctx.beginPath();
 ctx.moveTo(20,20);
 ctx.lineTo(20,100);
 ctx.lineTo(70,100);
-// ctx.closePath(); // 有closePath的会，会进行闭合
+// ctx.closePath(); // 有closePath的话，会进行闭合
 ctx.stroke();
 ```
 
@@ -65,10 +65,10 @@ var ctx = document.getElementById('canvas').getContext('2d');
 var offset = 0;
 
 function draw() {
-  ctx.clearRect(0,0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.setLineDash([4, 2]);
   ctx.lineDashOffset = -offset;
-  ctx.strokeRect(10,10, 100, 100);
+  ctx.strokeRect(10, 10, 100, 100);
 }
 
 function march() {
@@ -98,7 +98,7 @@ img.src = 'xxx.png'; // 设置图片地址
 
 ```js
 // 绘制
-drawImage(image, x, y) // Image 为 上面的img对象或者 canvas 对象 x和y 是其在目标 canvas画布 里的起始坐标
+drawImage(image, x, y) // Image 为 上面的img对象或者 canvas 对象； x和y 是其在目标 canvas画布 里的起始坐标
 // 缩放 Scaling
 drawImage(image, x, y, width, height) // 这个方法多了2个参数：width 和 height，这两个参数用来控制 当向canvas画入时应该缩放的大小
 // 切片
@@ -108,7 +108,7 @@ drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
 
 **重要**
 save()
-remote()
+restore()
 
 ```js
 function draw() {
@@ -141,10 +141,3 @@ rotate(angle) // 这个方法只接受一个参数：旋转的角度(angle)，�
 
 缩放 Scaling
 scale(x, y) // scale方法接受两个参数。x,y 分别是横轴和纵轴的缩放因子，它们都必须是正值。值比 1.0 小表示缩小，比 1.0 大则表示放大，值为 1.0 时什么效果都没有
-
-
-
-
-```js
-
-```
