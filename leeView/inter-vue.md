@@ -210,7 +210,35 @@ this.$emit('update:title', newTitle)
 
 将 v-bind.sync 用在一个字面量的对象上，例如 v-bind.sync=”{ title: doc.title }”，是无法正常工作的，因为在解析一个像这样的复杂表达式的时候，有很多边缘情况需要考虑。
 
+### computed 和 data 有什么不同呢
+
+**相同点**
+Vue 会递归的将 data 的属性转换为 getter/setter，从而让 data 的属性能够响应数据变化。
+computed是响应式的
+
+当你有一些数据需要随着其它数据变动而变动时，通常更好的做法是使用计算属性而不是命令式的 watch 回调。但是，我发觉，这个源数据只是指data中定义的数据，或者vuex中定义的state数据.。并不针对普通数据。
+
+**不同点**
+1.data属性的值，不会随赋值变量的改动而改动。如果要改变这个属性的值，则需要直接给data属性赋值，视图上对这个属性的显示才会变。
+
+2.computed属性，属于持续变化跟踪。在computed属性定义的时候，这个computed属性就与给它赋值的变量绑定了。改变这个赋值变量，computed属性值会随之改变。
+
+3.计算属性是基于它们的依赖进行缓存的。只在相关依赖发生改变时它们才会重新求值。
+    methods储存方法，，computed储存需要处理的数据值；methods每次都会调用，computed有缓存机制，只有改变时才执行，性能更佳；
+
+### computed 和 watch 有什么不同呢
+
+更进一步，computed 和 watch 有什么不同呢？
+
+
+①从属性名上，computed是计算属性，也就是依赖其它的属性计算所得出最后的值。watch是去监听一个值的变化，然后执行相对应的函数。
+②从实现上，computed的值在getter执行后是会缓存的，只有在它依赖的属性值改变之后，下一次获取computed的值时才会重新调用对应的getter来计算。watch在每次监听的值变化时，都会执行回调。其实从这一点来看，都是在依赖的值变化之后，去执行回调。很多功能本来就很多属性都可以用，只不过有更适合的。<u>如果一个值依赖多个属性（多对一），用computed肯定是更加方便的。如果一个值变化后会引起一系列操作，或者一个值变化会引起一系列值的变化（一对多），用watch更加方便一些。</u>
+③watch的回调里面会传入监听属性的新旧值，通过这两个值可以做一些特定的操作。computed通常就是简单的计算。
+④watch和computed并没有哪个更底层，watch内部调用的是vm.$watch，它们的共同之处就是每个定义的属性都单独建立了一个Watcher对象。
+
 ### 使用
+
+#### sync
 
 ```vue
 <comp :foo.sync="bar"></comp>
@@ -225,7 +253,45 @@ this.$emit('update:title', newTitle)
 
 // TIP:  语法糖。还是需要使用 `$emit` 这个方法
 
-**处理加载状态**
+#### 非表单组件上使用 v-model
+
+```js
+// main.vue
+<ToggleTag v-model="isShowTabBar" @on-change="handleToggleTag"></ToggleTag>
+
+// toggleTag
+<template>
+  <div @click="handleToggleTags" class="toggle-tags-btn-con">
+    <Tooltip :content="value ? '关闭标签栏' : '打开标签栏'" placement="bottom">
+      <Icon :type="value ? 'ios-pricetags' : 'ios-pricetags-outline'" :size="23"></Icon>
+    </Tooltip>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'ToggleTags',
+  props: {
+    value: {
+      type: Boolean,
+      default: true
+    }
+  },
+  methods: {
+    handleToggleTags () {
+      // NOTE:  正常的逻辑是使用下面的一种方式进行函数回调触发
+      this.$emit('input', !this.value)
+      // this.$emit('on-change', !this.value)
+    }
+  }
+}
+</script>
+```
+
+// TIP:  这个比较厉害了，非表单组件也可以进行双向数据绑定。关键是触发回调的方式很特别 `this.$emit('input', newVal)`. 和 `this.$emit('update:xxx', newVal)` 有异曲同工之妙！👍
+
+#### 处理加载状态
+
 这里的异步组件工厂函数也可以返回一个如下格式的对象
 
 ```js
@@ -244,7 +310,8 @@ const AsyncComponent = () => ({
 })
 ```
 
-**依赖注入**
+#### 依赖注入
+
 vue中的依赖注入 provide 和 inject
 provide 选项允许我们指定我们想要提供给后代组件的数据/方法。
 inject 选项来接收指定的我们想要添加在这个实例上的属性
@@ -287,7 +354,7 @@ var Child = {
 祖先组件不需要知道哪些后代组件使用它提供的属性
 后代组件不需要知道被注入的属性来自哪里
 
-**程序化的事件侦听器**
+#### 程序化的事件侦听器
 
 已经知道了 $emit 的用法，它可以被 v-on 侦听，但是 Vue 实例同时在其事件接口中提供了其它的方法。我们可以：
 
@@ -398,7 +465,7 @@ Vue 提供了 transition 的封装组件，在下列情形中，可以给任何�
 * 组件根节点
 
 显性的过渡持续时间
-可以用 <transition> 组件上的 duration 属性定制一个显性的过渡持续时间 (以毫秒计)
+可以用 `<transition>` 组件上的 duration 属性定制一个显性的过渡持续时间 (以毫秒计)
 
 ```js
 <transition :duration="1000">...</transition>
@@ -406,7 +473,7 @@ Vue 提供了 transition 的封装组件，在下列情形中，可以给任何�
 <transition :duration="{ enter: 500, leave: 800 }">...</transition>
 ```
 
-**JavaScript 钩子**
+### JavaScript 钩子
 
 ```js
 <transition
@@ -452,14 +519,14 @@ enter: function (el, done) {
 
 推荐对于仅使用 JavaScript 过渡的元素添加 v-bind:css="false"，Vue 会跳过 CSS 的检测。这也可以避免过渡过程中 CSS 的影响。
 
-**过渡模式**
+### 过渡模式
 
 同时生效的进入和离开的过渡不能满足所有要求，所以 Vue 提供了` 过渡模式 `
-
 
 ### 混入
 
 选项合并
+
 * 当组件和混入对象含有同名选项时，这些选项将以恰当的方式混合。
 比如，数据对象在内部会进行递归合并，在和组件的数据发生冲突时以组件数据优先。
 
@@ -498,7 +565,8 @@ Vue.directive('focus', {
 
 * unbind：只调用一次，指令与元素解绑时调用。
 
-2. 钩子函数参数
+2.钩子函数参数
+
 * el：指令所绑定的元素，可以用来直接操作 DOM 。
 * binding：一个对象，包含以下属性：
       name：指令名，不包括 v- 前缀。
@@ -525,9 +593,7 @@ keep-alive 组件激活时调用。
 
 ❗节制地使用 $parent 和 $children - 它们的主要目的是作为访问组件的应急方法。更推荐用 props 和 events 实现父子组件通信
 
-
 provide 和 inject 主要为高阶插件/组件库提供用例。并不推荐直接用于应用程序代码中。
-
 
 ### 实例属性
 
@@ -539,7 +605,6 @@ Vue 实例使用的根 DOM 元素。
 
 vm.$refs
 一个对象，持有注册过 ref 特性 的所有 DOM 元素和组件实例。
-
 
 ## CSS
 
