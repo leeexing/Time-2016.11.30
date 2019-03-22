@@ -23,10 +23,13 @@ deactivated () {
 
 ### 递归组件
 
+// REFER: [组件递归实现多级菜单](https://juejin.im/post/58c0e882da2f60186d6d4818)
+
 > 递归组件就是在我组件的自身去调用组件的自身
 在写组件的时候，都会写一个name的属性，它其中一个用途就是——递归组件
 
 ```html
+// detail-list.vue
 <div
     class="item"
     v-for="(item, index) of categoryList"
@@ -40,6 +43,25 @@ deactivated () {
       <detail-list :categoryList="item.children"></detail-list>     //把 children 传给递归组件
     </div>
  </div>
+
+ // 使用
+ <template>
+    <div class="list-detail">
+      <detail-list :list="list"></detail-list>
+    </div>
+</template>
+<script>
+import detailList from "./components/List";
+export default {
+  name: 'parent',
+  components: {detailList},
+  data () {
+    return {
+      list: [...]
+    }
+  }
+}
+</script>
 ```
 
 :categoryList 就是组件的 name 值

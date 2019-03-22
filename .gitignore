@@ -9,6 +9,7 @@ uploads/
 *.core.js
 
 # 测试文件
+test/
 test.*
 
 # 配置相关

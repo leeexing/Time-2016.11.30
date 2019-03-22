@@ -155,3 +155,63 @@ IIFE会创建一个块级作用域，
 那么最近的b变量就是这个函数。
 
 // TIP: 重点是：非匿名自执行函数，函数名只读。
+
+2019-03-15
+
+> 第 32 题：Virtual DOM 真的比操作原生 DOM 快吗？谈谈你的想法。
+
+// TODO: 有点难
+
+2019-03-14
+
+> 第 31 题：改造下面的代码，使之输出0 - 9，写出你能想到的所有解法。
+
+```js Q
+for (var i = 0; i< 10; i++){
+  setTimeout(() => {
+    console.log(i);
+  }, 1000)
+}
+```
+
+```js A
+// 1. 使用let
+
+// 2. 使用闭包
+for (var i = 0; i < 10; i++) {
+  (function(j) {
+    setTimeout(() => console.log(j), 1000)
+  })(i)
+}
+
+for (var i = 0; i < 10; i++) {
+  setTimeout(((j) => console.log(j))(i), 1000)
+}
+```
+
+2019-03-13
+
+> 第 30 题：两个数组合并成一个数组
+
+```js Q
+请把两个数组 ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'D1', 'D2'] 和 ['A', 'B', 'C', 'D']，合并为 ['A1', 'A2', 'A', 'B1', 'B2', 'B', 'C1', 'C2', 'C', 'D1', 'D2', 'D']。
+```
+
+```js A
+let a = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'D1', 'D2']
+let b =  ['A', 'B', 'C', 'D']
+
+let c = b.map(item => item + 3)
+console.log(c)
+
+console.log(
+  [...a, ...c].sort().map(item => {
+    if (item.includes('3')) {
+      return item.split('')[0]
+    }
+    return item
+  })
+)
+```
+
+// TIP: 思路真新奇啊
