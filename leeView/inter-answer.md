@@ -4,6 +4,139 @@
 
 ## 今日答疑
 
+2019-03-28
+
+> 第 43 题：使用 sort() 对数组 [3, 15, 8, 29, 102, 22] 进行排序，输出结果
+
+**解答**
+还是有点区别
+
+```js
+let a =  [3, 15, 8, 29, 102, 22]
+
+a.sort() // [ 102, 15, 22, 29, 3, 8 ]
+
+a.sort((a, b) => a - b) // [ 3, 8, 15, 22, 29, 102 ]
+```
+
+ TIP:  -
+若 a 小于 b，在排序后的数组中 a 应该出现在 b 之前，则返回一个小于 0 的值。
+若 a 等于 b，则返回 0。
+若 a 大于 b，则返回一个大于 0 的值
+
+2019-03-27
+
+> 第 42 题：实现一个 sleep 函数，比如 sleep(1000) 意味着等待1000毫秒，可从 Promise、Generator、Async/Await 等角度实现
+
+**解答**
+方法多种
+
+```js
+function _sleep (wait) {
+  return new Promise(resolve => setTimeout(resolve, wait * 1000))
+}
+
+async function sleep (wait) {
+  await _sleep(wait)
+  console.log(1)
+}
+
+function* sleepGenerator (time) {
+  yield new Promise((resolve, reject) => setTimeout(resolve, time))
+}
+sleepGenerator(2000).next().value.then(() => {console.log(1)})
+// ES5
+function sleep(cb, time) {
+  if (typeof cb === 'function') {
+    setTimeout(cb, time)
+  }
+}
+sleep(() => console.log(1), 2000)
+```
+
+ TIP: -
+Generator语法糖很有意思
+
+2019-03-26
+
+> 第 41 题：下面代码输出什么
+
+```js
+var a = 10;
+(function () {
+    console.log(a)
+    a = 5
+    console.log(window.a)
+    var a = 20;
+    console.log(a)
+})()
+```
+
+ A:
+依次输出：undefined -> 10 -> 20
+
+解析：
+
+在立即执行函数中，var a = 20; 语句定义了一个局部变量 a，由于js的变量声明提升机制，局部变量a的声明会被提升至立即执行函数的函数体最上方，且由于这样的提升并不包括赋值，因此第一条打印语句会打印undefined，最后一条语句会打印20。
+
+由于变量声明提升，a = 5; 这条语句执行时，局部的变量a已经声明，因此它产生的效果是对局部的变量a赋值，此时window.a 依旧是最开始赋值的10，
+
+2019-03-25
+
+> 第 40 题：在 Vue 中，子组件为何不可以修改父组件传递的 Prop，如果修改了，Vue 是如何监控到属性的修改并给出警告的。
+
+ A:
+
+1. 子组件为何不可以修改父组件传递的 Prop
+  单向数据流，易于监测数据的流动，出现了错误可以更加迅速的定位到错误发生的位置
+2. 如果修改了，Vue 是如何监控到属性的修改并给出警告的。
+
+```js
+if (process.env.NODE_ENV !== 'production') {
+      var hyphenatedKey = hyphenate(key);
+      if (isReservedAttribute(hyphenatedKey) ||
+          config.isReservedAttr(hyphenatedKey)) {
+        warn(
+          ("\"" + hyphenatedKey + "\" is a reserved attribute and cannot be used as component prop."),
+          vm
+        );
+      }
+      defineReactive$$1(props, key, value, function () {
+        if (!isRoot && !isUpdatingChildComponent) {
+          warn(
+            "Avoid mutating a prop directly since the value will be " +
+            "overwritten whenever the parent component re-renders. " +
+            "Instead, use a data or computed property based on the prop's " +
+            "value. Prop being mutated: \"" + key + "\"",
+            vm
+          );
+        }
+      });
+    }
+```
+
+在initProps的时候，在defineReactive时通过判断是否在开发环境，如果是开发环境，会在触发set的时候判断是否此key是否处于updatingChildren中被修改，如果不是，说明此修改来自子组件，触发warning提示。
+> 需要特别注意的是，当你从子组件修改的prop属于基础类型时会触发提示。 这种情况下，你是无法修改父组件的数据源的， 因为基础类型赋值时是值拷贝。你直接将另一个非基础类型（Object, array）赋值到此key时也会触发提示(但实际上不会影响父组件的数据源)， 当你修改object的属性时不会触发提示，并且会修改父组件数据源的数据。
+
+2019-03-24
+
+> 第 39 题：介绍下 BFC 及其应用。
+
+ A:
+BFC 就是块级格式上下文，是页面盒模型布局中的一种 CSS 渲染模式，相当于一个独立的容器，里面的元素和外部的元素相互不影响。创建 BFC 的方式有：
+
+html 根元素
+float 浮动
+绝对定位
+overflow 不为 visiable
+display 为表格布局或者弹性布局
+行内块元素、网格布局、contain值为layout、content或 strict的元素等。
+
+BFC 主要的作用是：
+
+清除浮动
+防止同一 BFC 容器中的相邻元素间的外边距重叠问题
+
 2019-03-21
 
 ```js
@@ -330,15 +463,83 @@ CSRF攻击是源于`Web的隐式身份验证机制`！Web的身份验证机制�
 通过上图也可以看到，在全局作用域中，用 let 和 const 声明的全局变量并没有在全局对象中，只是一个块级作用域（Script）中
 怎么获取？`在定义变量的块级作用域中就能获取啊`，既然不属于顶层对象，那就不加 window（global）呗。
 
-> 第 27 题：全局作用域中，用 const 和 let 声明的变量不在 window 上，那到底在哪里？如何去获取？
-
 2019-03-09
 
 > 第 26 题：介绍模块化发展历程.可从IIFE、AMD、CMD、CommonJS、UMD、webpack(require.ensure)、ES Module、<script type="module"> 这几个角度考虑。
 
+REFER: https://github.com/Advanced-Frontend/Daily-Interview-Question/issues/28
+
 2019-03-08
 
 > 第 25 题：说说浏览器和 Node 事件循环的区别
+
+REFER: https://github.com/Advanced-Frontend/Daily-Interview-Question/issues/26
+
+**解答**
+其中一个主要的区别在于浏览器的event loop 和nodejs的event loop 在处理异步事件的顺序是不同的,nodejs中有micro event;其中Promise属于micro event 该异步事件的处理顺序就和浏览器不同.nodejs V11.0以上 这两者之间的顺序就相同了.
+
+```js
+function test () {
+   console.log('start')
+    setTimeout(() => {
+        console.log('children2')
+        Promise.resolve().then(() => {console.log('children2-1')})
+    }, 0)
+    setTimeout(() => {
+        console.log('children3')
+        Promise.resolve().then(() => {console.log('children3-1')})
+    }, 0)
+    Promise.resolve().then(() => {console.log('children1')})
+    console.log('end')
+}
+
+test()
+
+// 以上代码在node11以下版本的执行结果(先执行所有的宏任务，再执行微任务)
+// start
+// end
+// children1
+// children2
+// children3
+// children2-1
+// children3-1
+
+// 以上代码在node11及浏览器的执行结果(顺序执行宏任务和微任务)
+// start
+// end
+// children1
+// children2
+// children2-1
+// children3
+// children3-1
+```
+
+**浏览器**
+关于微任务和宏任务在浏览器的执行顺序是这样的：
+
+* 执行一只task（宏任务）
+* 执行完micro-task队列 （微任务）
+
+如此循环往复下去
+
+**Node**
+大体的task（宏任务）执行顺序是这样的：
+
+timers定时器：本阶段执行已经安排的 setTimeout() 和 setInterval() 的回调函数。
+pending callbacks待定回调：执行延迟到下一个循环迭代的 I/O 回调。
+idle, prepare：仅系统内部使用。
+poll 轮询：检索新的 I/O 事件;执行与 I/O 相关的回调（几乎所有情况下，除了关闭的回调函数，它们由计时器和 setImmediate() 排定的之外），其余情况 node 将在此处阻塞。
+check 检测：setImmediate() 回调函数在这里执行。
+close callbacks 关闭的回调函数：一些准备关闭的回调函数，如：socket.on('close', ...)。
+
+Node 10以前：
+
+* 执行完一个阶段的所有任务
+* 执行完nextTick队列里面的内容
+* 然后执行完微任务队列的内容
+
+Node 11以后：
+和浏览器的行为统一了，都是每执行一个宏任务就执行完微任务队列。
 
 2019-03-07
 
@@ -346,13 +547,34 @@ CSRF攻击是源于`Web的隐式身份验证机制`！Web的身份验证机制�
 
 2019-03-06
 
+REFER:https://github.com/Advanced-Frontend/Daily-Interview-Question/issues/45
+
 > 第 23 题：介绍下观察者模式和订阅-发布模式的区别，各自适用于什么场景
+
+REFER: https://github.com/Advanced-Frontend/Daily-Interview-Question/issues/25
+
+**解答**
+观察者模式中主体和观察者是`互相感知`的，发布-订阅模式是借助第三方来实现调度的，发布者和订阅者之间互不感知
+[以图取胜](https://user-gold-cdn.xitu.io/2017/11/22/15fe1b1f174cd376?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+
+**大白话**
+发布-订阅模式就好像报社， 邮局和个人的关系，报纸的订阅和分发是由邮局来完成的。报社只负责将报纸发送给邮局。
+观察者模式就好像 个体奶农和个人的关系。奶农负责统计有多少人订了产品，所以个人都会有一个相同拿牛奶的方法。奶农有新奶了就负责调用这个方法。
+
+**总结**
+在观察者模式中，观察者是知道Subject的，Subject一直保持对观察者进行记录。然而，在发布订阅模式中，发布者和订阅者不知道对方的存在。它们只有通过消息代理进行通信。
+
+在发布订阅模式中，组件是松散耦合的，正好和观察者模式相反。
+
+观察者模式大多数时候是同步的，比如当事件触发，Subject就会去调用观察者的方法。而发布-订阅模式大多数时候是异步的（使用消息队列）。
+
+观察者 模式需要在单个应用程序地址空间中实现，而发布-订阅更像交叉应用模式。
 
 2019-03-05
 
 > 第 22 题：介绍下重绘和回流（Repaint & Reflow），以及如何进行优化
 
-// REFER: https://github.com/Advanced-Frontend/Daily-Interview-Question/issues/24
+REFER: https://github.com/Advanced-Frontend/Daily-Interview-Question/issues/24
 
 **解答**
 回流必定会发生重绘，重绘不一定会引发回流。
@@ -433,11 +655,87 @@ if (!Array.isArray) {
 
 > 第 20 题：介绍下 npm 模块安装机制，为什么输入 npm install 就可以自动安装对应的模块？
 
+REFER: https://github.com/Advanced-Frontend/Daily-Interview-Question/issues/22
+
+**解答**
+npm 模块安装机制：
+
+* 发出`npm install`命令
+* 查询`node_modules`目录之中是否已经存在指定模块
+  * 若存在，不再重新安装
+  * 若不存在
+    * npm 向 `registry` 查询模块压缩包的网址
+    * 下载压缩包，存放在根目录下的`.npm`目录里
+    * 解压压缩包到当前项目的node_modules目录
+
+安装模块
+这一步将会更新工程中的 node_modules，并执行模块中的生命周期函数（按照 preinstall、install、postinstall 的顺序）。
+
+执行工程自身生命周期
+当前 npm 工程如果定义了钩子此时会被执行（按照 install、postinstall、prepublish、prepare 的顺序）
+
 2019-03-02
 
 > 第 19 题：React setState 笔试题，下面的代码输出什么？
+
+```jsx
+class Example extends React.Component {
+  constructor() {
+    super();
+    this.state = {
+      val: 0
+    };
+  }
+
+  componentDidMount() {
+    this.setState({val: this.state.val + 1});
+    console.log(this.state.val);    // 第 1 次 log
+
+    this.setState({val: this.state.val + 1});
+    console.log(this.state.val);    // 第 2 次 log
+
+    setTimeout(() => {
+      this.setState({val: this.state.val + 1});
+      console.log(this.state.val);  // 第 3 次 log
+
+      this.setState({val: this.state.val + 1});
+      console.log(this.state.val);  // 第 4 次 log
+    }, 0);
+  }
+
+  render() {
+    return null;
+  }
+};
+```
+
+**解答**
+1、第一次和第二次都是在 react 自身生命周期内，触发时 isBatchingUpdates 为 true，所以并不会直接执行更新 state，而是加入了 dirtyComponents，所以打印时获取的都是更新前的状态 0。
+
+2、两次 setState 时，获取到 this.state.val 都是 0，所以执行时都是将 0 设置成 1，在 react 内部会被合并掉，只执行一次。设置完成后 state.val 值为 1。
+
+3、setTimeout 中的代码，触发时 isBatchingUpdates 为 false，所以能够直接进行更新，所以连着输出 2，3。
+
+输出： 0 0 2 3
+
+我理解的是：`isBatchingUpdates` 默认值为 false，当 react 自身的事件处理函数或 react 生命周期触发时，`isBatchingUpdates` 会被赋值为 true，当更新完成时又会被复原为 false。 @code-coder
 
 2019-03-01
 
 > 第 18 题：React 中 setState 什么时候是同步的，什么时候是异步的？
 
+**解答**
+在React中，如果是由React引发的事件处理（比如通过onClick引发的事件处理），调用setState不会同步更新this.state，除此之外的setState调用会同步执行this.state。
+所谓“除此之外”，指的是绕过React通过addEventListener直接添加的事件处理函数，还有通过setTimeout/setInterval产生的异步调用。
+
+*原因：*
+在React的setState函数实现中，会根据一个变量isBatchingUpdates判断是直接更新this.state还是放到队列中回头再说，
+而isBatchingUpdates默认是false，也就表示setState会同步更新this.state，但是，有一个函数batchedUpdates，这个函数会把isBatchingUpdates修改为true，
+而当React在调用事件处理函数之前就会调用这个batchedUpdates，造成的后果，就是由React控制的事件处理过程setState不会同步更新this.state。
+
+-注意-
+
+这里所说的同步异步， 并不是真正的同步异步， 它还是同步执行的。
+这里的异步指的是多个state会合成到一起进行批量更新。
+
+2019-02-28
