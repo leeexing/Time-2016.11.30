@@ -1,5 +1,13 @@
 # inter-css
 
+## New Tech
+
+> css3中的新技术
+
+### progress JPEG
+
+photoshop 生成。 有个选择是保存为jpeg时 “连续”
+
 ## border-radius
 
 不同于padding和margin的“上、右、下、左”的顺序，border-radius采用的是左上角、右上角、右下角、左下角的顺序

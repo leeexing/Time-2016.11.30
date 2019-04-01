@@ -14,21 +14,43 @@ perf: 提升性能
 test: 增加修改测试用例
 chore: 修改工具相关（包括但不限于文档、代码生成等）
 deps: 升级依赖
-
-2. scope // NOTE:  注意这里
+2. scope  NOTE:  注意这里
 修改文件的范围（包括但不限于 doc, middleware, core, config, plugin）
-
 3. subject
 用一句话清楚的描述这次提交做了什么
-
 4. body
 补充 subject，适当增加原因、目的等相关因素，也可不写。
-
 5. footer
 当有非兼容修改(Breaking Change)时必须在这里描述清楚
 关联相关 issue，如 Closes #1, Closes #2, #3
 
 如果功能点有新增或修改的，还需要关联文档 doc
+
+## git tag
+
+> Git tag分为两种类型：带注释的tag和轻量级的tag。两种都允许你`在你的repo中标记一个专用的commit`，只是在存储原数据上有些不同。
+
+```js
+// 带注释的tag
+git tag -a v1.0.0
+// or
+git tag v1.0.0 -m 'xxxx'
+
+// 轻量级的tag
+// 轻量级的tag是一种以最简单地方式在你的repo里添加tag，因为它只会存储你引用的commit的hash值。只要不使用上述的参数-a、-m、-s创建出来的就都是这种类型tag。
+```
+
+### 其他命令
+
+```js
+git tag
+        -l 可以过滤你想查看的tag名称，支持通配符，比如git tag -l 'v1.0.*'，就可以查看v1.0.*的所有存在的tag
+        -n 可以查看tag的注释内容，默认值查看一行，如果想查看多行的话后面加个数字即可，比如：-n3。
+        --sort=<type>
+        -d <tag名称> 删除本地指定的tag，本地删除之后如果想同步到远程： git push origin :tag名称
+git show: 显示某个特定的tag信息
+git push origin tag名称(git push --tags): 推送本地指定tag或者全部的tags到远程
+```
 
 ## git branch
 

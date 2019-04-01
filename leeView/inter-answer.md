@@ -4,11 +4,18 @@
 
 ## 今日答疑
 
+2019-03-29
+
+> 第 44 题：介绍 HTTPS 握手过程
+
+ A:
+三次握手
+
 2019-03-28
 
 > 第 43 题：使用 sort() 对数组 [3, 15, 8, 29, 102, 22] 进行排序，输出结果
 
-**解答**
+ A:
 还是有点区别
 
 ```js
@@ -739,3 +746,231 @@ class Example extends React.Component {
 这里的异步指的是多个state会合成到一起进行批量更新。
 
 2019-02-28
+
+## 手写js
+
+2019-03-30
+
+> 第 45 题
+实现一个new操作符
+实现一个JSON.stringify
+实现一个JSON.parse
+实现一个call或 apply
+实现一个Function.bind
+实现一个继承
+实现一个JS函数柯里化
+手写一个Promise(中高级必考)
+手写防抖(Debouncing)和节流(Throttling)
+手写一个JS深拷贝
+实现一个instanceOf
+
+REFER: https://juejin.im/post/5c9c3989e51d454e3a3902b6
+
+ A:
+
+```js new
+function new (func, ...args) {
+  let obj = Object.create(null)
+  obj.__proto__ = func,prototype
+  let ret = func.apply(obj, args)
+  return typeof ret === 'object' ? ret : obj
+}
+```
+
+ TIP: -
+new 实例化的过程：
+
+1. 生成一个新对象
+2. 挂在原型链
+3. 执行。绑定this
+4. 返回新对象
+
+JSON.stringify
+
+> JSON.stringify(value[, replacer [, space]])
+
+```js JSON.stringify
+// Boolean | Number| String 类型会自动转换成对应的原始值。
+// undefined、任意函数以及symbol，会被忽略（出现在非数组对象的属性值中时），或者被转换成 null（出现在数组中时）。
+// 不可枚举的属性会被忽略
+// 如果一个对象的属性值通过某种间接的方式指回该对象本身，即循环引用，属性也会被忽略。
+
+function jsonStringify (obj) {
+  let type = typeof obj
+  if (type !== 'object' || type === null) {
+    if (/string|undefined|function/.test(type)) {
+      obj = '"' + obj + '"'
+      return String(obj)
+    }
+  } else {
+    let json = []
+    isArr = Array.isArray(obj)
+    for (let key in obj) {
+      let val = obj[key]
+      let typeV = typeof val
+      if (/string|undefined|function/.test(typeV)) {
+        val = '"' + val + '"'
+      } else if (typeV === 'object') {
+        val = jsonStringify(val)
+      }
+      json.push((isArr ? '' : '"' + key + '"') + String(val))
+    }
+    return (isArr ? '[' : '{') + String(json) + (isArr ? ']' : '}')
+  }
+}
+```
+
+ TIP: -
+理清思路也不难
+
+JSON.parse
+
+> 核心：Function与eval有相同的字符串参数特性。
+
+```js JSON.parse
+var jsonStr = '{ "age": 20, "name": "jack" }'
+var json = (new Function('return ' + jsonStr))();
+```
+
+call
+
+核心：
+
+* 将函数设为对象的属性
+* 执行&删除这个函数
+* 指定this到函数并传入给定参数执行函数
+* 如果不传入参数，默认指向为 window
+
+```js call
+Function.prototype._call = (context = window, ...args) => {
+  context.fn = this
+  let ret = context.fn(...args)
+  delete context.fn
+  return ret
+}
+```
+
+```js apply
+Function.prototype._apply = (context = window, ...args) => {
+  context.fn = this
+  let ret
+  if (args.length > 1) {
+    ret =  = context.fn(...args)
+  } else {
+    ret = context.fn()
+  }
+  delete context.fn
+  return ret
+}
+```
+
+bind
+
+> 会创建一个新函数。当这个新函数被调用时，bind() 的第一个参数将作为它运行时的 this，之后的一序列参数将会在传递的实参前传入作为它的参数。
+
+```js bind
+Function.prototype._bind = (cotext, ...args) => {
+  if (typeof context !== 'function) {
+    throw new Error('not a function)
+  }
+  let that = this
+  let bound = function (...params) {
+    return that.apply(this instanceof bound ? this : context, [...args, ...params])
+  }
+  function F () {}
+  F.prototype = this.prototype
+  bound.prototype = new F()
+
+  return bound
+}
+```
+
+debounce
+防抖
+
+> 一个高频时间
+
+```js
+const debounce = (fn, wait=500, immediate=true) => {
+  let timer
+  return function (...args) {
+    timer && clearTimeout(timer)
+    if (immediate) {
+      !timer && fn.apply(this, args)
+      timer = setTimeout(() => {
+        return fn.apply(this, args)
+      }, wait)
+    } else {
+      timer = setTimeout(() => {
+        return fn.apply(this, args)
+      }, wait)
+    }
+  }
+}
+```
+
+throttle
+节流
+
+```js
+const throttle = (fn, wait=500) => {
+  let timer
+  return funciton (..args) {
+    if (!timer) {
+      timer = setTimeout(() => { // 不用箭头函数的话，需要保存this变量
+        return fn.apply(this, atgs)
+        timer = null
+      }, wait)
+    }
+  }
+}
+```
+
+ TIP: -
+还是容易忘记
+
+deepClone
+
+```js
+function deepClone (obj) {
+  let ret
+  if (typeof obj === 'object') {
+    ret = Array.isArray(obj) ? [] : {}
+    for (let key in obj) {
+      ret[key] = typeof obj[key] === 'object' ? deepClone(obj[key]) : obj[key]
+    }
+  } else {
+    ret = obj // 简单数据，直接赋值
+  }
+  return ret
+}
+
+// 简单
+
+function deep_clone (obj) {
+  return JSON.parse(JSON.stringify(obj))
+}
+```
+
+instanceof
+
+```js
+function instanceOf (left, right) {
+  let proto = left.__proto__
+  let prototype = right.prototype
+  while (true) {
+    if (proto === null) return false
+    if (protot === prototype) return true
+    proto = proto.__proto__
+  }
+}
+```
+
+ TIP: -
+需要切实理解原型链的机制，才会明白这里的写法
+
+promise
+
+```js
+
+```

@@ -6,6 +6,25 @@
 
 ## 今日面试题
 
+2019-03-30
+
+> 第 45 题
+实现一个new操作符
+实现一个JSON.stringify
+实现一个JSON.parse
+实现一个call或 apply
+实现一个Function.bind
+实现一个继承
+实现一个JS函数柯里化
+手写一个Promise(中高级必考)
+手写防抖(Debouncing)和节流(Throttling)
+手写一个JS深拷贝
+实现一个instanceOf
+
+2019-03-29
+
+> 第 44 题：介绍 HTTPS 握手过程
+
 2019-03-28
 
 > 第 43 题：使用 sort() 对数组 [3, 15, 8, 29, 102, 22] 进行排序，输出结果

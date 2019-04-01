@@ -139,7 +139,6 @@ const debounce = (fn, wait=500, immediate=true) => {
       }, wait)
     }
   }
-<<<<<<< HEAD
 }
 
 // 2019-02-20
@@ -188,6 +187,4 @@ const debounce = (fn, wait=500, immediate=true) => {
       }, wait)
     }
   }
-=======
->>>>>>> 140e6830de719963913902d58b843656b9983158
 }
