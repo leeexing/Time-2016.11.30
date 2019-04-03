@@ -24,7 +24,7 @@ class LazyLoad {
   getBound (el) {
     let bound = el.getBoundingClientRect(el)
     let clientHeight = window.innerHeight
-    return bound .top <= clientHeight - 100 // -100是为了看到效果，可以去掉
+    return bound.top <= clientHeight - 100 // -100是为了看到效果，可以去掉
   }
   loadImage (el, index) {
     let src = el.getAttribute('data-origin')

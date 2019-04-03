@@ -747,6 +747,30 @@ class Example extends React.Component {
 
 2019-02-28
 
+2019-04-02
+
+> 第 1 期：写 React / Vue 项目时为什么要在组件中写 key，其作用是什么
+
+ A:
+REFER: https://github.com/Advanced-Frontend/Daily-Interview-Question/issues/1
+
+> key是给每一个vnode的唯一id,可以依靠key,更准确, 更快的拿到oldVnode中对应的vnode节点。
+
+1. 更准确
+因为带key就不是就地复用了，在sameNode函数 a.key === b.key对比中可以避免就地复用的情况。所以会更加准确。
+2. 更快
+利用key的唯一性生成map对象来获取对应节点，比遍历方式更快。(这个观点，就是我最初的那个观点。从这个角度看，map会比遍历更快。)
+
+vue和react都是采用diff算法来对比新旧虚拟节点，从而更新节点。在vue的diff函数中（建议先了解一下diff算法过程）。
+在交叉对比中，当新节点跟旧节点头尾交叉对比没有结果时，`会根据新节点的key去对比旧节点数组中的key`，从而找到相应旧节点（这里对应的是一个key => index 的map映射）。
+如果没找到就认为是一个新增节点。而如果没有key，那么就会采用遍历查找的方式去找到对应的旧节点。一种一个map映射，另一种是遍历查找。相比而言。map映射的速度更快。
+
+another (对比)
+正是因为带唯一key时每次更新都不能找到可复用的节点，不但要销毁和创建vnode，在DOM里添加移除节点对性能的影响更大。所以才会说“不带key可能性能更好”。
+说到底，`key的作用就是更新组件时判断两个节点是否相同`。相同就复用，不相同就删除旧的创建新的。
+因为不带key时节点能够复用，省去了销毁/创建组件的开销，同时只需要修改DOM文本内容而不是移除/添加节点，这就是文档中所说的“刻意依赖默认行为以获取性能上的提升”。
+既然如此，为什么还要建议带key呢？`因为这种模式只适用于渲染简单的无状态组件`。对于大多数场景来说，列表组件都有自己的状态。
+
 ## 手写js
 
 2019-03-30
@@ -771,9 +795,16 @@ REFER: https://juejin.im/post/5c9c3989e51d454e3a3902b6
 ```js new
 function new (func, ...args) {
   let obj = Object.create(null)
-  obj.__proto__ = func,prototype
+  obj.__proto__ = func.prototype
   let ret = func.apply(obj, args)
   return typeof ret === 'object' ? ret : obj
+}
+
+// 牛人是这么写的
+function _new (fn, ...args) {
+  const obj = Object.create(fn.prototype)
+  const ret = fn.apply(obj, args)
+  return ret instanceof Object ? ret : obj
 }
 ```
 
@@ -842,7 +873,8 @@ call
 * 如果不传入参数，默认指向为 window
 
 ```js call
-Function.prototype._call = (context = window, ...args) => {
+// Function.prototype._call = (context = window, ...args) => { // 不能使用箭头函数，不然就绑定了 this
+Function.prototype._call = function (context = window, ...args) {
   context.fn = this
   let ret = context.fn(...args)
   delete context.fn
@@ -888,7 +920,7 @@ Function.prototype._bind = (cotext, ...args) => {
 debounce
 防抖
 
-> 一个高频时间
+> 触发高频事件后n秒内函数只会执行一次，如果n秒内高频事件再次被触发，则重新计算时间
 
 ```js
 const debounce = (fn, wait=500, immediate=true) => {
@@ -911,6 +943,9 @@ const debounce = (fn, wait=500, immediate=true) => {
 
 throttle
 节流
+
+> 如果一个函数持续的，频繁地触发，那么让它在一定的时间间隔后再触发。
+> 高频事件触发，但在n秒内只会执行一次，所以节流会稀释函数的执行频率
 
 ```js
 const throttle = (fn, wait=500) => {
@@ -960,7 +995,7 @@ function instanceOf (left, right) {
   let prototype = right.prototype
   while (true) {
     if (proto === null) return false
-    if (protot === prototype) return true
+    if (proto === prototype) return true
     proto = proto.__proto__
   }
 }

@@ -161,7 +161,6 @@ for (var i = 0; i< 10; i++){
 
 > 第 22 题：介绍下重绘和回流（Repaint & Reflow），以及如何进行优化
 
-
 2019-03-04
 
 > 第 21 题：有以下 3 个判断数组的方法，请分别介绍它们之间的区别和优劣
@@ -182,3 +181,6 @@ Object.prototype.toString.call() 、 instanceof 以及 Array.isArray()
 
 > 第 18 题：React 中 setState 什么时候是同步的，什么时候是异步的？
 
+2019-04-02
+
+> 第 1 期：写 React / Vue 项目时为什么要在组件中写 key，其作用是什么

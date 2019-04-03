@@ -1,5 +1,27 @@
 # js探寻
 
+## js事件循环与异步
+
+Call Stack 是调用栈，Event Loop 就是本期的主角 - 事件循环，Web APIs 泛指宿主环境，比如 nodejs 中的 c++，前端中的浏览器。
+
+`任何同步的代码都只存在于 Call Stack 中`，遵循先进后出，后进先出的规则，也就是只有异步的代码（不一定是回调）才会进入 Event Loop 中
+
+```js
+setTimeout()
+setInterval()
+Promise.resolve().then()
+fetch().then()
+```
+
+所有这些异步代码在执行时，都不会进入 Call Stack，而是进入 Event Loop 队列，此时 JS 主线程执行完毕后，且异步时机到了，就会将异步回调中的代码推入 Call Stack 执行。
+
+**Microtask 与 Macrotask**
+Event Loop 处理异步的方式也分两种，分别是 setTimeout 之流的 Macrotask，与 Promise 之流的 Microtask。
+
+异步队列是周而复始循环执行的，可以看作是二维数组：横排是一个队列中的每一个函数，纵排是每一个队列。
+
+Macrotask 的方式是将执行函数添加到新的纵排，而 Microtask 将执行函数添加到当前执行到队列的横排，因此 Microtask 方式的插入是轻量的，最快被执行到的。
+
 ## Proxy 相比于 defineProperty 的优势
 
 1. 数组变化也能监听到
