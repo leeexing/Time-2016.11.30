@@ -364,6 +364,8 @@ db.temps.update({id: 326}, {
 }
 ```
 
+ TIP:  - 这个很有用啊
+
 **addToSet**
 追加的值，只有在不存在的情况下才生效
 
@@ -375,6 +377,13 @@ db.products.update({slug: 'shovel'}, {
 db.products.update({slug: 'shovel'}, {
   $addToSet: {tags: {$each: ['tools', 'dirt', 'steel']}}
 })
+
+db.products.aggregate([
+  {$group: {_id: null, uids: {$addToSet: '$UiD'}}},
+  {$project: {count: {$size: '$uids'}}}
+])
+
+ NOTE:  这样就可以可以不使用 `distinct` 这个操作符来获取绝对唯一的字段数量了。
 
 只有在添加的值不存在于 tags 中才进行添加
 ```

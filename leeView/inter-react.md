@@ -185,3 +185,39 @@ return isMount;
 效果：通过 createStore 创建一个全局 Store，再通过 StoreProvider 将 store 注入到子组件的 context 中，最终通过两个 Hooks 进行获取与操作：useStore 与 useAction：
 
 REFER: https://github.com/ctrlplusb/easy-peasy
+
+## redux
+
+### mapDispatchToProps
+
+> connect 的第二个参数是 mapDispatchToProps，它的功能是，用来建立 UI 组件的参数到store.dispatch方法的映射。也就是说，它定义了哪些用户的操作应该当作 Action，传给 Store。
+
+如果mapDispatchToProps是一个对象，它的每个键名也是对应 UI 组件的同名参数，`键值应该是一个函数`，会被当作 Action creator ，返回的 Action 会由 Redux发出
+
+```js
+const mapDispatchToProps = (dispatch) => {
+   return {
+       onJudge:(data)=>{
+           dispatch({type:"LOGIN",data});
+       }
+   }
+}
+```
+
+如果mapDispatchToProps是一个函数，会得到dispatch和ownProps（容器组件的props对象）两个参数
+
+```js
+const mapDispatchToProps = (
+  dispatch,
+  ownProps
+) => {
+  return {
+    onJudge: () => {
+      dispatch({
+        type: 'LOGIN',
+        data
+      });
+    }
+  };
+}
+```
