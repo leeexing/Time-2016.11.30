@@ -1,7 +1,8 @@
-/**
- * inter-util
-*/
+# inter-util
 
+## 图片懒加载
+
+```js
 class LazyLoad {
   constructor (el) {
     this.imgList = Array.from(document.querySelector(el))
@@ -40,3 +41,5 @@ class LazyLoad {
 }
 
 const lazy = new LazyLoad('.lazy')
+
+```

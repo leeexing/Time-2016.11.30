@@ -7,10 +7,14 @@ uploads/
 
 # 源码文件
 *.core.js
+core/
 
 # 测试文件
 test/
 test.*
+
+# 思维导图等
+LeeMap/
 
 # 配置相关
 .vscode

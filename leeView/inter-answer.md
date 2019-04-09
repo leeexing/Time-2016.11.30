@@ -4,6 +4,168 @@
 
 ## 今日答疑
 
+2019-04-09
+
+> 第 50 题：实现 (5).add(3).minus(2) 功能
+
+ A:
+原型链
+
+```js
+Number.prototype.add = function (n) {
+  // return this.valueOf() + n
+  return this + n
+}
+
+Number.prototype.minus = function (n) {
+  // return this.valueOf() - n
+  return this - n
+}
+```
+
+> 第 49 题：为什么通常在发送数据埋点请求的时候使用的是 1x1 像素的透明 gif 图片？
+
+ A:
+作用：工作中，用于前端监控，比如曝光等等，谷歌和百度的都是用的1x1 像素的透明 gif 图片；
+why?
+
+1. 没有跨域问题，一般这种上报数据，代码要写通用的；（排除ajax）
+2. 不会阻塞页面加载，影响用户的体验，只要new Image对象就好了；（排除JS/CSS文件资源方式上报）
+3. 在所有图片中，体积最小；（比较PNG/JPG）
+
+* 能够完成整个 HTTP 请求+响应（尽管不需要响应内容）
+* 触发 GET 请求之后不需要获取和处理数据、服务器也不需要发送数据
+* 跨域友好
+* 执行过程无阻塞
+* 相比 XMLHttpRequest 对象发送 GET 请求，性能上更好
+* GIF的最低合法体积最小（最小的BMP文件需要74个字节，PNG需要67个字节，而合法的GIF，只需要43个字节）
+
+```html
+<script type="text/javascript">
+  var thisPage = location.href;
+  var referringPage = (document.referrer) ? document.referrer : "none";
+  var beacon = new Image();
+  beacon.src = "http://www.example.com/logger/beacon.gif?page=" + encodeURI(thisPage)
+  + "&ref=" + encodeURI(referringPage);
+</script>
+```
+
+2019-04-07
+
+> 第 48 题：call 和 apply 的区别是什么，哪个性能更好一些
+
+ A:
+
+* Function.prototype.apply和Function.prototype.call 的作用是一样的，区别在于传入参数的不同；
+* 第一个参数都是，指定函数体内this的指向；
+* 第二个参数开始不同，apply是传入带下标的集合，数组或者类数组，apply把它传给函数作为参数，call从第二个开始传入的参数是不固定的，都会传给函数作为参数。
+* call比apply的性能要好，平常可以多用call, call传入参数的格式正是内部所需要的格式
+
+总结: 在我们平时的开发中其实不必关注call和apply的性能问题，但是可以尽可能的去用call，特别是es6的reset解构的支持，call基本可以代替apply，可以看出`lodash`源码里面并没有直接用Function.prototype.apply，而是在参数较少(1-3)个时采用call的方式调用(因为lodash里面没有超过4个参数的方法，PS如果一个函数的设计超过4个入参，那么这个函数就要考虑重构了)
+REFER: https://github.com/noneven/__/issues/6
+
+2019-04-06
+
+> 第 47 题：双向绑定和 vuex 是否冲突
+
+ A:
+
+没有好好看官网：
+REFER: https://vuex.vuejs.org/zh/guide/forms.html
+
+```js
+const store = new Vuex.Store({
+  // ...
+  strict: true
+})
+
+// - 利用vuex的思维去解决。还是通过 commit 去修改变量的值
+
+<input v-model="message">
+
+// ...
+computed: {
+  message: {
+    get () {
+      return this.$store.state.obj.message
+    },
+    set (value) {
+      this.$store.commit('updateMessage', value)
+    }
+  }
+}
+```
+
+在严格模式下，无论何时发生了状态变更且不是由 `mutation` 函数引起的，将会抛出错误。这能保证所有的状态变更都能被调试工具跟踪到
+
+2019-04-05
+
+> 第 46 题：输出以下代码执行的结果并解释为什么
+
+```js
+var obj = {
+    '2': 3,
+    '3': 4,
+    'length': 2,
+    'splice': Array.prototype.splice,
+    'push': Array.prototype.push
+}
+obj.push(1)
+obj.push(2)
+console.log(obj)
+```
+
+ A:
+
+```js
+结果：[,,1,2], length为4
+伪数组（ArrayLike）
+```
+
+ TIP: -
+在`对象`中加入`splice`属性方法，和`length`属性后。这个对象变成一个类数组。
+
+> push方法将值追加到数组中。push 方法有意具有通用性。该方法和 call() 或 apply() 一起使用时，可应用在类似数组的对象上。push 方法根据 length 属性来决定从哪里开始插入给定的值。如果 length 不能被转成一个数值，则插入的元素索引为 0，包括 length 不存在时。当 length 不存在时，将会创建它。
+> 对象转数组的方式： Array.from()、splice()、concat()等
+
+另外，有 splice 和没有 splice 两者的结果是不一样的。
+
+```js 不包含splice
+var obj = {
+    '2': 3,
+    '3': 4,
+    'length': 2,
+    'push': Array.prototype.push
+}
+obj.push(11)
+obj.push(33)
+console.log(obj)
+
+// {2: 11, 3: 33, length: 4, push: ƒ}
+// 依旧还是一个对象。没有变成一个类数组
+```
+
+下面是chrome浏览器判断对象是不是 `类数组` 时的检测方法
+
+```js ChromeDevTools
+    /**
+     * @param {?Object} obj
+     * @return {boolean}
+     */
+    function isArrayLike(obj) {
+      if (!obj || typeof obj !== 'object')
+        return false;
+      try {
+        if (typeof obj.splice === 'function') {  <----- 😂
+          const len = obj.length;
+          return typeof len === 'number' && (len >>> 0 === len && (len > 0 || 1 / len > 0));
+        }
+      } catch (e) {
+      }
+      return false;
+    }
+```
+
 2019-03-29
 
 > 第 44 题：介绍 HTTPS 握手过程
@@ -772,129 +934,6 @@ another (对比)
 既然如此，为什么还要建议带key呢？`因为这种模式只适用于渲染简单的无状态组件`。对于大多数场景来说，列表组件都有自己的状态。
 
 ## 手写js
-
-> 第 49 题：为什么通常在发送数据埋点请求的时候使用的是 1x1 像素的透明 gif 图片？
-
- A:
-作用：工作中，用于前端监控，比如曝光等等，谷歌和百度的都是用的1x1 像素的透明 gif 图片；
-why?
-
-1. 没有跨域问题，一般这种上报数据，代码要写通用的；（排除ajax）
-2. 不会阻塞页面加载，影响用户的体验，只要new Image对象就好了；（排除JS/CSS文件资源方式上报）
-3. 在所有图片中，体积最小；（比较PNG/JPG）
-
-* 能够完成整个 HTTP 请求+响应（尽管不需要响应内容）
-* 触发 GET 请求之后不需要获取和处理数据、服务器也不需要发送数据
-* 跨域友好
-* 执行过程无阻塞
-* 相比 XMLHttpRequest 对象发送 GET 请求，性能上更好
-* GIF的最低合法体积最小（最小的BMP文件需要74个字节，PNG需要67个字节，而合法的GIF，只需要43个字节）
-
-```html
-<script type="text/javascript">
-  var thisPage = location.href;
-  var referringPage = (document.referrer) ? document.referrer : "none";
-  var beacon = new Image();
-  beacon.src = "http://www.example.com/logger/beacon.gif?page=" + encodeURI(thisPage)
-  + "&ref=" + encodeURI(referringPage);
-</script>
-```
-
-2019-04-07
-
-> 第 48 题：call 和 apply 的区别是什么，哪个性能更好一些
-
- A:
-
-* Function.prototype.apply和Function.prototype.call 的作用是一样的，区别在于传入参数的不同；
-* 第一个参数都是，指定函数体内this的指向；
-* 第二个参数开始不同，apply是传入带下标的集合，数组或者类数组，apply把它传给函数作为参数，call从第二个开始传入的参数是不固定的，都会传给函数作为参数。
-* call比apply的性能要好，平常可以多用call, call传入参数的格式正是内部所需要的格式
-
-总结: 在我们平时的开发中其实不必关注call和apply的性能问题，但是可以尽可能的去用call，特别是es6的reset解构的支持，call基本可以代替apply，可以看出`lodash`源码里面并没有直接用Function.prototype.apply，而是在参数较少(1-3)个时采用call的方式调用(因为lodash里面没有超过4个参数的方法，PS如果一个函数的设计超过4个入参，那么这个函数就要考虑重构了)
-REFER: https://github.com/noneven/__/issues/6
-
-2019-04-06
-
-> 第 47 题：双向绑定和 vuex 是否冲突
-
- A:
-
-没有好好看官网：
-REFER: https://vuex.vuejs.org/zh/guide/forms.html
-
-```js
-const store = new Vuex.Store({
-  // ...
-  strict: true
-})
-```
-
-在严格模式下，无论何时发生了状态变更且不是由 `mutation` 函数引起的，将会抛出错误。这能保证所有的状态变更都能被调试工具跟踪到
-
-2019-04-05
-
-> 第 46 题：输出以下代码执行的结果并解释为什么
-
-```js
-var obj = {
-    '2': 3,
-    '3': 4,
-    'length': 2,
-    'splice': Array.prototype.splice,
-    'push': Array.prototype.push
-}
-obj.push(1)
-obj.push(2)
-console.log(obj)
-```
-
- A:
-
-```js
-结果：[,,1,2], length为4
-伪数组（ArrayLike）
-```
-
- TIP: -
-在`对象`中加入`splice`属性方法，和`length`属性后。这个对象变成一个类数组。
-
-> push方法将值追加到数组中。push 方法有意具有通用性。该方法和 call() 或 apply() 一起使用时，可应用在类似数组的对象上。push 方法根据 length 属性来决定从哪里开始插入给定的值。如果 length 不能被转成一个数值，则插入的元素索引为 0，包括 length 不存在时。当 length 不存在时，将会创建它。
-> 对象转数组的方式： Array.from()、splice()、concat()等
-
-```js 不包含splice
-var obj = {
-    '2': 3,
-    '3': 4,
-    'length': 2,
-    'push': Array.prototype.push
-}
-obj.push(11)
-obj.push(33)
-console.log(obj)
-
-// {2: 11, 3: 33, length: 4, push: ƒ}
-// 依旧还是一个对象。没有变成一个类数组
-```
-
-```js ChromeDevTools
-    /**
-     * @param {?Object} obj
-     * @return {boolean}
-     */
-    function isArrayLike(obj) {
-      if (!obj || typeof obj !== 'object')
-        return false;
-      try {
-        if (typeof obj.splice === 'function') {
-          const len = obj.length;
-          return typeof len === 'number' && (len >>> 0 === len && (len > 0 || 1 / len > 0));
-        }
-      } catch (e) {
-      }
-      return false;
-    }
-```
 
 2019-03-30
 
