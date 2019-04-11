@@ -4,12 +4,22 @@
 
 ## 今日答疑
 
+2019-04-10
+
+> 第 51 题：Vue 的响应式原理中 Object.defineProperty 有什么缺陷？为什么在 Vue3.0 采用了 Proxy，抛弃了 Object.defineProperty？
+
+ A:
+
+1. `Object.defineProperty`无法监控到数组下标的变化，导致通过数组下标添加元素，不能实时响应；
+2. `Object.defineProperty`只能劫持对象的属性，从而需要对每个对象，每个属性进行遍历，如果，属性值是对象，还需要深度遍历。`Proxy`可以劫持整个对象，并返回一个新的对象。
+3. `Proxy`不仅可以代理对象，还可以代理数组。还可以代理动态增加的属性。
+
 2019-04-09
 
 > 第 50 题：实现 (5).add(3).minus(2) 功能
 
  A:
-原型链
+原型链实现
 
 ```js
 Number.prototype.add = function (n) {
@@ -22,6 +32,29 @@ Number.prototype.minus = function (n) {
   return this - n
 }
 ```
+
+2019-04-09 PM
+
+> 下午茶：输出结果是什么
+
+```js
+var z = 10;
+
+function foo(){
+    console.log(z);
+}
+
+(function(funArg){
+    var z = 20;
+    funArg();
+})(foo);
+```
+
+ A:
+
+输出：10
+
+因为 js 的函数是`静态作用域`，也就是函数的作用域在定义的那一刻就已经确定了，所以嗲用 funArg 时，实际上调用的是外部的 foo 函数，所以作用域上是调用 foo 函数的作用域
 
 > 第 49 题：为什么通常在发送数据埋点请求的时候使用的是 1x1 像素的透明 gif 图片？
 

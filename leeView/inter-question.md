@@ -6,9 +6,30 @@
 
 ## 今日面试题
 
+2019-04-10
+
+> 第 51 题：Vue 的响应式原理中 Object.defineProperty 有什么缺陷？为什么在 Vue3.0 采用了 Proxy，抛弃了 Object.defineProperty？
+
 2019-04-09
 
 > 第 50 题：实现 (5).add(3).minus(2) 功能
+
+2019-04-09 PM
+
+> 下午茶：输出结果是什么
+
+```js
+var z = 10;
+
+function foo(){
+    console.log(z);
+}
+
+(function(funArg){
+    var z = 20;
+    funArg();
+})(foo);
+```
 
 2019-04-08
 
