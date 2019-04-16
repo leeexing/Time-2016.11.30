@@ -218,7 +218,7 @@ class DrBluePrint {
       if (e.which == 2 || this.isMiddleBtn || (this.isMobile && this.mobileSelectMode)) {
         this.isMiddleBtn = false
         this.isLeftMouseDown = false
-        console.log(sliceMouseTrackPosition)
+        // console.log(sliceMouseTrackPosition)
         let selectRegion = {
           left: this.overlappedCanvas.checkBox.minX,
           top: this.overlappedCanvas.checkBox.minY,
@@ -231,13 +231,10 @@ class DrBluePrint {
           selectRegion.right,
           selectRegion.bottom
         )
-        let rectPos = [
-          sliceMouseTrackPosition.startX,
-          sliceMouseTrackPosition.startY,
-          sliceMouseTrackPosition.x,
-          sliceMouseTrackPosition.y]
-        this.userMarkedRectangles.push({...sliceMouseTrackPosition})
+        console.log(this.userSelectRegion)
+        this.userMarkedRectangles.push([...this.userSelectRegion])
         this.drawUserMarkedRectangles()
+        this.middleMouseSelectCallback && this.middleMouseSelectCallback()
       }
     }, false)
 
@@ -266,6 +263,7 @@ class DrBluePrint {
         this.dy = this.initDy + realMoveY
 
         this.loadImageTexture()
+        this.drawUserMarkedRectangles()
 
 			}
     }, false)
@@ -320,6 +318,7 @@ class DrBluePrint {
         this.width = this.oWidth * this.scale
         this.height = this.oHeight * this.scale
         this.loadImageTexture()
+        this.drawUserMarkedRectangles()
       }
     }, false)
   }
@@ -330,7 +329,7 @@ class DrBluePrint {
       this.calculatePos(imageObj)
       this.renderData = imageObj
       this.loadImageTexture()
-      // this.drawTipRect()
+      this.drawTipRect()
     }
   }
   loadImageTexture () {
@@ -342,14 +341,29 @@ class DrBluePrint {
     this.overlappedCanvas.context.strokeStyle = '#ff0000';
     this.overlappedCanvas.context.lineWidth = 1;
     this.userMarkedRectangles.forEach(item => {
+      let startX = item[0] * this.width + this.dx
+      let startY = item[1] * this.height + this.dy
+      let endX = item[2] * this.width + this.dx
+      let endY = item[3] * this.height + this.dy
       this.overlappedCanvas.context.beginPath();
-      this.overlappedCanvas.context.moveTo(item.startX, item.startY);
-      this.overlappedCanvas.context.lineTo(item.startX, item.y);
-      this.overlappedCanvas.context.lineTo(item.x, item.y);
-      this.overlappedCanvas.context.lineTo(item.x, item.startY);
-      this.overlappedCanvas.context.lineTo(item.startX, item.startY);
+      this.overlappedCanvas.context.moveTo(startX, startY);
+      this.overlappedCanvas.context.lineTo(startX, endY);
+      this.overlappedCanvas.context.lineTo(endX, endY);
+      this.overlappedCanvas.context.lineTo(endX, startY);
+      this.overlappedCanvas.context.lineTo(startX, startY);
       this.overlappedCanvas.context.stroke();
     })
+
+    // let {offsetX, offsetY} = event
+    // let relateX = (offsetX - this.dx) / this.width
+    // let relateY = (offsetY - this.dy) / this.height
+
+    // let dx = relateX * (scaleRatio - 1) * this.width
+    // let dy = relateY * (scaleRatio - 1) * this.height
+    // this.dx -= dx
+    // this.dy -= dy
+    // this.width = this.oWidth * this.scale
+    // this.height = this.oHeight * this.scale
   }
   drawTipRect (pos={}) {
     this.overlappedCanvas.context.save()
@@ -364,10 +378,11 @@ class DrBluePrint {
     return this.testCanvas.toDataURL('image/png')
   }
   toImageCoordinateNum (pt1x, pt1y, pt2x, pt2y) {
-    let ret = this.toImageCoordinate({pt1x, pt1y}, {pt2x, pt2y})
-  }
-  toImageCoordinate (pt1, pt2) {
-    // console.log(pt1, pt2)
+    let relateX1 = (pt1x - this.dx) / this.width
+    let relateY1 = (pt1y - this.dy) / this.height
+    let relateX2 = (pt2x - this.dx) / this.width
+    let relateY2 = (pt2y - this.dy) / this.height
+    return [relateX1, relateY1, relateX2, relateY2]
   }
   calculatePos (imgInfo) {
     let W1 = this.containerW
