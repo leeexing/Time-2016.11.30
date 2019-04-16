@@ -40,4 +40,4 @@ let data6 = {width: 500, height: 200}
 let data7 = {width: 800, height: 300}
 let data8 = {width: 800, height: 400}
 
-calculatePos(data1)
+calculatePos(data8)

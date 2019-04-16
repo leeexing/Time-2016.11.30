@@ -3,7 +3,7 @@
  * author： leeing
  * time： 2018-12-19 08:59
  */
-class MarkTipOfDoutuImage {
+class DrBluePrint {
   constructor (options) {
     let defaultOpts = {
       mode: 'image', // or canvas
@@ -100,7 +100,7 @@ class MarkTipOfDoutuImage {
 
 
 onload = function() {
-  let doutuImage = new MarkTipOfDoutuImage({containerClass: '.doutu-wrapper'})
+  let doutuImage = new DrBluePrint({containerClass: '.doutu-wrapper'})
   // doutuImage.updateImage('')
   doutuImage.canvas2Image()
 
