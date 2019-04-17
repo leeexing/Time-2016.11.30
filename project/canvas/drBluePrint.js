@@ -10,16 +10,21 @@ class DrBluePrint {
       cacheMemory: true,
       cacheCount: 100,
       containerClass: '.dr-wrap',
-      strokeColor: '#f00'
+      strokeColor: '#f00',
+      maxScale: 5,
+      minScale: 0.5
     }
     this.options = Object.assign(defaultOpts, options)
     this.container = document.querySelector(this.options.containerClass)
     this.imageUrls = []
     this.imageDatas = []
-    this.containerW = this.container.offsetWidth
-    this.containerH = this.container.offsetHeight
-    this.oWidth = this.width = this.container.offsetWidth
-    this.oHeight = this.height = this.container.offsetHeight
+    let domRect = this.container.getBoundingClientRect()
+    this.containerW = domRect.width
+    this.containerH = domRect.height
+    this.containerLeft = domRect.left
+    this.containerTop = domRect.top
+    this.initWidth = this.width = domRect.width
+    this.initHeight = this.height = domRect.height
     this.scale = 1
     this.zoomOfImage = 1
     this.dx = 0
@@ -48,17 +53,23 @@ class DrBluePrint {
     this.containerCanvas.height = this.height
     this.containerCanvas.context = this.containerCanvas.getContext('2d')
 
-    // 上层canvas
-    this.overlappedCanvas = document.createElement("canvas");
-    this.overlappedCanvas.width = this.width;
-    this.overlappedCanvas.height = this.height;
-    this.container.appendChild(this.overlappedCanvas);
-    this.container.style.position = "relative";
+    // -上层canvas
+    this.overlappedCanvas = document.createElement("canvas")
+    this.overlappedCanvas.width = this.width
+    this.overlappedCanvas.height = this.height
+    this.container.appendChild(this.overlappedCanvas)
+    this.container.style.position = "relative"
 
-    this.overlappedCanvas.style.position = "absolute";
-    this.overlappedCanvas.style.left = 0;
-    this.overlappedCanvas.style.top = 0;
-    this.overlappedCanvas.context = this.overlappedCanvas.getContext('2d');
+    this.overlappedCanvas.style.position = "absolute"
+    this.overlappedCanvas.style.left = 0
+    this.overlappedCanvas.style.top = 0
+    this.overlappedCanvas.context = this.overlappedCanvas.getContext('2d')
+
+    // -离线绘制canvas
+    this.offlineCanvas = document.createElement("canvas")
+    this.offlineCanvas.width = this.width
+    this.offlineCanvas.height = this.height
+    this.offlineCanvas.context = this.offlineCanvas.getContext('2d')
   }
   // 向容器中添加事件:下层canvas，主要用于图像、嫌疑框、Tip 图像的渲染
   addContainerListenerIfNone (eventType, fun) {
@@ -119,7 +130,7 @@ class DrBluePrint {
     return this.isMobile ? eventnameMobile[eventname] : eventnamePc[eventname]
 	}
   attachEvent () {
-    var sliceMouseTrackPosition = {
+    let sliceMouseTrackPosition = {
       x: -100000,
       y: -100000,
       startX: -100000,
@@ -128,15 +139,26 @@ class DrBluePrint {
     this.isLeftMouseDown = false
     this.isRightMouseDown = false
 
+    // -禁止鼠标右键
+    this.container.oncontextmenu = function disableContextMenu () {
+      event.returnValue = false
+    }
+
     // *==========================【分割线·上】====================================
 
     this.overlappedCanvas.addEventListener(this.getMouseOrTouchEventName('mousedown'), e => {
       e.preventDefault()
       e.returnValue = false
-      if (this.isMobile && !this.mobileSelectMode) return
+
+      if (this.isMobile && !this.mobileSelectMode) {
+        this.checkRemoveRectangle(e) // 检测是否点击删除键按钮，并删除
+        return
+      }
 
       if (e.which == 1) {
         this.isLeftMouseDown = true
+        this.checkRemoveRectangle(e)
+        return
       } else if (e.which == 2 || (this.isMobile && this.mobileSelectMode)) {
         this.isMiddleBtn = true
         this.overlappedCanvas.context.clearRect(
@@ -145,43 +167,39 @@ class DrBluePrint {
           this.overlappedCanvas.width,
           this.overlappedCanvas.height
         )
-        let boundingBox = this.overlappedCanvas.getBoundingClientRect();
-        let offsetX = boundingBox.left;
-        let offsetY = boundingBox.top;
-        let clientPos = this.getClientPos(e);
-        let relativeX = clientPos[0] - offsetX;
-        let relativeY = clientPos[1] - offsetY;
+        let boundingBox = this.overlappedCanvas.getBoundingClientRect()
+        let offsetX = boundingBox.left
+        let offsetY = boundingBox.top
+        let clientPos = this.getClientPos(e)
+        let relativeX = clientPos[0] - offsetX
+        let relativeY = clientPos[1] - offsetY
         // -保存当前鼠标点
-        sliceMouseTrackPosition.startX = relativeX;
-        sliceMouseTrackPosition.startY = relativeY;
+        sliceMouseTrackPosition.startX = relativeX
+        sliceMouseTrackPosition.startY = relativeY
 
         // -碰撞检测
         this.overlappedCanvas.checkBox = { minX: 10000, minY: 10000, maxX: -10000, maxY: -10000 }
 
-        if (this.overlappedCanvas.checkBox.minX > relativeX) this.overlappedCanvas.checkBox.minX = relativeX;
-        if (this.overlappedCanvas.checkBox.maxX < relativeX) this.overlappedCanvas.checkBox.maxX = relativeX;
-        if (this.overlappedCanvas.checkBox.minY > relativeY) this.overlappedCanvas.checkBox.minY = relativeY;
-        if (this.overlappedCanvas.checkBox.maxY < relativeY) this.overlappedCanvas.checkBox.maxY = relativeY;
+        if (this.overlappedCanvas.checkBox.minX > relativeX) this.overlappedCanvas.checkBox.minX = relativeX
+        if (this.overlappedCanvas.checkBox.maxX < relativeX) this.overlappedCanvas.checkBox.maxX = relativeX
+        if (this.overlappedCanvas.checkBox.minY > relativeY) this.overlappedCanvas.checkBox.minY = relativeY
+        if (this.overlappedCanvas.checkBox.maxY < relativeY) this.overlappedCanvas.checkBox.maxY = relativeY
+      } else {
+        this.checkRemoveRectangle(e)
       }
     }, false)
 
     this.overlappedCanvas.addEventListener(this.getMouseOrTouchEventName('mousemove'), e => {
       if (this.isMobile && !this.mobileSelectMode) return // 上层只有来标记框，除此之外，不做任何操作
-      // this.overlappedCanvas.context.clearRect(
-      //   0,
-      //   0,
-      //   this.overlappedCanvas.width,
-      //   this.overlappedCanvas.height
-      // );
-      var boundingBox = this.overlappedCanvas.getBoundingClientRect();
-      var offsetX = boundingBox.left;
-      var offsetY = boundingBox.top;
+      var boundingBox = this.overlappedCanvas.getBoundingClientRect()
+      var offsetX = boundingBox.left
+      var offsetY = boundingBox.top
 
-      var clientPos = this.getClientPos(e);
-      var relativeX = clientPos[0] - offsetX;
-      var relativeY = clientPos[1] - offsetY;
-      sliceMouseTrackPosition.x = relativeX;
-      sliceMouseTrackPosition.y = relativeY;
+      var clientPos = this.getClientPos(e)
+      var relativeX = clientPos[0] - offsetX
+      var relativeY = clientPos[1] - offsetY
+      sliceMouseTrackPosition.x = relativeX
+      sliceMouseTrackPosition.y = relativeY
 
       if (e.which == 2 || this.isMiddleBtn || this.isMobile) {
         this.overlappedCanvas.context.clearRect(
@@ -189,27 +207,27 @@ class DrBluePrint {
           0,
           this.overlappedCanvas.width,
           this.overlappedCanvas.height
-        );
-        // this.drawUserMarkedRectangles();
+        )
+        // this.drawUserMarkedRectangles()
 
-        this.overlappedCanvas.context.strokeStyle = '#ff0000';
-        this.overlappedCanvas.context.lineWidth = 1;
-        this.overlappedCanvas.context.beginPath();
-        this.overlappedCanvas.context.moveTo(sliceMouseTrackPosition.startX, sliceMouseTrackPosition.startY);
-        this.overlappedCanvas.context.lineTo(sliceMouseTrackPosition.startX, sliceMouseTrackPosition.y);
-        this.overlappedCanvas.context.lineTo(sliceMouseTrackPosition.x, sliceMouseTrackPosition.y);
-        this.overlappedCanvas.context.lineTo(sliceMouseTrackPosition.x, sliceMouseTrackPosition.startY);
-        this.overlappedCanvas.context.lineTo(sliceMouseTrackPosition.startX, sliceMouseTrackPosition.startY);
-        this.overlappedCanvas.context.stroke();
+        this.overlappedCanvas.context.strokeStyle = '#ff0000'
+        this.overlappedCanvas.context.lineWidth = 1
+        this.overlappedCanvas.context.beginPath()
+        this.overlappedCanvas.context.moveTo(sliceMouseTrackPosition.startX, sliceMouseTrackPosition.startY)
+        this.overlappedCanvas.context.lineTo(sliceMouseTrackPosition.startX, sliceMouseTrackPosition.y)
+        this.overlappedCanvas.context.lineTo(sliceMouseTrackPosition.x, sliceMouseTrackPosition.y)
+        this.overlappedCanvas.context.lineTo(sliceMouseTrackPosition.x, sliceMouseTrackPosition.startY)
+        this.overlappedCanvas.context.lineTo(sliceMouseTrackPosition.startX, sliceMouseTrackPosition.startY)
+        this.overlappedCanvas.context.stroke()
 
-        if (this.overlappedCanvas.checkBox.minX > relativeX) this.overlappedCanvas.checkBox.minX = relativeX;
-        if (this.overlappedCanvas.checkBox.maxX < relativeX) this.overlappedCanvas.checkBox.maxX = relativeX;
-        if (this.overlappedCanvas.checkBox.minY > relativeY) this.overlappedCanvas.checkBox.minY = relativeY;
-        if (this.overlappedCanvas.checkBox.maxY < relativeY) this.overlappedCanvas.checkBox.maxY = relativeY;
+        if (this.overlappedCanvas.checkBox.minX > relativeX) this.overlappedCanvas.checkBox.minX = relativeX
+        if (this.overlappedCanvas.checkBox.maxX < relativeX) this.overlappedCanvas.checkBox.maxX = relativeX
+        if (this.overlappedCanvas.checkBox.minY > relativeY) this.overlappedCanvas.checkBox.minY = relativeY
+        if (this.overlappedCanvas.checkBox.maxY < relativeY) this.overlappedCanvas.checkBox.maxY = relativeY
 
       } else if (this.enableMouseMoveDensity && this.mouseMoveCallback != undefined) {
-        var pixelInfo = this.getPixelData(relativeX, relativeY);
-        this.mouseMoveCallback(pixelInfo);
+        var pixelInfo = this.getPixelData(relativeX, relativeY)
+        this.mouseMoveCallback(pixelInfo)
       }
     }, false)
 
@@ -224,17 +242,19 @@ class DrBluePrint {
           top: this.overlappedCanvas.checkBox.minY,
           right: this.overlappedCanvas.checkBox.maxX,
           bottom: this.overlappedCanvas.checkBox.maxY
-        };
+        }
+        // -嫌疑框在图像上的相对位置
         this.userSelectRegion = this.toImageCoordinateNum(
           selectRegion.left,
           selectRegion.top,
           selectRegion.right,
           selectRegion.bottom
         )
-        console.log(this.userSelectRegion)
+        // console.log(this.userSelectRegion)
         this.userMarkedRectangles.push([...this.userSelectRegion])
         this.drawUserMarkedRectangles()
-        this.middleMouseSelectCallback && this.middleMouseSelectCallback()
+        let len = this.userMarkedRectangles.length
+        this.middleMouseSelectCallback && this.middleMouseSelectCallback(this.userSelectRegion, len)
       }
     }, false)
 
@@ -242,25 +262,25 @@ class DrBluePrint {
 
     // !下层canas
     this.container.addEventListener(this.getMouseOrTouchEventName('mousedown'), event => {
+      event.preventDefault()
+			event.returnValue = false
       // let clientPos = this.getClientPos(event)
       if (event.which == 1 || (this.isMobile && !this.mobileSelectMode)) {
         this.isLeftMouseDown = true
-        this.initDx = this.dx
-        this.initDy = this.dy
+        this.containerCanvas.startX = this.dx
+        this.containerCanvas.startY = this.dy
+        this.container.startMouseDownPos = this.getPagePos(event) // +[e.pageX, e.pageY]
       }
-      this.container.startMouseDownPos = this.getPagePos(event) // +[e.pageX, e.pageY];
-			event.preventDefault()
-			event.returnValue = false
     }, false)
 
     this.container.addEventListener(this.getMouseOrTouchEventName('mousemove'), event => {
       if (this.isLeftMouseDown) {
-        let [offsetX, offsetY] = this.getPagePos(event) // +[e.pageX, e.pageY];
+        let [offsetX, offsetY] = this.getPagePos(event) // +[e.pageX, e.pageY]
 				let realMoveX = offsetX - this.container.startMouseDownPos[0]
         let realMoveY = offsetY - this.container.startMouseDownPos[1]
 
-        this.dx = this.initDx + realMoveX
-        this.dy = this.initDy + realMoveY
+        this.dx = this.containerCanvas.startX + realMoveX
+        this.dy = this.containerCanvas.startY + realMoveY
 
         this.loadImageTexture()
         this.drawUserMarkedRectangles()
@@ -290,92 +310,152 @@ class DrBluePrint {
       event.preventDefault &&	event.preventDefault()
       event.returnValue = false
       let delta = 0
-			if (!event) {
-				event = window.event
-			}
+      event = event || window.event
 			if (event.wheelDelta) {
 				delta = event.wheelDelta / 120
 			} else if (event.detail) {
 				delta = -event.detail / 3
       }
-      if (delta) {
-        let scaleRatio = 1.0
-				if (delta > 0) {
-          scaleRatio = 1.05
-				} else {
-          scaleRatio = 0.9
-        }
-        this.scale *= scaleRatio
-        // -获取之前鼠标点在图像中的相对位置
-        let {offsetX, offsetY} = event
-        let relateX = (offsetX - this.dx) / this.width
-        let relateY = (offsetY - this.dy) / this.height
+      if (!delta) return
 
-        let dx = relateX * (scaleRatio - 1) * this.width
-        let dy = relateY * (scaleRatio - 1) * this.height
-        this.dx -= dx
-        this.dy -= dy
-        this.width = this.oWidth * this.scale
-        this.height = this.oHeight * this.scale
-        this.loadImageTexture()
-        this.drawUserMarkedRectangles()
+      let scaleRatio = delta > 0 ? 1.05 : 0.9
+      this.scale *= scaleRatio
+      if (this.scale <= this.options.minScale) {
+        this.scale = this.options.minScale
+        return
       }
+      if (this.scale >= this.options.maxScale) {
+        this.scale = this.options.maxScale
+        return
+      }
+      // -获取之前鼠标点在图像中的相对位置
+      let {offsetX, offsetY} = event
+      let relateX = (offsetX - this.dx) / this.width
+      let relateY = (offsetY - this.dy) / this.height
+
+      let dx = relateX * (scaleRatio - 1) * this.width
+      let dy = relateY * (scaleRatio - 1) * this.height
+      this.dx -= dx
+      this.dy -= dy
+      this.width = this.initWidth * this.scale
+      this.height = this.initHeight * this.scale
+      this.loadImageTexture()
+      this.drawUserMarkedRectangles()
     }, false)
   }
   show (url='./images/sfd1205_0215.jpg') {
     let imageObj = new Image()
     imageObj.src = url
     imageObj.onload = () => {
-      this.calculatePos(imageObj)
       this.renderData = imageObj
+      this.calculatePos(imageObj)
+      this.clearUserMarkedRectangles()
       this.loadImageTexture()
-      this.drawTipRect()
     }
+  }
+  clearUserMarkedRectangles () {
+    this.userMarkedRectangles.length = 0
+    this.drawUserMarkedRectangles()
   }
   loadImageTexture () {
     this.containerCanvas.context.clearRect(0, 0, this.containerW, this.containerH)
     this.containerCanvas.context.drawImage(this.renderData, this.dx, this.dy, this.width, this.height)
   }
-  drawUserMarkedRectangles () {
+  drawUserMarkedRectangles (showCloseBtn = true) {
     this.overlappedCanvas.context.clearRect(0, 0, this.containerW, this.containerH)
-    this.overlappedCanvas.context.strokeStyle = '#ff0000';
-    this.overlappedCanvas.context.lineWidth = 1;
+    this.overlappedCanvas.context.lineWidth = 1
     this.userMarkedRectangles.forEach(item => {
       let startX = item[0] * this.width + this.dx
       let startY = item[1] * this.height + this.dy
       let endX = item[2] * this.width + this.dx
       let endY = item[3] * this.height + this.dy
-      this.overlappedCanvas.context.beginPath();
-      this.overlappedCanvas.context.moveTo(startX, startY);
-      this.overlappedCanvas.context.lineTo(startX, endY);
-      this.overlappedCanvas.context.lineTo(endX, endY);
-      this.overlappedCanvas.context.lineTo(endX, startY);
-      this.overlappedCanvas.context.lineTo(startX, startY);
-      this.overlappedCanvas.context.stroke();
+      this.overlappedCanvas.context.strokeStyle = '#ff0000'
+      this.overlappedCanvas.context.beginPath()
+      this.overlappedCanvas.context.moveTo(startX, startY)
+      this.overlappedCanvas.context.lineTo(startX, endY)
+      this.overlappedCanvas.context.lineTo(endX, endY)
+      this.overlappedCanvas.context.lineTo(endX, startY)
+      this.overlappedCanvas.context.lineTo(startX, startY)
+      this.overlappedCanvas.context.stroke()
+      // - 绘制删除按钮
+      if (showCloseBtn) {
+        this.overlappedCanvas.context.fillStyle = item[5] || '#1890ff'
+        this.overlappedCanvas.context.beginPath()
+        this.overlappedCanvas.context.arc(endX, startY, 8 * this.scale, Math.PI * 2, false)
+        this.overlappedCanvas.context.fill()
+        this.overlappedCanvas.context.beginPath()
+        this.overlappedCanvas.context.strokeStyle = '#fff'
+        this.overlappedCanvas.context.moveTo(endX - 3.6 * this.scale, startY - 3.6 * this.scale)
+        this.overlappedCanvas.context.lineTo(endX + 3.6 * this.scale, startY + 3.6 * this.scale)
+        this.overlappedCanvas.context.moveTo(endX - 3.6 * this.scale, startY + 3.6 * this.scale)
+        this.overlappedCanvas.context.lineTo(endX + 3.6 * this.scale, startY - 3.6 * this.scale)
+        this.overlappedCanvas.context.stroke()
+      }
+      // -绘制文字
+      if (item[4]) {
+        let fontSize = 16 * this.scale
+        let maxWidth = (endX - startX) * this.scale
+        this.overlappedCanvas.context.fillStyle = item[5] || '#9FEAFF'
+        this.overlappedCanvas.context.font = `${fontSize}px Arial`
+        this.overlappedCanvas.context.fillText(item[4], startX + 4 * this.scale, startY + fontSize)
+      }
     })
-
-    // let {offsetX, offsetY} = event
-    // let relateX = (offsetX - this.dx) / this.width
-    // let relateY = (offsetY - this.dy) / this.height
-
-    // let dx = relateX * (scaleRatio - 1) * this.width
-    // let dy = relateY * (scaleRatio - 1) * this.height
-    // this.dx -= dx
-    // this.dy -= dy
-    // this.width = this.oWidth * this.scale
-    // this.height = this.oHeight * this.scale
   }
-  drawTipRect (pos={}) {
-    this.overlappedCanvas.context.save()
-    this.overlappedCanvas.context.rect(100, 100, 50, 30)
-    this.overlappedCanvas.context.stroke()
-    this.overlappedCanvas.context.restore()
+  checkRemoveRectangle (event) {
+    let offsetX, offsetY
+    if (this.isMobile) {
+      offsetX = event.touches[0].pageX - this.containerLeft
+      offsetY = event.touches[0].pageY - this.containerTop
+    } else {
+      offsetX = event.offsetX
+      offsetY = event.offsetY
+    }
+    let reletaX = (offsetX - this.dx) / this.width
+    let relateY = (offsetY - this.dy) / this.height
+    this.userMarkedRectangles.forEach((item, index) => {
+      let endX = item[2]
+      let startY = item[1]
+      let distance = Math.sqrt((reletaX - endX)**2 + (relateY - startY)**2)
+      if (distance < (this.isMobile ? 0.02 : 0.012)) {
+        this.userMarkedRectangles.splice(index, 1)
+      }
+    })
+    this.drawUserMarkedRectangles()
   }
-  getDoutuImage (index) {
-    return this.imageUrls[index]
+  addUserMarkedRectangleText (index, text, color) {
+    this.userMarkedRectangles[index].push(text, color)
+    this.drawUserMarkedRectangles()
+  }
+  removeUserMarkedRectangleText (index) {
+    this.userMarkedRectangles.splice(index, 1)
+    this.drawUserMarkedRectangles()
+  }
+  getUserMarkedRectanglesInfo () {
+    return this.userMarkedRectangles
+  }
+  // 还需要一比一的还原
+  getMarkedImage () {
+    this.offlineCanvas.width = this.originImageW
+    this.offlineCanvas.height = this.originImageH
+    this.reset()
+    this.offlineCanvas.context.drawImage(this.containerCanvas, this.dx, this.dy, this.width, this.height, 0, 0, this.originImageW, this.originImageH)
+    this.drawUserMarkedRectangles(false)
+    this.offlineCanvas.context.drawImage(this.overlappedCanvas, this.dx, this.dy, this.width, this.height, 0, 0, this.originImageW, this.originImageH)
+    let imageSrc = this.offlineCanvas.toDataURL()
+    let image = new Image()
+    image.onload = () => {
+      let img = document.querySelector('img')
+      img && document.body.removeChild(img)
+      document.body.appendChild(image)
+    }
+    image.src = imageSrc
+    console.log(this.getUserMarkedRectanglesInfo())
   }
   getImageData () {
     return this.testCanvas.toDataURL('image/png')
+  }
+  setMiddleMouseSelectCallback (fn) {
+    this.middleMouseSelectCallback = fn
   }
   toImageCoordinateNum (pt1x, pt1y, pt2x, pt2y) {
     let relateX1 = (pt1x - this.dx) / this.width
@@ -383,6 +463,16 @@ class DrBluePrint {
     let relateX2 = (pt2x - this.dx) / this.width
     let relateY2 = (pt2y - this.dy) / this.height
     return [relateX1, relateY1, relateX2, relateY2]
+  }
+  reset () {
+    this.dx = this.initDx
+    this.dy = this.initDy
+    this.width = this.initWidth
+    this.height = this.initHeight
+    this.scale = 1
+    console.log(this.dx, this.dy, this.width, this.height)
+    this.loadImageTexture()
+    this.drawUserMarkedRectangles()
   }
   calculatePos (imgInfo) {
     let W1 = this.containerW
@@ -396,28 +486,20 @@ class DrBluePrint {
     let zoom
     let retW
     let retH
-
     console.log(W1, H1)
     console.log(W2, H2)
-
-    // 竖着的矩形
-    // 分两种情况：图像宽高大于/小于容器
-    // if (W2 < H2) {
-    //   console.log(ratioW, ratioH)
-    //   zoom = Math.max(ratioW, ratioH)
-    // } else {
-    //   console.log('需要旋转：', ratioWR, ratioHR)
-    //   zoom = Math.max(ratioWR, ratioHR)
-    // }
+    // zoom = Math.max(ratioWR, ratioHR) // 需要旋转的处理
     zoom = Math.max(ratioW, ratioH)
     retW = Math.ceil(W2 / zoom)
     retH = Math.ceil(H2 / zoom)
     console.log(`缩放系数：${zoom}`)
     console.log(`宽：${retW}, 高：${retH}`)
-    this.oWidth = this.width = retW
-    this.oHeight = this.height = retH
-    this.dx = Math.floor((W1 - retW) / 2)
-    this.dy = Math.floor((H1 - retH) / 2)
+    this.originImageW = W2 // 保存图像原始宽高
+    this.originImageH = H2
+    this.initWidth = this.width = retW
+    this.initHeight = this.height = retH
+    this.initDx = this.dx = Math.floor((W1 - retW) / 2)
+    this.initDy = this.dy = Math.floor((H1 - retH) / 2)
   }
   mobileAndTabletcheck () {
     var check = false
@@ -432,10 +514,44 @@ class DrBluePrint {
 
 
 $(() => {
-  let doutuImage = new DrBluePrint()
-  doutuImage.show()
+  const $footer = $('footer')
+  const colors = ['#ff7a45', '#ffa940', '#52c41a', '#ffec3d', '#a0d911', '#1890ff']
+  const texts = ['危险品', '管制刀具', '爆炸物', '玩具枪', '一个很危险的物件', '我的名字很长，就是测试']
+  const middleMouseSelectCallback = (pos, len) => {
+    // console.log(pos, len)
+    let text = texts[Math.floor(Math.random() * texts.length)]
+    let color = colors[Math.floor(Math.random() * colors.length)]
+    drBluePrint.addUserMarkedRectangleText(len - 1, text, color)
+    // $footer.append(`<a class="btn" style="color:${color}">${text} <span data-index="${len - 1}" class="remove">❌</span></a>`)
+  }
+  $footer.on('click', '.remove', function () {
+    let index = $(this).data('index')
+    // console.log(index, typeof index)
+    drBluePrint.removeUserMarkedRectangleText(index)
+    $(this).parent().remove()
+  })
+
+
+  let drBluePrint = new DrBluePrint()
+  drBluePrint.setMiddleMouseSelectCallback(middleMouseSelectCallback)
+  drBluePrint.show()
 
   $('.mark').click(() => {
-    doutuImage.setMobileSelectMode(!doutuImage.mobileSelectMode)
+    drBluePrint.setMobileSelectMode(!drBluePrint.mobileSelectMode)
+  })
+
+  const urls = ['./images/sfd1205_0215.jpg', './images/testDr.png', './images/testDr_1.png',
+  './images/testDr_2.png', './images/testDr_3.png', './images/testDr_4.png']
+
+  $('.next').click(() => {
+    drBluePrint.show(urls[Math.floor(Math.random() * urls.length)])
+  })
+
+  $('.reset').click(() => {
+    drBluePrint.reset()
+  })
+
+  $('.get').click(() => {
+    drBluePrint.getMarkedImage()
   })
 })

@@ -10,32 +10,44 @@
       margin: 0;
       padding: 0;
     }
-    canvas {
-      border: 2px solid #666;
-      cursor: default;
+    header {
+      border-bottom: 1px solid #666;
+    }
+    footer {
+      margin-top: 10px;
     }
     .dr-wrap {
       position: relative;
       height: 500px;
     }
-    .mark {
+    .btn {
+      margin-left: 5px;
       padding: 5px;
       background: #A8EDEA;
       border-radius: 4px;
       color: #666;
       font-size: 14px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
 	<header>
-		<h1>drBluePrint <a class="btn mark">mark</a></h1>
+		<h1>
+      drBluePrint
+      <a class="btn mark">Mark</a>
+      <a class="btn next">Next</a>
+      <a class="btn reset">Reset</a>
+  </h1>
 	</header>
 	<main class="main">
     <div class="dr-wrap">
       <canvas id="drcanvas"></canvas>
     </div>
-	</main>
+  </main>
+  <footer>
+    <a class="btn get">Get</a>
+  </footer>
 
   <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
 	<script src="./drBluePrint.js"></script>
