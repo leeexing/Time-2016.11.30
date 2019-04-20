@@ -4,6 +4,219 @@
 
 ## 今日答疑
 
+2019-04-17
+
+> 第 57 题：分析比较 opacity: 0、visibility: hidden、display: none 优劣和适用场景
+
+ A:
+
+结构：
+display: none (不占空间，不能点击)（场景，显示出原来这里不存在的结构）
+visibility: hidden（占据空间，不能点击）（场景：显示不会导致页面结构发生变动，不会撑开）
+opacity: 0（占据空间，可以点击）（场景：可以跟transition搭配）
+
+继承：
+display: none和opacity: 0：是非继承属性，子孙节点消失由于元素从渲染树消失造成，通过修改子孙节点属性无法显示。
+visibility: hidden：是继承属性，子孙节点消失由于继承了hidden，通过设置visibility: visible;可以让子孙节点显式。
+
+性能：
+displaynone : 修改元素会造成文档回流,读屏器不会读取display: none元素内容，性能消耗较大
+visibility:hidden: 修改元素只会造成本元素的重绘,性能消耗较少读屏器读取visibility: hidden元素内容
+opacity: 0 ： 修改元素会造成重绘，性能消耗较少
+
+ TIP: -
+一个问题，每个人看到的都可能查产生不同的见解。思考的角度都很不一样
+
+2019-04-17
+
+> 第 56 题：要求设计 LazyMan 类，实现以下功能。
+
+```js
+LazyMan('Tony');
+// Hi I am Tony
+
+LazyMan('Tony').sleep(10).eat('lunch');
+// Hi I am Tony
+// 等待了10秒...
+// I am eating lunch
+
+LazyMan('Tony').eat('lunch').sleep(10).eat('dinner');
+// Hi I am Tony
+// I am eating lunch
+// 等待了10秒...
+// I am eating diner
+
+LazyMan('Tony').eat('lunch').eat('dinner').sleepFirst(5).sleep(10).eat('junk food');
+// Hi I am Tony
+// 等待了5秒...
+// I am eating lunch
+// I am eating dinner
+// 等待了10秒...
+// I am eating junk food
+```
+
+ A:
+很有意思啊。一开始以为只需要return一个this就可以实现链式调用，然后分别执行。但是，看到后面的sleepFirst之后就有点懵逼了。怎么将这个任务插入到前面的函数执行呢
+没有特别好的思路。
+看了网友的留言后，才知道，有一个任务队列的概念
+
+```js
+class LazyManClass {
+  constructor (name) {
+    this.name = name
+    console.log(`Hi, I am ${this.name}`)
+    this.tasks = []
+    setTimeout(() => { // 这里是关键啊。将任务都放在事件循环之后执行
+      this.next()
+    }, 0)
+  }
+
+  eat (waht) {
+    const task = () => {
+      console.log(`I am eating ${waht}`)
+      this.next()
+    }
+    this.tasks.push(task)
+    return this
+  }
+
+  sleepFirst (time) {
+    const task = () => {
+      setTimeout(() => {
+        console.log(`等待了 ${time} 秒 ...`)
+        this.next()
+      }, time * 1000)
+    }
+    this.tasks.unshift(task)
+    return this
+  }
+
+  sleep (time) {
+    const task = () => {
+      setTimeout(() => {
+        console.log(`等待了 ${time} 秒 ...`)
+        this.next()
+      }, time * 1000)
+    }
+    this.tasks.push(task)
+    return this
+  }
+
+  // -这个点也很关键。巧妙
+  next () {
+    let fn = this.tasks.shift()
+    fn && fn()
+  }
+
+}
+
+function LazyMan (props) {
+  return new LazyManClass(props)
+}
+```
+
+```js proxy
+const LazyMan = name => {
+  console.log('Hi, My name is ' + name)
+
+  let obj = {
+    tasks: [],
+    eat (food) {
+      return () => {
+        console.log(`eating ${food} ....`)
+        this.next()
+      }
+    },
+    sleepFirst (time) {
+      return () => {
+        setTimeout(() => {
+          console.log(`Wating ${time} S`)
+          this.next()
+        }, time * 1000)
+      }
+    },
+    sleep (time) {
+      return () => {
+        setTimeout(() => {
+          console.log(`Wating ${time} S`)
+          this.next()
+        }, time * 1000)
+      }
+    },
+    next () {
+      let fn = this.tasks.shift()
+      fn && fn()
+    }
+  }
+
+  let proxy = new Proxy(obj, {
+    get (target, key, receive) { // 接受三个参数，依次为目标对象、属性名和 proxy 实例本身（严格地说，是操作行为所针对的对象）
+      return (...args) => {
+        if (key === 'sleepFirst') {
+          target.tasks.unshift(target[key](...args))
+        } else {
+          target.tasks.push(target[key](...args))
+        }
+        return receive
+      }
+    }
+  })
+
+  setTimeout(() => {
+    obj.next()
+  })
+
+  return proxy
+}
+```
+
+```js async&await
+// 这个真的也很棒
+class LazyManClass {
+  constructor(props) {
+    this.sub = []
+    console.log(`Hi I am ${props}`)
+    setTimeout(() => {
+      this.start()
+    }, 0)
+  }
+  eat(params) {
+    this.sub.push(function () {
+      console.log(`I am eating ${params}`)
+    })
+    return this
+  }
+  sleepFirst(s) {
+    this.sub.unshift(this.delay(s))
+    // 这边还没有返回  同步就继续执行了
+    return this
+  }
+  delay(s) {
+    return () => {
+      return new Promise(resolve => {
+        setTimeout(function () {
+          console.log(`等待了${s}秒...`)
+          resolve()
+        }, s * 1000)
+      })
+    }
+  }
+  sleep(s) {
+    this.sub.push(this.delay(s))
+    // 这边还没有返回  同步就继续执行了
+    return this
+  }
+  async start() {
+    for (const iterator of this.sub) {
+      await iterator() // 这种思路真的很难得。估计作者平时经常使用这种方式进行编程
+    }
+  }
+}
+```
+
+ TIP:  -
+真的是学到了。1：加深时间循环机制的运用；2：对于 `proxy` 知识点的运用
+
 2019-04-16
 
 > 第 55 题：某公司 1 到 12 月份的销售额存在一个对象里面，如下：{1:222, 2:123, 5:888}，请把数据处理为如下结构：[222, 123, null, null, 888, null, null, null, null, null, null, null]。
