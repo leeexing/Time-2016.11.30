@@ -4,6 +4,56 @@
 
 ## 今日答疑
 
+2019-04-22
+
+> 第 59 题：给定两个数组，写一个方法来计算它们的交集。
+> 判断一个数组出现次数最多的元素，出现了几次？
+
+ A:
+
+```js
+const nums1 = [1, 2, 2, 1], nums2 = [2, 2, 3, 4]
+
+function inter (a1, a2) {
+  // return a1.filter(item => a2.indexOf(item) > -1)
+  return a1.filter(item => a2.includes(item))
+}
+```
+
+```js
+const arr = [1,2,2,23,3,2,2,4,4,2,2,2,21,2,2,2,2,33,3,4,4,4,2]
+arr.reduce((pre, cur) => {
+  pre[cur] ? (pre[cur] += 1) : (pre[cur] = 1)
+  return pre
+}, {})
+```
+
+2019-04-21
+
+> 第 58 题：箭头函数与普通函数（function）的区别是什么？构造函数（function）可以使用 new 生成实例，那么箭头函数可以吗？为什么？
+
+ A:
+
+箭头函数是普通函数的简写，可以更优雅的定义一个函数，和普通函数相比，有以下几点差异：
+
+1、函数体内的 this 对象，就是定义时所在的对象，而不是使用时所在的对象。
+
+2、不可以使用 arguments 对象，该对象在函数体内不存在。如果要用，可以用 rest 参数代替。
+
+3、不可以使用 yield 命令，因此箭头函数不能用作 Generator 函数。
+
+4、不可以使用 new 命令，因为：
+
+没有自己的 this，无法调用 call，apply。
+没有 prototype 属性 ，而 new 命令在执行时需要将构造函数的 prototype 赋值给新的对象的 __proto__
+
+2019-04-18
+
+> websocket 心跳机制？
+
+ A:
+
+
 2019-04-17
 
 > 第 57 题：分析比较 opacity: 0、visibility: hidden、display: none 优劣和适用场景
