@@ -4,6 +4,64 @@
 
 ## 今日答疑
 
+2019-05-05
+
+> 第 64 题：模拟实现一个 Promise.finally
+
+```js
+Promise.ptototype.finally = function(callback) {
+  let p = this.constructor
+  return this.then(
+    value => P.resolve(callback()).then(() => value),
+    reason => P.resolve(callback()).then(() => {throw reason})
+  )
+}
+
+// 方式二
+
+window.Promise && !('finally' in Promise) && !function() {
+  Promise.prototype.finally = function(cb) {
+    cb = typeof cb === 'function' ? cb : function() {}
+
+    let Fn = this.contructor
+
+    let onFulfilled = function(data) {
+      return Fn.resolve(cb()).then(() => data)
+    }
+    let onRejected = function(err) {
+      return Fn.resolve(cb()).then(() => throw err)
+    }
+
+    return this.then(onFulfilled, onRejected)
+  }
+}()
+```
+
+2019-04-25
+
+> 第 63 题：如何设计实现无缝轮播
+
+ A:
+
+简单来说，无缝轮播的核心就是制造一个连续的效果。最简单的方法就是复制一个轮播元素，当复制元素将要滚到目标位置后，把原来的元素进行归为操作，以达到无缝的效果
+
+2019-04-24
+
+> 第 62 题：redux 为什么要把 reducer 设计成纯函数
+
+ A:
+store 里的 state 是一个引用类型，多个组件都可能共享这个 state，如果允许直接在组件中修改这个 state，犹豫组件间千丝万缕的关系，复杂度会变得很高，定位问题会变得异常困难，因为很难搞清楚到底是哪个组件“搞坏”了数据，而采用纯函数就没有这样的问题
+
+redux 三大原则
+1、单一数据源
+  整个应用 state 都被存储在一个 store 里面，构成一个 Object tree
+2、State 是只读的
+  唯一改变 state 的方法就是触发 action，action 是一个用于描述已发生事件的普通对象
+3、使用纯函数来执行修改
+  为了描述 action如何改变 state tree，需要编写 reducers
+
+把 reducer 设计成纯函数，可以实现时间旅行，记录/回放或者热加载
+
 2019-04-23
 
 > 第 60 题：已知如下代码，如何修改才能让图片宽度为 300px ？注意下面代码不可修改

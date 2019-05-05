@@ -1,5 +1,91 @@
 # mongodb
 
+REFER: 常见的mongodb配置 https://www.jianshu.com/p/f9f1454f251f
+
+## 数据导入导出
+
+REFER: https://www.cnblogs.com/qingtianyu2015/p/5968400.html
+
+### 导出
+
+> mongoexport
+
+```conf
+mongoexport -d dbname -c collectionname -o file --type json/csv -f field
+```
+
+参数说明：
+            -d ：数据库名
+            -c ：collection名
+            -o ：输出的文件名
+            --type ： 输出的格式，默认为json
+            -f ：输出的字段，如果-type为csv，则需要加上-f "字段名"
+
+```conf
+sudo mongoexport -d mongotest -c users -o /home/python/Desktop/mongoDB/users.json --type json -f  "_id,user_id,user_name,age,status"
+```
+
+### 导入
+
+> mongoimport
+
+```conf
+mongoimport -d dbname -c collectionname --file filename --headerline --type json/csv -f field
+```
+
+参数说明：
+            -d ：数据库名
+            -c ：collection名
+            --type ：导入的格式默认json
+            -f ：导入的字段名
+            --headerline ：如果导入的格式是csv，则可以使用第一行的标题作为导入的字段
+            --file ：要导入的文件
+
+```conf
+sudo mongoimport -d mongotest -c users --file /home/mongodump/articles.json --type json
+```
+
+## 备份与恢复
+
+### 备份
+
+> mongodump
+
+```conf
+mongodump -h dbhost -d dbname -o dbdirectory
+```
+
+参数说明：
+            -h： MongDB所在服务器地址，例如：127.0.0.1，当然也可以指定端口号：127.0.0.1:27017
+            -d： 需要备份的数据库实例，例如：test
+            -o： 备份的数据存放位置，例如：/home/mongodump/，当然该目录需要提前建立，这个目录里面存放该数据库实例的备份数据。
+
+```shell
+sudo rm -rf /home/momgodump/
+sudo mkdir -p /home/momgodump
+sudo mongodump -h 192.168.17.129:27017 -d itcast -o /home/mongodump/
+```
+
+### 恢复
+
+> mongorestore
+
+mongorestore恢复数据默认是追加. 如打算先删除后导入，可以加上--drop参数，不过添加--drop参数后，会将数据库数据清空后再导入
+
+```conf
+mongorestore -h dbhost -d dbname --dir dbdirectory
+```
+
+参数或名：
+            -h： MongoDB所在服务器地址
+            -d： 需要恢复的数据库实例，例如：test，当然这个名称也可以和备份时候的不一样，比如test2
+            --dir： 备份数据所在位置，例如：/home/mongodump/itcast/
+            --drop： 恢复的时候，先删除当前数据，然后恢复备份的数据。就是说，恢复后，备份后添加修改的数据都会被删除，慎用
+
+```shell
+mongorestore -h 192.168.17.129:27017 -d itcast_restore --dir /home/mongodump/itcast/
+```
+
 ## 基本使用
 
 ### $elelMatch
@@ -423,6 +509,10 @@ db.products.update({slug: 'shovel'}, {
 
 ## 复制
 
+REFER: https://www.cnblogs.com/clsn/p/8214345.html
+
+一组Mongodb复制集，就是一组mongod进程，这些进程维护同一个数据集合。复制集提供了数据冗余和高等级的可靠性，这是生产部署的基础。
+
 > 可复制集群、主从复制
 
 强烈推荐在生产环境下启用复制和日志功能
@@ -432,4 +522,210 @@ db.products.update({slug: 'shovel'}, {
 1. oplog      -- 盖子集合
 2. heartbeat
 
-## 分片集群
+### 创建所需目录
+
+```shell
+
+for  i in 28017 28018 28019 28020
+    do
+      mkdir -p /mongodb/$i/conf
+      mkdir -p /mongodb/$i/data
+      mkdir -p /mongodb/$i/log
+done
+```
+
+### 配置多实例环境
+
+```shell
+
+cat >>/mongodb/28017/conf/mongod.conf<<'EOF'
+systemLog:
+  destination: file
+  path: /mongodb/28017/log/mongodb.log
+  logAppend: true
+storage:
+  journal:
+    enabled: true
+  dbPath: /mongodb/28017/data
+  directoryPerDB: true
+  #engine: wiredTiger
+  wiredTiger:
+    engineConfig:
+      # cacheSizeGB: 1
+      directoryForIndexes: true
+    collectionConfig:
+      blockCompressor: zlib
+    indexConfig:
+      prefixCompression: true
+processManagement:
+  fork: true
+net:
+  port: 28017
+replication:
+  oplogSizeMB: 2048
+  replSetName: my_repl
+EOF
+
+# 复制配置文件
+
+
+for i in 28018 28019 28020
+  do
+   \cp  /mongodb/28017/conf/mongod.conf  /mongodb/$i/conf/
+done
+
+# 修改配置文件
+
+
+for i in 28018 28019 28020
+  do
+    sed  -i  "s#28017#$i#g" /mongodb/$i/conf/mongod.conf
+done
+
+# 启动服务
+
+
+for i in 28017 28018 28019 28020
+  do
+    mongod -f /mongodb/$i/conf/mongod.conf
+done
+
+# 关闭服务的方法
+
+
+for i in 28017 28018 28019 28020
+   do
+     mongod --shutdown  -f /mongodb/$i/conf/mongod.conf
+done
+
+
+```
+
+### 配置复制集
+
+```shell
+
+shell> mongo --port 28017
+
+config = {_id: 'my_repl', members: [
+                          {_id: 0, host: '10.0.0.152:28017'},
+                          {_id: 1, host: '10.0.0.152:28018'},
+                          {_id: 2, host: '10.0.0.152:28019'}]
+          }
+
+# 初始化这个配置
+> rs.initiate(config)
+
+```
+
+### 测试主从复制
+
+```shell
+# 在主节点插入数据
+my_repl:PRIMARY> db.movies.insert([ { "title" : "Jaws", "year" : 1975, "imdb_rating" : 8.1 },
+   { "title" : "Batman", "year" : 1989, "imdb_rating" : 7.6 },
+  ] );
+
+# 在主节点查看数据
+my_repl:PRIMARY> db.movies.find().pretty()
+{
+    "_id" : ObjectId("5a4d9ec184b9b2076686b0ac"),
+    "title" : "Jaws",
+    "year" : 1975,
+    "imdb_rating" : 8.1
+}
+{
+    "_id" : ObjectId("5a4d9ec184b9b2076686b0ad"),
+    "title" : "Batman",
+    "year" : 1989,
+    "imdb_rating" : 7.6
+}
+```
+
+注：在mongodb复制集当中，默认从库不允许读写。
+
+在从库打开配置（危险）
+
+   　　　注意：严禁在从库做任何修改操作
+
+```shell
+my_repl:SECONDARY> rs.slaveOk()
+my_repl:SECONDARY> show tables;
+movies
+my_repl:SECONDARY> db.movies.find().pretty()
+{
+    "_id" : ObjectId("5a4d9ec184b9b2076686b0ac"),
+    "title" : "Jaws",
+    "year" : 1975,
+    "imdb_rating" : 8.1
+}
+{
+    "_id" : ObjectId("5a4d9ec184b9b2076686b0ad"),
+    "title" : "Batman",
+    "year" : 1989,
+    "imdb_rating" : 7.6
+}
+
+# 在从库查看完成在登陆到主库
+```
+
+### 复制集管理操作
+
+1）查看复制集状态：
+
+```shell
+rs.status();     # 查看整体复制集状态
+rs.isMaster();   #  查看当前是否是主节点
+```
+
+2）添加删除节点
+
+```shell
+rs.add("ip:port");     #  新增从节点
+rs.addArb("ip:port"); #  新增仲裁节点
+rs.remove("ip:port"); #  删除一个节点
+```
+
+ps:
+    添加特殊节点时，
+
+    　　1>可以在搭建过程中设置特殊节点
+
+    　　2>可以通过修改配置的方式将普通从节点设置为特殊节点
+
+    　　/*找到需要改为延迟性同步的数组号*/;
+
+3）配置延时节点（一般延时节点也配置成hidden）
+
+```conf
+cfg=rs.conf()
+cfg.members[2].priority=0
+cfg.members[2].slaveDelay=120
+cfg.members[2].hidden=true
+; 注：这里的2是rs.conf()显示的顺序（除主库之外），非ID
+```
+
+重写复制集配置
+
+> rs.reconfig(cfg)
+
+也可将延时节点配置为arbiter节点
+
+> cfg.members[2].arbiterOnly=true
+
+## 分片(集群)
+
+REFER: https://www.cnblogs.com/clsn/p/8214345.html
+
+分片（sharding）是MongoDB用来将大型集合分割到不同服务器（或者说一个集群）上所采用的方法。尽管分片起源于关系型数据库分区，但MongoDB分片完全又是另一回事。
+和MySQL分区方案相比，MongoDB的最大区别在于它几乎能自动完成所有事情，只要告诉MongoDB要分配数据，它就能自动维护数据在不同服务器之间的均衡。
+
+### 分片的目的
+
+高数据量和吞吐量的数据库应用会对单机的性能造成较大压力,大的查询量会将单机的CPU耗尽,大的数据量对单机的存储压力较大,最终会耗尽系统的内存而将压力转移到磁盘IO上。
+
+* 垂直扩展：增加更多的CPU和存储资源来扩展容量。
+
+* 水平扩展：将数据集分布在多个服务器上。水平扩展即分片。
+
+## 项目中实用的`mongod`处理脚本
