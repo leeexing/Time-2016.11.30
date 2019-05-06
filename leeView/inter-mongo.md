@@ -522,15 +522,38 @@ REFER: https://www.cnblogs.com/clsn/p/8214345.html
 1. oplog      -- 盖子集合
 2. heartbeat
 
+### 复制的基本架构
+
+* 三个存储数据的复制集
+具有三个存储数据的成员的复制集有：
+
+    一个主库；
+
+    两个从库组成，主库宕机时，这两个从库都可以被选为主库。
+
+当主库宕机后,两个从库都会进行竞选，其中一个变为主库，当原主库恢复后，作为`从库`加入当前的复制集群即可。
+
+* 当存在arbiter节点
+在三个成员的复制集中，有两个正常的主从，及一台arbiter节点：
+    一个主库
+
+    一个从库，可以在选举中成为主库
+
+    一个aribiter节点，在选举中，只进行投票，不能成为主库
+
+由于`arbiter节点没有复制数据`，因此这个架构中仅提供一个完整的数据副本。arbiter节点只需要更少的资源，代价是更有限的冗余和容错。
+
+当主库宕机时，将会选择从库成为主，主库修复后，将其加入到现有的复制集群中即可。
+
 ### 创建所需目录
 
 ```shell
 
 for  i in 28017 28018 28019 28020
     do
-      mkdir -p /mongodb/$i/conf
-      mkdir -p /mongodb/$i/data
-      mkdir -p /mongodb/$i/log
+      mkdir -p ./$i/conf
+      mkdir -p ./$i/data
+      mkdir -p ./$i/log
 done
 ```
 
@@ -557,13 +580,15 @@ storage:
       blockCompressor: zlib
     indexConfig:
       prefixCompression: true
-processManagement:
-  fork: true
 net:
   port: 28017
 replication:
   oplogSizeMB: 2048
   replSetName: my_repl
+
+# 如果是widows，下面这个启用后台进程的设置无效还报错。只适用于 linux。
+processManagement:
+  fork: true
 EOF
 
 # 复制配置文件
@@ -571,7 +596,7 @@ EOF
 
 for i in 28018 28019 28020
   do
-   \cp  /mongodb/28017/conf/mongod.conf  /mongodb/$i/conf/
+   \cp  ./28017/conf/mongod.conf  ./$i/conf/
 done
 
 # 修改配置文件
@@ -579,7 +604,7 @@ done
 
 for i in 28018 28019 28020
   do
-    sed  -i  "s#28017#$i#g" /mongodb/$i/conf/mongod.conf
+    sed  -i  "s#28017#$i#g" ./$i/conf/mongod.conf
 done
 
 # 启动服务
@@ -587,7 +612,7 @@ done
 
 for i in 28017 28018 28019 28020
   do
-    mongod -f /mongodb/$i/conf/mongod.conf
+    ../bin/mongod -f ./$i/conf/mongod.conf
 done
 
 # 关闭服务的方法
@@ -595,11 +620,51 @@ done
 
 for i in 28017 28018 28019 28020
    do
-     mongod --shutdown  -f /mongodb/$i/conf/mongod.conf
+     ../bin/mongod --shutdown  -f ./$i/conf/mongod.conf
 done
 
 
 ```
+
+ NOTE: -
+正常情况下都是在 linux 服务器（生产环境下进行配置的），如果是在 windows 服务下设置的。情况会有所不同
+REFER: https://blog.csdn.net/qq_33774822/article/details/83899102
+
+```conf windows
+
+../bin/mongo.exe -f ./28017/conf/mongod.conf
+../bin/mongo.exe -f ./28018/conf/mongod.conf
+../bin/mongo.exe -f ./28019/conf/mongod.conf
+
+; 注意。使用window进行设置的时候
+
+
+I face this issue when i tried to run two mongod instance in same machine. It throws error when i provide like
+
+   rs.add("localhost:27027")
+   (or)
+   rs.add("127.0.0.1:27027")
+
+where 27027 is the port number of secondary.
+
+Solution:
+
+Pass the hostname instead of ip address
+
+  rs.add("myhostname:27027")
+
+shareimprove this answer
+
+
+rs.add('192.168.120.1:28018') -- 这样才是对的😂
+```
+
+ NOTE: -
+一定要设置一个 arbert 复制集节点
+
+`rs.addArb('192.168.120.1:28019')`
+(or) || 如果有两个 SECONDARY
+`rs.addArb('192.168.120.1:28020')`
 
 ### 配置复制集
 
@@ -608,9 +673,9 @@ done
 shell> mongo --port 28017
 
 config = {_id: 'my_repl', members: [
-                          {_id: 0, host: '10.0.0.152:28017'},
-                          {_id: 1, host: '10.0.0.152:28018'},
-                          {_id: 2, host: '10.0.0.152:28019'}]
+                          {_id: 0, host: '192.168.120.1:28017'},
+                          {_id: 1, host: '192.168.120.1:28018'},
+                          {_id: 2, host: '192.168.120.1:28019'}]
           }
 
 # 初始化这个配置
@@ -669,7 +734,14 @@ my_repl:SECONDARY> db.movies.find().pretty()
 # 在从库查看完成在登陆到主库
 ```
 
-### 复制集管理操作
+### 复制集管理操作(很有用👍👍👍)
+
+REFER: https://www.cnblogs.com/zhaowenzhong/p/5667312.html
+可以更好的管理复制集。
+
+1. 可以修改成员的优先级：priority: 1，2
+2. 修改成员的隐藏属性 hidden: true
+
 
 1）查看复制集状态：
 
@@ -713,6 +785,16 @@ cfg.members[2].hidden=true
 
 > cfg.members[2].arbiterOnly=true
 
+### 强制修改副本集成员
+
+```conf
+var config=rs.config()
+config.member[n].host=...
+config.member[n].priority=...
+.....
+rs.reconfig(config,{"force":true})
+```
+
 ## 分片(集群)
 
 REFER: https://www.cnblogs.com/clsn/p/8214345.html
@@ -728,4 +810,28 @@ REFER: https://www.cnblogs.com/clsn/p/8214345.html
 
 * 水平扩展：将数据集分布在多个服务器上。水平扩展即分片。
 
-## 项目中实用的`mongod`处理脚本
+### 分片中各个角色的作用
+
+* 配置服务器。是一个独立的mongod进程，保存集群和分片的元数据，即各分片包含了哪些数据的信息。最先开始建立，启用日志功能。像启动普通的mongod一样启动配置服务器，指定configsvr选项。不需要太多的空间和资源，配置服务器的1KB空间相当于真实数据的200MB。保存的只是数据的分布表。当服务不可用，则变成只读，无法分块、迁移数据。
+* 路由服务器。即mongos，起到一个路由的功能，供程序连接。本身不保存数据，在启动时从配置服务器加载集群信息，开启mongos进程需要知道配置服务器的地址，指定configdb选项。
+* 分片服务器。是一个独立普通的mongod进程，保存数据信息。可以是一个副本集也可以是单独的一台服务器。
+
+## 项目中使用的`mongod`处理脚本
+
+### 将数据库中的时间进行转化
+
+```js
+db.getCollection('EventTracking').find({}).skip(5000).limit(5000).forEach(function(item) {
+  item.rcDatetime = new Date(item.rcDate + ' ' + item.rcTime)
+  db.getCollection('EventTracking').save(item)
+})
+
+```
+
+### 将数据库恢复到原有数据库中
+
+```conf
+./mongorestore -h 127.0.0.1:27017 -d brushingdata --dir ./mongodump/brushingdata/
+```
+
+### 聚合语句

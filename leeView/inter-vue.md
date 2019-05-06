@@ -628,10 +628,6 @@ Vue 实例使用的根 DOM 元素。
 vm.$refs
 一个对象，持有注册过 ref 特性 的所有 DOM 元素和组件实例。
 
-## CSS
-
-flex 着重于单轴，而 grid 适应于多轴
-
 ### 容器属性
 
 grid-template 系列
@@ -665,28 +661,59 @@ grid-auto-columns
 grid-auto-rows
 grid-auto-flow
 
-## question
+## keep-alive
 
-1. 在chrome的地址栏输入http://baidu.com
-2. chrome通过DNS去查找http://baidu.com这个域名对应的IP地址
-  chrome浏览器会先查找有没有缓存的DNS记录，如果在浏览器缓存没有找到需要的记录，就会去做一个系统的调用，获取系统缓存的记录
-  如果没有记录请求会继续到路由器上，路由器上有自己的DNS缓存
-  如果没有记录就会到ISP的DNS缓存中查看记录
-  如果没有记录就会在ISP的DNS服务器从根服务器域名服务器开始递归搜索最后得到IP地址
-3. 浏览器给baidu服务器发送一个HTTP请求
-4. baidu服务器301重定向响应
-5. chrome浏览器请求重定向来的地址
-6. baidu服务器处理请求
-  baidu服务器在这个时候接收到了请求，它会去查看请求它的参数还有cookie信息，然后会进行一些操作处理，例如对数据进行存储，从数据库中获取需要被请求的数据等
-7. baidu服务器返回HTML响应
-  当baidu服务器处理好之后，就会给浏览器返回数据了，这个时候会有一个Response Headers发送给浏览器
-8. chrome浏览器显示baidu页面
+REFER: https://juejin.im/post/5cce49036fb9a031eb58a8f9
 
-1. 浏览器获得url对应的请求，向操作系统请求该url对应的iP地址
-2. 操作系统查询DNS （首先查询本地host文件，没有则查询网络）获得对应ip地址
-3. 浏览器发送tcp连接请求向 ip地址对应的服务器（带SYN标志数据包）。
-4. 服务器收到tcp连接请求后，回复可以链接请求（有SYN/ACK标志的数据包）。
-5. 浏览器收到回传的数据，确认ok后，还会向服务端发送数据（带ACK标志的数据包）包表示三次握手结束。
-6. 三次握手成功后，浏览器和服务端开始tcp连接形式传输数据包。
-7. 服务器传给浏览所需要的资源数据。
-8. 浏览器获得数据，渲染网页然后呈现给用户。
+```js
+export default {
+  name: 'keep-alive',
+  abstract: true, // 判断当前组件虚拟dom是否渲染成真是dom的关键
+
+  props: {
+    include: patternTypes,
+    exclude: patternTypes,
+    max: [String, Number]
+  },
+
+  created () {
+    this.cache = Object.create(null) // 缓存虚拟dom
+    this.keys = [] // 缓存的虚拟dom的健集合
+  },
+
+  destroyed () {
+    for (const key in this.cache) { // 删除所有的缓存
+      pruneCacheEntry(this.cache, key, this.keys)
+    }
+  },
+
+  mounted () {
+    // 实时监听黑白名单的变动
+    this.$watch('inlcude', val => {
+      pruneCache(this, naem => matches(val, name))
+    })
+
+    this.$watch('exlcude', val => {
+      pruneCache(this, naem => !matches(val, name))
+    })
+  },
+
+  render () {
+    //
+  }
+}
+
+function pruneCacheEntry (
+  cache: VNodeCache,
+  key: string,
+  keys: Array<string>,
+  current?: VNode
+) {
+  const cached = cache[key]
+  if (cached && (!current || cached.tag !== current.tag)) {
+    cached.componentInstance.$destroy() // -执行组件的 destroy 钩子函数
+  }
+  cache[key] = null
+  remove(keys, key)
+}
+```
