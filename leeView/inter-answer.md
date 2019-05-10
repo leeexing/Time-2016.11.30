@@ -4,6 +4,113 @@
 
 ## 今日答疑
 
+2019-05-10
+
+> 第 70 题： 介绍下 webpack 热更新原理，是如何做到在不刷新浏览器的前提下更新页面的
+
+ A:
+这题有难度。围观大佬们的回答
+
+1.当修改了一个或多个文件；
+2.文件系统接收更改并通知webpack；
+3.webpack重新编译构建一个或多个模块，并通知HMR服务器进行更新；
+4.HMR Server 使用webSocket通知HMR runtime 需要更新，HMR运行时通过HTTP请求更新jsonp；
+5.HMR运行时替换更新中的模块，如果确定这些模块无法更新，则触发整个页面刷新。
+
+2019-05-09
+
+> 用正则判断是否为小写字母
+
+```js
+function isLitterLeter (code) {
+  return /[a-z]/.test(code)
+}
+```
+
+2019-05-08
+
+> 第 69 题： 如何把一个字符串的大小写取反（大写变小写小写变大写），例如 ’AbC' 变成 'aBc' 。
+
+```js
+let name = 'Leeing'
+
+console.log(
+  name.replace(/\w/g, item => item.charCodeAt(0) > 97 ? item.toUpperCase() : item.toLowerCase())
+)
+
+// 大牛写的还是严谨
+'AbcDefGh'.replace(/[a-zA-Z]/g,function(a){ return /[a-z]/.test(a)?a.toUpperCase():a.toLowerCase(); });
+
+// 转换思路，这个也很惊喜哈
+str.replace(/(\w)/g, m => m === m.toUpperCase() ? m.toLowerCase() : m.toUpperCase())
+```
+
+ TIP: -
+自己写的还是不够严谨
+
+2019-05-07
+
+> 第 68 题： 如何解决移动端 Retina 屏 1px 像素问题
+
+REFER: https://juejin.im/entry/584e427361ff4b006cd22c7c
+
+![一张图片](https://user-images.githubusercontent.com/15519616/57264890-41f5fc00-70a7-11e9-9e67-43d3ee053751.png)
+
+1 伪元素 + transform scaleY(.5)
+2 border-image
+3 background-image
+4 box-shadow
+
+2019-05-06
+
+> 第 67 题：随机生成一个长度为 10 的整数类型的数组，例如 [2, 10, 3, 4, 5, 11, 10, 11, 20]，将其排列成一个新数组，要求新数组形式如下，例如 [[2, 3, 4, 5], [10, 11], [20]]
+
+ A:
+理解题目也很重要！
+
+```js
+function getNums (num, base = 100) {
+  return Array.from({length: num}, () => Math.floor(Math.random() * base))
+}
+
+function formArray(arr) {
+  const sortedArr = Array.from(new Set(arr)).sort((a, b) => a - b);
+
+  const map = new Map();
+
+  sortedArr.forEach((v) => {
+    const key = Math.floor(v / 10);
+    const group = map.get(key) || [];
+    group.push(v);
+
+    map.set(key, group);
+  });
+
+  return [...map.values()];
+}
+
+function formArray1(arr) {
+  const sortedArr = Array.from(new Set(arr)).sort((a, b) => a - b);
+
+  return sortedArr.reduce((acc, cur) => {
+    const lastArr = acc.slice().pop() || [];
+
+    const lastVal = lastArr.slice().pop();
+    if (lastVal!=null && cur-lastVal === 1) {
+      lastArr.push(cur);
+    } else {
+      acc.push([cur]);
+    }
+
+    return acc;
+  }, []);
+}
+
+console.log(
+  formArray1(getNums(10))
+)
+```
+
 2019-05-05
 
 > 第 64 题：模拟实现一个 Promise.finally

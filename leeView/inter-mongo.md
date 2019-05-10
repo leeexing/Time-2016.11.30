@@ -2,6 +2,17 @@
 
 REFER: 常见的mongodb配置 https://www.jianshu.com/p/f9f1454f251f
 
+## 使用注意事项
+
+### 开启mongodb.service 启动
+
+### 启动时报错
+
+ Q: `To see additional information in this output, start without the "--fork" option.`
+
+ A:
+一个原因就可能是 log 日志文件夹中没有事先创建 `mongodb.log` 这个文件
+
 ## 数据导入导出
 
 REFER: https://www.cnblogs.com/qingtianyu2015/p/5968400.html
@@ -499,14 +510,6 @@ db.products.update({slug: 'shovel'}, {
 // 同时删除 dirt 和 garden 标签
 ```
 
-## 精通mongoDB
-
-### 索引与查询优化
-
-> 索引非常重要
-
-虽然索引对于查询性能非常重要，但每个新的索引都需要额外的维护成本
-
 ## 复制
 
 REFER: https://www.cnblogs.com/clsn/p/8214345.html
@@ -742,7 +745,6 @@ REFER: https://www.cnblogs.com/zhaowenzhong/p/5667312.html
 1. 可以修改成员的优先级：priority: 1，2
 2. 修改成员的隐藏属性 hidden: true
 
-
 1）查看复制集状态：
 
 ```shell
@@ -815,6 +817,297 @@ REFER: https://www.cnblogs.com/clsn/p/8214345.html
 * 配置服务器。是一个独立的mongod进程，保存集群和分片的元数据，即各分片包含了哪些数据的信息。最先开始建立，启用日志功能。像启动普通的mongod一样启动配置服务器，指定configsvr选项。不需要太多的空间和资源，配置服务器的1KB空间相当于真实数据的200MB。保存的只是数据的分布表。当服务不可用，则变成只读，无法分块、迁移数据。
 * 路由服务器。即mongos，起到一个路由的功能，供程序连接。本身不保存数据，在启动时从配置服务器加载集群信息，开启mongos进程需要知道配置服务器的地址，指定configdb选项。
 * 分片服务器。是一个独立普通的mongod进程，保存数据信息。可以是一个副本集也可以是单独的一台服务器。
+
+### 创建程序所需的目录
+
+```shell
+for  i in 17 18 19 20 21 22 23 24 25 26
+  do
+  mkdir -p /mongodb/280$i/conf
+  mkdir -p /mongodb/280$i/data
+  mkdir -p /mongodb/280$i/log
+done
+```
+
+### 编辑shard集群配置文件
+
+```conf
+# 系统日志
+systemLog:
+  destination: file
+  path: E:\Mongodb\dbshard\28021\log\mongodb.log
+  logAppend: true
+# 存储
+storage:
+  dbPath: E:\Mongodb\dbshard\28021\data
+  journal:
+    enabled: true
+  directoryPerDB: true
+  #engine: wiredTiger
+  wiredTiger:
+    engineConfig:
+      cacheSizeGB: 1
+      directoryForIndexes: true
+    collectionConfig:
+      blockCompressor: zlib
+    indexConfig:
+      prefixCompression: true
+# 网络
+net:
+  bindIp: 192.168.120.1
+  port: 28021
+# 主从复制
+replication:
+  oplogSizeMB: 2048
+  replSetName: sh1
+# 分片
+sharding:
+  clusterRole: shardsvr
+# 进程管理
+# processManagement:
+#   fork: true
+```
+
+复制shard集群配置文件
+
+```shell
+for  i in  22 23 24 25 26
+  do
+   \cp  ./28021/conf/mongod.conf  ./280$i/conf/
+done
+```
+
+修改配置文件端口
+
+```shell
+for i in 22 23 24 25 26
+  do
+    sed  -i  "s#28021#280$i#g" ./280$i/conf/mongod.conf
+done
+```
+
+修改配置文件复制集名称（replSetName）
+
+```shell
+for i in 24 25 26
+  do
+    sed -i "s#sh1#sh2#g" ./280$i/conf/mongod.conf
+done
+```
+
+启动shard集群
+
+```shell
+for i in 21 22 23 24 25 26
+  do
+    ../bin/mongod -f ./280$i/conf/mongod.conf
+done
+```
+
+配置复制集1
+
+```shell
+mongo --host 10.0.0.152 --port 28021  admin
+
+# 配置复制集
+config = {_id: 'sh1', members: [
+                          {_id: 0, host: '10.0.0.152:28021'},
+                          {_id: 1, host: '10.0.0.152:28022'},
+                          {_id: 2, host: '10.0.0.152:28023',"arbiterOnly":true}]
+           }
+
+# 初始化配置
+rs.initiate(config)
+```
+
+ 配置复制集2
+
+ ```shell
+mongo --host 10.0.0.152 --port 28024  admin
+
+# 配置复制集
+config = {_id: 'sh2', members: [
+                          {_id: 0, host: '10.0.0.152:28024'},
+                          {_id: 1, host: '10.0.0.152:28025'},
+                          {_id: 2, host: '10.0.0.152:28026',"arbiterOnly":true}]
+           }
+
+# 初始化配置
+rs.initiate(config)
+```
+
+### config集群配置
+
+创建主节点配置文件
+
+```conf
+systemLog:
+  destination: file
+  path: /mongodb/28018/log/mongodb.conf
+  logAppend: true
+storage:
+  journal:
+    enabled: true
+  dbPath: /mongodb/28018/data
+  directoryPerDB: true
+  #engine: wiredTiger
+  wiredTiger:
+    engineConfig:
+      cacheSizeGB: 1
+      directoryForIndexes: true
+    collectionConfig:
+      blockCompressor: zlib
+    indexConfig:
+      prefixCompression: true
+net:
+  bindIp: 10.0.0.152
+  port: 28018
+replication:
+  oplogSizeMB: 2048
+  replSetName: configReplSet
+sharding:
+  clusterRole: configsvr
+; processManagement:
+;   fork: true
+```
+
+将配置文件分发到从节点
+
+```shell
+for i in 19 20
+  do
+   \cp  ./28018/conf/mongod.conf  ./280$i/conf/
+done
+```
+
+修改配置文件端口信息
+
+```shell
+for i in 19 20
+  do
+    sed  -i  "s#28018#280$i#g" ./280$i/conf/mongod.conf
+done
+```
+
+启动config server集群
+
+```shell
+for i in 18 19 20
+  do
+    mongod -f ./280$i/conf/mongod.conf
+done
+```
+
+配置config server复制集
+
+```shell
+mongo --host 10.0.0.152 --port 28018  admin
+
+# 配置复制集信息
+config = {_id: 'configReplSet', members: [
+                          {_id: 0, host: '192.168.120.1:28018'},
+                          {_id: 1, host: '192.168.120.1:28019'},
+                          {_id: 2, host: '192.168.120.1:28020'}]
+           }
+
+# 初始化配置
+rs.initiate(config)
+
+# 注：config server 使用复制集不用有arbiter节点。3.4版本以后config必须为复制集
+```
+
+### mongos节点配置
+
+```conf mongos.conf
+systemLog:
+  destination: file
+  path: E:\Mongodb\dbshard\28017\log\mongos.log
+  logAppend: true
+net:
+  bindIp: 192.168.120.1
+  port: 28017
+sharding:
+  configDB: configReplSet/192.168.120.1:28108,192.168.120.1:28019,192.168.120.1:28020
+; processManagement:
+;   fork: true
+```
+
+启动mongos
+
+`mongos -f ./28017/conf/mongos.conf`
+
+登陆到mongos
+
+`mongo 192.168.120.1:28017/admin`
+
+ NOTE: - 这里是 `mongos`
+
+添加分片节点
+
+```shell
+db.runCommand( { addshard : "sh1/192.168.120.1:28021,192.168.120.1:28022,192.168.120.1:28023",name:"shard1"} )
+db.runCommand( { addshard : "sh2/192.168.120.1:28024,192.168.120.1:28025,192.168.120.1:28026",name:"shard2"} )
+```
+
+列出分片
+
+```shell
+mongos> db.runCommand( { listshards : 1 } )
+{
+    "shards" : [
+        {
+            "_id" : "shard2",
+            "host" : "sh2/192.168.120.1:28024,192.168.120.1:28025"
+        },
+        {
+            "_id" : "shard1",
+            "host" : "sh1/192.168.120.1:28021,192.168.120.1:28022"
+        }
+    ],
+    "ok" : 1
+}
+```
+
+整体状态查看
+
+`mongos> sh.status();`
+
+### 数据库分片配置
+
+激活数据库分片功能
+
+`mongos> db.runCommand( { enablesharding : "test" } )`
+
+指定分片建对集合分片，范围片键--创建索引
+
+```js
+mongos> use test
+mongos> db.vast.ensureIndex( { id: 1 } )
+mongos> use admin
+mongos> db.runCommand( { shardcollection : "test.vast",key : {id: 1} } )
+```
+
+集合分片验证
+
+```js
+mongos> use test
+mongos> for(i=0;i<20000;i++){ db.vast.insert({"id":i,"name":"clsn","age":70,"date":new Date()}); }
+mongos> db.vast.stats()
+```
+
+### 片键的设置
+
+* 要对一个集合分片，首先你要对这个集合的数据库启用分片，执行如下命令：sh.enableSharding("test")
+* 片键是集合的一个键，mongoDB根据这个键拆分数据，例如 username，在启用分片之前，现在希望作为片键的键上创建索引。db.users.ensureIndex({"username":1})
+* 对集合分片：sh.shardCollection("test.users",{"username":1})
+* 集合被拆分为多个数据块，每个数据块都是集合的一个数据子集。这是按照片键的范围排列的({"username":minValue}-->>{"username":maxValue}指出了每个数据块的范围)
+* 包含片键的查询能够直接被发送到目标分片或者是集群分片的一个子集。这样的查询叫做定向查询(targetd query)。有些查询必须被发送到所有分片，这样的查询叫做分散-聚合查询(
+
+      scatter-gather query);mongos将查询分散到所有的分片上，然后经各个分片的查询结果聚集起来。
+
+范围片键
+
+admin> sh.shardCollection("数据库名称.集合名称",key : {分片键: 1}  )
 
 ## 项目中使用的`mongod`处理脚本
 
