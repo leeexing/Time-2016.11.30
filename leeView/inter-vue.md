@@ -2,7 +2,209 @@
 
 > 好好整理一下
 
+## 规范
+
+### 命名规范
+
+REFER: https://cn.vuejs.org/v2/style-guide/index.html#
+
+1 只应该拥有单个活跃实例的组件应该以 The 前缀命名，以示其唯一性。
+
+```js
+// bad
+components/
+|- Heading.vue
+|- MySidebar.vue
+
+// good
+components/
+|- TheHeading.vue
+|- TheSidebar.vue
+```
+
+2 和父组件紧密耦合的子组件应该以父组件名作为前缀命名。
+
+```js
+// bad
+components/
+|- TodoList.vue
+|- TodoItem.vue
+|- TodoButton.vue
+
+// good
+components/
+|- TodoList.vue
+|- TodoListItem.vue
+|- TodoListItemButton.vue
+```
+
+3 组件名应该以高级别的 (通常是一般化描述的) 单词开头，以描述性的修饰词结尾。
+
+```js
+// bad
+components/
+|- ClearSearchButton.vue
+|- ExcludeFromSearchInput.vue
+|- LaunchOnStartupCheckbox.vue
+|- RunSearchButton.vue
+|- SearchInput.vue
+|- TermsCheckbox.vue
+
+// good
+components/
+|- SearchButtonClear.vue
+|- SearchButtonRun.vue
+|- SearchInputQuery.vue
+|- SearchInputExcludeGlob.vue
+|- SettingsCheckboxTerms.vue
+|- SettingsCheckboxLaunchOnStartup.vue
+```
+
+### 优先级
+
+#### 组件/实例的选项的顺序
+
+```js
+副作用 (触发组件外的影响)
+  el
+
+全局感知 (要求组件以外的知识)
+  name
+  parent
+
+组件类型 (更改组件的类型)
+  functional
+
+模板修改器 (改变模板的编译方式)
+  delimiters
+  comments
+
+模板依赖 (模板内使用的资源)
+  components
+  directives
+  filters
+
+组合 (向选项里合并属性)
+  extends
+  mixins
+
+接口 (组件的接口)
+  inheritAttrs
+  model
+  props/propsData
+
+本地状态 (本地的响应式属性)
+  data
+  computed
+
+事件 (通过响应式事件触发的回调)
+
+  watch
+  生命周期钩子 (按照它们被调用的顺序)
+    beforeCreate
+    created
+    beforeMount
+    mounted
+    beforeUpdate
+    updated
+    activated
+    deactivated
+    beforeDestroy
+    destroyed
+非响应式的属性 (不依赖响应系统的实例属性)
+  methods
+
+渲染 (组件输出的声明式描述)
+  template/render
+  renderError
+
+```
+
+#### 元素特性的顺序
+
+```js
+定义 (提供组件的选项)
+  is
+
+列表渲染 (创建多个变化的相同元素)
+  v-for
+
+条件渲染 (元素是否渲染/显示)
+  v-if
+  v-else-if
+  v-else
+  v-show
+  v-cloak
+
+渲染方式 (改变元素的渲染方式)
+  v-pre
+  v-once
+
+全局感知 (需要超越组件的知识)
+  id
+
+唯一的特性 (需要唯一值的特性)
+  ref
+  key
+  slot
+
+双向绑定 (把绑定和事件结合起来)
+  v-model
+
+其它特性 (所有普通的绑定或未绑定的特性)
+
+事件 (组件事件监听器)
+  v-on
+
+内容 (覆写元素的内容)
+  v-html
+  v-text
+
+```
+
+#### 隐性的父子组件通信
+
+**应该优先通过 prop 和事件进行父子组件之间的通信，而不是 this.$parent 或改变 prop。**
+一个理想的 Vue 应用是 prop 向下传递，事件向上传递的。遵循这一约定会让你的组件更易于理解。然而，在一些边界情况下 prop 的变更或 this.$parent 能够简化两个深度耦合的组件。
+
+#### 为组件样式设置作用域
+
+**对于应用来说，顶级 `App` 组件和布局组件中的样式可以是全局的，但是其它所有组件都应该是有作用域的。**
+这条规则只和单文件组件有关。你不一定要使用 `scoped` 特性。设置作用域也可以通过 `CSS Modules`，那是一个基于 `class` 的类似 `BEM` 的策略，当然你也可以使用其它的库或约定。
+
+不管怎样，对于组件库，我们应该更倾向于选用基于 `class` 的策略而不是 `scoped` 特性。
+
 ## vue
+
+### redirect 刷新页面
+
+> 一种新的实现方案
+
+```js
+// 先注册一个名为 `redirect` 的路由
+<script>
+export default {
+  beforeCreate() {
+    const { params, query } = this.$route
+    const { path } = params
+    this.$router.replace({ path: '/' + path, query })
+  },
+  render: function(h) {
+    return h() // avoid warning message
+  }
+}
+</script>
+```
+
+```js
+// 手动重定向页面到 '/redirect' 页面
+const { fullPath } = this.$route
+this.$router.replace({
+  path: '/redirect' + fullPath
+})
+```
+
+当遇到你需要刷新页面的情况，你就手动重定向页面到redirect页面，它会将页面重新redirect重定向回来，由于页面的 key 发生了变化，从而间接实现了刷新页面组件的效果。
 
 ### 全局事件
 
@@ -661,7 +863,7 @@ grid-auto-columns
 grid-auto-rows
 grid-auto-flow
 
-## keep-alive
+### keep-alive
 
 REFER: https://juejin.im/post/5cce49036fb9a031eb58a8f9
 
@@ -717,3 +919,73 @@ function pruneCacheEntry (
   remove(keys, key)
 }
 ```
+
+### Watch immediate
+
+> 当 watch 一个变量的时候，初始化时并不会执行，如下面的例子，你需要在created的时候手动调用一次
+
+```js
+watch: {
+  searchText: {
+    handler: 'fetchUserList',
+    immediate: true
+  }
+}
+```
+
+ps: watch 还有一个容易被大家忽略的属性`deep`。当设置为`true`时，它会进行深度监听。
+简而言之就是你有一个 const obj={a:1,b:2}，里面任意一个 key 的 value 发生变化的时候都会触发watch。
+应用场景：比如我有一个列表，它有一堆query筛选项，这时候你就能deep watch它，只有任何一个筛序项改变的时候，就自动请求新的数据。
+或者你可以deep watch一个 form 表单，当任何一个字段内容发生变化的时候，你就帮它做自动保存等等。
+
+### Attrs 和 Listeners
+
+### .sync
+
+> 这个也是 vue 2.3 之后新加的一个语法糖。这也是平时在分装组件的时候很好用的一个语法糖，它的实现机制和v-model是一样的。
+
+```js
+<comp :foo.sync="bar" />
+
+// 等同于
+
+<comp :foo="bar" @update:foo="val => bar = val" />
+
+// 更新方式
+this.$emit('update:foo', newVal)
+```
+
+### Object.freeze
+
+当你把一个普通的 JavaScript 对象传给 Vue 实例的 data 选项，Vue 将遍历此对象所有的属性，并使用 Object.defineProperty 把这些属性全部转为 getter/setter，它们让 Vue 能进行追踪依赖，在属性被访问和修改时通知变化。
+使用了 Object.freeze 之后，不仅可以减少 observer 的开销，还能减少不少内存开销。
+
+## vue-router
+
+### addRoutes && removeRoutes
+
+背景：
+动态添加的路由，并不能动态的删除。这就是导致一个问题，当用户权限发生变化的时候，或者说用户登出的时候，我们只能通过刷新页面的方式，才能清空我们之前注册的路由。之前老版本的 vue-element-admin就一直采用的是这种方式。虽然能用，但作为一个 spa，刷新页面其实是一种很糟糕的用户体验。
+
+**后来发现了一种 hack 的方法，能很好的动态清除注册的路由**-
+
+```js
+const createRouter = () => new Router({
+  scrollBehavior: () => ({y: 0}),
+  routes: constantRoutes
+})
+
+const router = createRouter()
+
+export function resetRouter() {
+  const newRouter = createRouter()
+  router.master = newRouter.matcher // reset router
+}
+
+export default router
+```
+
+所有的 `vue-router` 注册的路由信息都是存放在`matcher`之中的
+所以当我们想清空路由的时候，我们只要新建一个空的`Router`实例，将它的`matcher`重新赋值给我们之前定义的路由就可以了。巧妙的实现了动态路由的清除。
+
+## vuex
