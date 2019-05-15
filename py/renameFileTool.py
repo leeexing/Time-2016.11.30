@@ -5,12 +5,11 @@ import os
 import wx
 import shutil
 
-helixNames = ['helix', 'helixse']
 
 class PlotImage():
 
     def __init__(self):
-
+        """GUI初始化"""
         self.path = ''
         self.running = False
 
@@ -20,7 +19,7 @@ class PlotImage():
         # 命名前缀
         batch_label = wx.StaticText(self.frame, -1, '前缀名称：', pos=(8, 8), size=(80, 24), style=wx.ALIGN_CENTER)
         batch_label.SetForegroundColour('red')
-        self.batch_name = wx.TextCtrl(self.frame, pos=(100, 5), size=(240, 24), value='test')
+        self.batch_name = wx.TextCtrl(self.frame, pos=(100, 5), size=(240, 24), value='nuctech')
 
         # 开始序号
         index_label = wx.StaticText(self.frame, -1, '开始序号：', pos=(8, 42), size=(80, 24), style=wx.ALIGN_CENTER)
@@ -28,8 +27,8 @@ class PlotImage():
         self.index_name = wx.TextCtrl(self.frame, pos=(100, 40), size=(240, 24), value='1')
 
         # 文件路径
-        open_button = wx.Button(self.frame, label='选择文件夹', pos=(5, 80), size=(80, 24))
-        open_button.SetForegroundColour('red')
+        path_button = wx.Button(self.frame, label='选择文件夹', pos=(5, 80), size=(80, 24))
+        path_button.SetForegroundColour('red')
         self.path_name = wx.TextCtrl(self.frame, pos=(100, 80), size=(240, 24), style=wx.TE_READONLY)
 
         # 运行
@@ -42,16 +41,16 @@ class PlotImage():
         clear_button = wx.Button(self.frame, label='清除日志', pos=(10, 325), size=(60, 24))
 
         # 绑定事件
-        open_button.Bind(wx.EVT_BUTTON, self.selectFolder)
+        path_button.Bind(wx.EVT_BUTTON, self.select_folder)
         save_button.Bind(wx.EVT_BUTTON, self.start)
-        clear_button.Bind(wx.EVT_BUTTON, self.clearLogo)
+        clear_button.Bind(wx.EVT_BUTTON, self.clear_log)
 
     def show(self):
         """GUI显示"""
         self.frame.Show()
         self.app.MainLoop()
 
-    def selectFolder(self, event):
+    def select_folder(self, event):
         """选择文件夹"""
         dlg = wx.DirDialog(None, u'选择文件夹', style=wx.DD_DEFAULT_STYLE)
         if dlg.ShowModal() == wx.ID_OK:
@@ -73,24 +72,24 @@ class PlotImage():
         self.prefix_name = self.batch_name.GetValue()
         self.index_value = self.index_name.GetValue()
 
-    def clearLogo(self, event):
+    def clear_log(self, event):
         """清空日志"""
         self.content_text.SetValue('日志输出:')
 
-    def resetStatus(self):
-        """重置"""
+    def reset_path(self):
+        """重置文件夹路径"""
         self.path_name.SetValue('')
         self.path = ''
 
     def start(self, event):
-        """结构化数据"""
+        """开始执行"""
         self.get_batch_remark()
 
-        if (self.prefix_name == '请输入批次号' or self.prefix_name == ''):
-            self.alert_msg('请输入正确的批次名称')
+        if (self.prefix_name == '请输入前缀名称' or self.prefix_name == ''):
+            self.alert_msg('请输入正确的前缀名称')
             return
         if not self.index_value:
-            self.alert_msg('请选择文件开始序列号')
+            self.alert_msg('请输入命名开始的序列号')
             return
         if not self.path:
             self.alert_msg('请选择文件路径')
@@ -101,7 +100,7 @@ class PlotImage():
         self.running = True
         self.rename_file()
         self.running = False
-        self.resetStatus()
+        self.reset_path()
         self.alert_msg('批量命名已完成！')
 
     def rename_file(self):
@@ -113,16 +112,15 @@ class PlotImage():
                 files = os.listdir(os.path.join(self.path, currentDir))
                 for fileName in files:
                     filePath = os.path.join(self.path, currentDir)
-                    if not os.path.isdir(os.path.join(filePath, fileName)):  # 文件
-                        fileExtensionIndex = fileName.rfind('.')
-                        fileExtension = fileName[fileExtensionIndex:]
+                    if not os.path.isdir(os.path.join(filePath, fileName)): # 文件
+                        _, fileExtension = os.path.splitext(fileName)
 
                         if fileExtension == '.jpg' and 'OB' in fileName[:2]:
                             continue
 
                         # 对于以pi、db、raw结尾的文件不进行处理
                         if fileExtension not in ['.pi', '.db', '.raw']:
-                            if fileName.find('_') != -1:  # 名字中带有'_'
+                            if fileName.find('_') != -1: # 名字中带有'_'
                                 indexToChange = fileName.find('_')
                                 print('change name contains [ _ ] : ', fileName)
                                 self.content_text.AppendText('\nchange name contains [ _ ] : ' + fileName)
@@ -135,10 +133,9 @@ class PlotImage():
                                 os.rename(filePath + '\\' + fileName, filePath + '\\' + newName)
 
                     else: # 只处理Helix和HelixSE文件夹
-                        if fileName.lower() in helixNames:
+                        if fileName.lower() in ['helix', 'helixse']:
                             filePath = filePath + '\\' + fileName
-                            helixFiles = os.listdir(filePath)
-                            for helixFileName in helixFiles:
+                            for helixFileName in os.listdir(filePath):
                                 helixIndexToChange = helixFileName.find('_')
                                 print('change helix file name:', helixFileName)
                                 self.content_text.AppendText('\nchange helix file name : ' + helixFileName)
