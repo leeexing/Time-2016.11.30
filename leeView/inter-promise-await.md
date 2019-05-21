@@ -106,6 +106,8 @@ Promise回调函数中的第一个参数resolve，会对Promise执行"拆箱"动
 ### 手写Promise-版本一
 
 ```js
+let pID = 0
+
 class MyPromise {
   constructor(executor) {
     this.status = 'pending'
@@ -140,7 +142,7 @@ class MyPromise {
   }
 
   then(onFulfilled, onRejected) {
-    console.log('现在的状态：', this.status)
+    console.log(this.pID, '现在的状态：', this.status)
     onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : val => val
     onRejected = typeof onRejected === 'function' ? onRejected : err => {throw err}
 
@@ -210,13 +212,13 @@ class MyPromise {
     return this.then(null, onRejected)
   }
 
-  static resolve (val) {
+  static resolve(val) {
     return new MyPromise((resolve, reject) => {
       resolve(val)
     })
   }
 
-  static reject (val) {
+  static reject(val) {
     return new MyPromise((resolve, reject) => {
       reject(val)
     })
@@ -231,14 +233,14 @@ class MyPromise {
       if (i === promises.length) {
         resolve(arr)
       }
+      return new MyPromise((resolve, reject) => {
+        for (let i = 0; i < promises.length; i++) {
+          promises[i].then(data => {
+            processData(i, data)
+          }, reject)
+        }
+      })
     }
-    return new MyPromise((resolve, reject) => {
-      for (let i = 0; i < promises.length; i++) {
-        promises[i].then(data => {
-          processData(i, data)
-        }, reject)
-      }
-    })
   }
 
   static race(promises) {
