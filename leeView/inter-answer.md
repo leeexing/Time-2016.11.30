@@ -4,6 +4,105 @@
 
 ## 今日答疑
 
+2019-05-22
+
+> 如何遍历一个dom树
+
+```js
+function traverse(node) {
+  if (node && node.nodeType === 1) {
+    console.log(node.nodeName, '++', node)
+  }
+  if (node && node.nodeType === 2) {
+    console.warn(node.nodeName, '++', node)
+  }
+  let i = 0,
+      nodes = node.childNodes,
+      item
+  for(; i < nodes.length; i++) {
+    item = nodes[i]
+    if(item.nodeType === 1) {
+      traverse(item)
+    }
+  }
+}
+```
+
+2019-05-21
+
+> 第 78 题：Vue 的父组件和子组件生命周期钩子执行顺序是什么
+> 一次性插入1000个div，如何优化插入的性能
+> 向1000个并排的div元素中，插入一个平级的div元素，如何优化插入的性能
+
+ A:
+
+父组件： beforeCreate -> created -> beforeMount
+子组件： -> beforeCreate -> created -> beforeMount -> mounted
+父组件： -> mounted
+总结：`从外到内，再从内到外`
+
+加载渲染过程
+  父beforeCreate->父created->父beforeMount->子beforeCreate->子created->子beforeMount->子mounted->父mounted
+子组件更新过程
+  父beforeUpdate->子beforeUpdate->子updated->父updated
+父组件更新过程
+  父beforeUpdate->父updated
+销毁过程
+  父beforeDestroy->子beforeDestroy->子destroyed->父destroyed
+
+**一次性插入1000个div，如何优化插入的性能**:
+
+使用`document.createDocumentFragment()`
+
+**向1000个并排的div元素中，插入一个平级的div元素，如何优化插入的性能**:
+
+* 先 display：none，然后插入，再 display：block
+* 赋予key，然后使用 virtual-dom，先render，然后 diff，最后 patch
+* 脱离文档流，用 GPU 去渲染，开启硬件加速
+
+2019-05-20
+
+> 第 77 题：旋转数组算法题
+
+ A:
+
+```js
+let arr = [1, 2, 3, 4, 5, 6, 7, 8]
+
+function rotate(arr, k) {
+  return [...arr.splice(k + 1), ...arr]
+}
+
+rotate(arr, 4)
+```
+
+2019-05-19
+
+> 第 76 题：输出以下代码运行结果
+
+```js
+var a={}, b='123', c=123;
+a[b]='b';
+a[c]='c';
+console.log(a[b]);
+
+var a={}, b=Symbol('123'), c=Symbol('123');
+a[b]='b';
+a[c]='c';
+console.log(a[b]);
+
+var a={}, b={key:'123'}, c={key:'456'};
+a[b]='b';
+a[c]='c';
+console.log(a[b]);
+```
+
+考察的是对象的键名的转换
+
+1. 对象的键名只能是字符串和 `Symbol` 类型
+2. 其他类型的键名会被转换成字符串类型
+3. 对象转字符串默认会调用 `toString` 方法
+
 ### 2019-05-13
 
 > 第 71 题： 实现一个字符串匹配算法，从长度为 n 的字符串 S 中，查找是否存在字符串 T，T 的长度是 m，若存在返回所在位置

@@ -423,3 +423,38 @@ new Promise(function (resolve) {
 })
 console.log('script end')
 ```
+
+### 简单实现
+
+async 函数的实现原理，就是将 Generator 函数和自动执行器，包装在一个函数里
+
+```js
+function spawn(genF) {
+  return new Promise((resolve, reject) => {
+    const gen = genF()
+
+    function step(nextF) {
+      let next
+      try {
+        next = nextF()
+      } catch(e) {
+        return reject(e)
+      }
+      if (next.done) {
+        return resolve(next.value)
+      }
+      let rej
+      Promise.resolve(next.value).then(
+        (val) => {
+          step(() => gen.next(val))
+        },
+        (e) => step(() => gen.throw(e))
+      )
+    }
+
+    step(() => gen.next(undefined))
+  })
+}
+```
+
+### todo

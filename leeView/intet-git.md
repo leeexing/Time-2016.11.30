@@ -113,3 +113,7 @@ git show commitId fileName 查看某次commit中具体某个文件的修改
 1. git diff
 2. git diff --cache
 3. git diff --HEAD
+
+## git reflog + git cherry-pick
+
+实现代码回滚，并且选择你需要的某一次提交
