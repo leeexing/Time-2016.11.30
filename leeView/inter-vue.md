@@ -940,6 +940,66 @@ ps: watch 还有一个容易被大家忽略的属性`deep`。当设置为`true`�
 
 ### Attrs 和 Listeners
 
+REFER: https://juejin.im/post/5ae4288a5188256712784787
+REFER: [vue组件间通信的六种方式](https://juejin.im/post/5cde0b43f265da03867e78d3#heading-11)
+
+$attrs--继承所有的父组件属性（除了prop传递的属性、class 和 style ）
+inheritAttrs--默认值true,继承所有的父组件属性（除props的特定绑定）作为普通的HTML特性应用在子组件的根元素上，如果你不希望组件的根元素继承特性设置inheritAttrs: false,但是class属性会继承
+$listeners--属性，它是一个对象，里面包含了作用在这个组件上的所有监听器，你就可以配合 v-on="$listeners" 将所有的事件监听器指向这个组件的某个特定的子元素。
+
+**主要用途**
+用在父组件传递数据给子组件或者孙组件
+
+### provide 和 inject
+
+REFER: [vue组件间通信的六种方法]https://juejin.im/post/5cde0b43f265da03867e78d3#heading-11
+
+provide / inject API 主要解决了跨级组件间的通信问题，不过它的`使用场景，主要是子组件获取上级组件的状态`，跨级组件间建立了一种主动提供与依赖注入的关系。
+
+*需要注意的是*：provide 和 inject 绑定并不是可响应的。这是刻意为之的。然而，如果你传入了一个可监听的对象，那么其对象的属性还是可响应的
+
+**provide与inject 怎么实现数据响应式**
+使用2.6最新API `Vue.observable` 优化响应式 provide(推荐)
+
+```js
+  // 方法二:使用2.6最新API Vue.observable 优化响应式 provide
+  provide() {
+    this.theme = Vue.observable({
+      color: "blue"
+    });
+    return {
+      theme: this.theme
+    };
+  },
+  methods: {
+    changeColor(color) {
+      if (color) {
+        this.theme.color = color;
+      } else {
+        this.theme.color = this.theme.color === "blue" ? "red" : "blue";
+      }
+    }
+  }
+```
+
+### capture 和 self
+
+> capture和self主要是函数执行顺序的问题
+
+.capture先执行父级的函数，再执行子级的触发函数
+
+self是只执行子级本身的函数
+
+```js
+<div v-on:click.self='alert("1")' style="width: 100%;height: 45px;background-color: black;">
+  <div v-on:click="alert('2')" style='width: 80%;margin-left: 10%;background-color: white;'>
+    123
+  </div>
+</div>
+
+// 此时点击子级的div会执行alert(‘2’)，不会执行alert(‘1’)
+```
+
 ### .sync
 
 > 这个也是 vue 2.3 之后新加的一个语法糖。这也是平时在分装组件的时候很好用的一个语法糖，它的实现机制和v-model是一样的。

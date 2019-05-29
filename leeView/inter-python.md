@@ -2,6 +2,16 @@
 
 > python 常用的小技巧和函数
 
+## 常用包
+
+### AES\pyCrypto\pycryptodome
+
+> 安装pyCrypto真是一个坑啊
+
+REFER: https://blog.csdn.net/HH775313602/article/details/78991340
+
+from Crypto.Cipher import AES
+
 ## format
 
 ### 数字格式化
@@ -62,5 +72,41 @@ class Student(Person):
 `isinstance(p, Person)`
 
 dir()返回的属性是字符串列表，如果已知一个属性名称，要获取或者设置对象的属性，就需要用 `getattr()` 和 `setattr( )` 函数了：
+
+## shutil
+
+### shutil.copytree
+
+> 一定要目录结构一致才行
+
+```py
+src = r'E:/Leeing/sd_fls/images/78f9197a-7dcd-11e9-afc0-00155d3e1922/001'
+des = r'E:/Leeing/sd_fls/downloads'
+
+def main():
+    shutil.copytree(src, des)
+
+# 这样报错
+# PermissionError: [Errno 13] Permission denied: 'E:/Leeing/sd_fls/images/78f9197a-7dcd-11e9-afc0-00155d3e1922/001'
+
+# 因为默认是执行了下面的语句
+File "C:\Users\lixing1\AppData\Local\Programs\Python\Python36-32\lib\shutil.py", line 315, in copytree
+    os.makedirs(dst)
+  File "C:\Users\lixing1\AppData\Local\Programs\Python\Python36-32\lib\os.py", line 220, in makedirs
+    mkdir(name, mode)
+```
+
+```py
+src = r'E:/Leeing/sd_fls/images/78f9197a-7dcd-11e9-afc0-00155d3e1922/001'
+des = r'E:/Leeing/sd_fls/downloads/随便一个名字都可以'
+
+def main():
+    shutil.copytree(src, des)
+
+```
+
+这样没有问题，但是，会将`E:/Leeing/sd_fls/images/78f9197a-7dcd-11e9-afc0-00155d3e1922/001`文件夹下所有的文件都复制到 `随便一个名字都可以` 文件夹下。不符合预期
+
+看需求，还是需要和 src 源目录地址保持一个维度的目录结构才比较好
 
 ## todo
