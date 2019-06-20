@@ -2,6 +2,39 @@
 
 > ngixn 学习
 
+## nginx - include 配置
+
+在我自己的本地我是这么配置的
+
+```conf
+http {
+  # 一大堆
+
+  include "D:/Soft Ware/nginx/nginx-1.14.0/conf/conf.d/*.conf";
+}
+
+# 由于我的路径中带有空格，所以，我需要将绝对路径用双引号引起来
+# 但是发现，这里我使用的是 “绝对路径”
+```
+
+在实际线上环境部署的时候，我使用同样的策略
+
+```conf
+http {
+  # 省略一大段
+
+  include C:/nginx/conf/conf.d/*.conf;
+
+  # or
+
+  include extra/*.conf;
+
+}
+```
+
+
+ TIP: 配置的路径的时候，一定要小心，别少了任何一个 `/`
+
 ## 配置
 
 ### location

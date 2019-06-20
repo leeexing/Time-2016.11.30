@@ -85,6 +85,14 @@ rebase在git中是一个非常有魅力的命令，使用得当会极大提高�
 * 当我准备push我的本地工作时。。。我得首先清理我的本地历史信息以便我总是push一些清晰易读有用的功能；
 * 当我的push由于和别人已经发布的工作相冲突而被拒绝时，我总是rebase更新到最新的remote branch以避免用一些无意义的micro-merge来污染历史图谱
 
+pick：保留该commit（缩写:p）
+reword：保留该commit，但我需要修改该commit的注释（缩写:r）
+edit：保留该commit, 但我要停下来修改该提交(不仅仅修改注释)（缩写:e）
+squash：将该commit和前一个commit合并（缩写:s）
+fixup：将该commit和前一个commit合并，但我不要保留该提交的注释信息（缩写:f）
+exec：执行shell命令（缩写:x）
+drop：我要丢弃该commit（缩写:d）
+
 ## git show
 
 git show 查看提交的详情

@@ -4,6 +4,437 @@
 
 ## 今日答疑
 
+2019-06-19
+
+> 第 92 题：已知数据格式，实现一个函数 fn 找出链条中所有的父级 id
+
+```js
+let list =[
+  {id:1,name:'部门A',parentId:0},
+  {id:2,name:'部门B',parentId:0},
+  {id:3,name:'部门C',parentId:1},
+  {id:4,name:'部门D',parentId:1},
+  {id:5,name:'部门E',parentId:2},
+  {id:6,name:'部门F',parentId:3},
+  {id:7,name:'部门G',parentId:2},
+  {id:8,name:'部门H',parentId:4},
+  {id:9,name:'部门H',parentId:6}
+];
+```
+
+ A:
+
+```js
+let list =[
+  {id:1,name:'部门A',parentId:0},
+  {id:2,name:'部门B',parentId:0},
+  {id:3,name:'部门C',parentId:1},
+  {id:4,name:'部门D',parentId:1},
+  {id:5,name:'部门E',parentId:2},
+  {id:6,name:'部门F',parentId:3},
+  {id:7,name:'部门G',parentId:2},
+  {id:8,name:'部门H',parentId:4},
+  {id:9,name:'部门H',parentId:6}
+];
+
+function convert(list) {
+  const ret = []
+  const map = list.reduce((res, v) => (res[v.id] = v, res), {})
+  console.log(map)
+  for (const item of list) {
+    if (item.parentId === 0) {
+      ret.push(item)
+      continue
+    }
+    if (item.parentId in map) {
+      const parent = map[item.parentId]
+      parent.children = parent.children || []
+      parent.children.push(item)
+    }
+  }
+
+  return ret
+}
+
+console.log(convert(list))
+```
+
+ TIP: -
+
+* 要学会使用对象的 hash 结构，理解为一种字典。这样可以很快的查询到对应的键值
+* 其次，对象的引用关系，需要再一次的去理解
+  * 修改了一个对象，引用了这个对象的其他对象也能实时的获取他里面键值的不同。不要想着去修改这个对象
+  * 需要有一种内存的思想去思考问题
+
+2019-06-18
+
+> 第 91 题：介绍下 HTTPS 中间人攻击
+
+解析：
+
+REFER: https://segmentfault.com/a/1190000013075736
+
+```js
+要防止被中间人攻击，那么就要确保通信中的信息来自他声称的那个人，且没有被修改过
+```
+
+2019-06-03
+
+> 第 90 题：实现模糊搜索结果的关键词高亮显示
+
+ A:
+
+```js 喜欢这种思想
+// 考虑节流、缓存。其实还可以上列表diff+定时清理缓存
+function debounce(fn, timeout = 300) {
+  let t;
+  return (...args) => {
+    if (t) {
+      clearTimeout(t);
+    }
+    t = setTimeout(() => {
+      fn.apply(fn, args);
+    }, timeout);
+  }
+}
+
+function memorize(fn) {
+  const cache = new Map();
+  return (name) => {
+    if (!name) {
+      container.innerHTML = '';
+      return;
+    }
+    if (cache.get(name)) {
+      container.innerHTML = cache.get(name);
+      return;
+    }
+    const res = fn.call(fn, name).join('');
+    cache.set(name, res);
+    container.innerHTML = res;
+  }
+}
+
+function handleInput(value) {
+  const reg = new RegExp(`\(${value}\)`);
+  const search = data.reduce((res, cur) => {
+    if (reg.test(cur)) {
+      const match = RegExp.$1;
+      res.push(`<li>${cur.replace(match, '<bdi>$&</bdi>')}</li>`);
+    }
+    return res;
+  }, []);
+  return search;
+}
+
+const data = ["上海野生动物园", "上饶野生动物园", "北京巷子", "上海中心", "上海黄埔江", "迪士尼上海", "陆家嘴上海中心"]
+const container = document.querySelector('.container');
+const memorizeInput = memorize(handleInput);
+document.querySelector('.inp').addEventListener('input', debounce(e => {
+  memorizeInput(e.target.value);
+}))
+```
+
+2019-06-02
+
+> 第 89 题：设计并实现 Promise.race()
+
+ A:
+
+```js
+Promise._rave = promises => new Promise((resolve, reject) => {
+  promises.forEach(promise => {
+    promise.then(resolve, reject)
+  })
+})
+```
+
+2019-06-01
+
+> 第 88 题：实现 convert 方法，把原始 list 转换成树形结构，要求尽可能降低时间复杂度
+
+以下数据结构中，id 代表部门编号，name 是部门名称，parentId 是父部门编号，为 0 代表一级部门，现在要求实现一个 convert 方法，把原始 list 转换成树形结构，parentId 为多少就挂载在该 id 的属性 children 数组下，结构如下：
+
+```js
+// 原始 list 如下
+let list =[
+  {id:1,name:'部门A',parentId:0},
+  {id:2,name:'部门B',parentId:0},
+  {id:3,name:'部门C',parentId:1},
+  {id:4,name:'部门D',parentId:1},
+  {id:5,name:'部门E',parentId:2},
+  {id:6,name:'部门F',parentId:3},
+  {id:7,name:'部门G',parentId:2},
+  {id:8,name:'部门H',parentId:4}
+];
+const result = convert(list, ...);
+
+// 转换后的结果如下
+let result = [{
+  id: 1,
+  name: '部门A',
+  parentId: 0,
+  children: [{
+      id: 3,
+      name: '部门C',
+      parentId: 1,
+      children: [{
+        id: 6,
+        name: '部门F',
+        parentId: 3
+      }, {
+        id: 16,
+        name: '部门L',
+        parentId: 3
+      }]
+    },
+    {
+      id: 4,
+      name: '部门D',
+      parentId: 1,
+      children: [{
+        id: 8,
+        name: '部门H',
+        parentId: 4
+      }]
+    }
+  ]
+}, ···];
+```
+
+ A:
+
+```js
+function convert(list) {
+  const res = []
+  const map = list.reduce((res, v) => (res[v.id] = v, res), {})
+  for (const item of list) {
+    if (item.parentId === 0) {
+      res.push(item)
+      continue
+    }
+    if (item.parentId in map) {
+      const parent = map[item.parentId]
+      parent.children = parent.children || []
+      parent.children.push(item)
+    }
+  }
+  return res
+}
+```
+
+ TIP: 基本思路：
+使用Map保存id和对象的映射，循环list，根据parentId在Map里取得父节点，
+如果父节点有children属性，就直接push当前的子节点，
+如果没有就添加children属性，最后遍历一遍list把parentId===0的节点取出来。
+
+2019-05-30
+
+> 第 86 题：周一算法题之「两数之和」
+
+给定一个整数数组和一个目标值，找出数组中和为目标值的两个数。
+
+你可以假设每个输入只对应一种答案，且同样的元素不能被重复利用。
+
+  给定 nums = [2, 7, 11, 15], target = 9
+
+  因为 nums[0] + nums[1] = 2 + 7 = 9
+  所以返回 [0, 1]
+
+ A:
+
+```js
+// 思路一：暴力
+
+function twoSum(arr, target) {
+  for (let i = 0; i < arr.length; i++) {
+    for (let j = i + 1; j < arr.length; j++) {
+      if (arr[i] + arr[j] == target) {
+        return [i, j]
+      }
+    }
+  }
+}
+// 由于进行了双重循环，时间复杂度是O(n^2), 空间复杂度O(1)
+
+
+// 思路二：两趟哈希表
+function twoSum(nums, target) {
+  const map = {}
+  const len = nums.length
+  for (let i = 0; i < len; i++) {
+    map[nums[i]] = i
+  }
+  for (let j = 0; j < len; j++) {
+    let number = target - nums[j]
+    if (number in map) {
+      return [j, map[number]]
+    }
+  }
+}
+ TIP:  这种思想还是不较少。哈希表，每天都在用，但是还是没有理解透
+
+ // 思路三：一趟哈希表
+function twoSum(nums, target) {
+  const map = {}
+  for (let i = 0; i < nums.length; i++) {
+    const n = nums[i]
+    if (target - n in map) {
+      return [map[target - n], i]
+    } else {
+      map[n] = i
+    }
+  }
+}
+```
+
+2019-05-29
+
+> 第 85 题：react-router 里的 `<Link>` 标签和 `<a>` 标签有什么区别. 如何禁掉 <a> 标签默认事件，禁掉之后如何实现跳转
+
+ A:
+
+先看Link点击事件handleClick部分源码
+
+```js
+if (_this.props.onClick) _this.props.onClick(event);
+
+if (!event.defaultPrevented && // onClick prevented default
+event.button === 0 && // ignore everything but left clicks
+!_this.props.target && // let browser handle "target=_blank" etc.
+!isModifiedEvent(event) // ignore clicks with modifier keys
+) {
+    event.preventDefault();
+
+    var history = _this.context.router.history;
+    var _this$props = _this.props,
+        replace = _this$props.replace,
+        to = _this$props.to;
+
+
+    if (replace) {
+      history.replace(to);
+    } else {
+      history.push(to);
+    }
+  }
+```
+
+Link做了3件事情：
+
+1 有onclick那就执行onclick
+2 click的时候阻止a标签默认事件（这样子点击`<a href="/abc">123</a>`就不会跳转和刷新页面）
+3 再取得跳转href（即是to），用history（前端路由两种方式之一，history & hash）跳转，此时只是链接变了，并没有刷新页面
+
+2019-05-28
+
+> 第 84 题：请实现一个 add 函数，满足以下功能。
+
+```js
+add(1); // 1
+add(1)(2); // 3
+add(1)(2)(3); // 6
+add(1)(2, 3); // 6
+add(1, 2)(3); // 6
+add(1, 2, 3); // 6
+```
+
+柯里化就行了？
+
+2019-05-27
+
+> 第 83 题：var、let 和 const 区别的实现原理是什么
+
+ A:
+
+var 和 let 用以声明变量，const 用于声明只读的常量；
+
+var 声明的变量，不存在块级作用域，在全局范围内都有效，let 和 const 声明的，只在它所在的代码块内有效；
+
+let 和 const 不存在像 var 那样的 “变量提升” 现象，所以 var 定义变量可以先使用，后声明，而 let 和 const 只可先声明，后使用；
+
+let 声明的变量存在暂时性死区，即只要块级作用域中存在 let，那么它所声明的变量就绑定了这个区域，不再受外部的影响。
+
+let 不允许在相同作用域内，重复声明同一个变量；
+
+const 在声明时必须初始化赋值，一旦声明，其声明的值就不允许改变，更不允许重复声明；
+
+  如 const 声明了一个复合类型的常量，其存储的是一个引用地址，不允许改变的是这个地址，而对象本身是可变的。
+
+变量与内存之间的关系，主要由三个部分组成：
+
+* 变量名
+* 内存地址
+* 内存空间
+
+JS 引擎在读取变量时，先找到变量绑定的内存地址，然后找到地址所指向的内存空间，最后读取其中的内容。当变量改变时，JS 引擎不会用新值覆盖之前旧值的内存空间（虽然从写代码的角度来看，确实像是被覆盖掉了），而是重新分配一个新的内存空间来存储新值，并将新的内存地址与变量进行绑定，JS 引擎会在合适的时机进行 GC，回收旧的内存空间。
+
+const 定义变量（常量）后，变量名与内存地址之间建立了一种不可变的绑定关系，阻隔变量地址被改变，当 const 定义的变量进行重新赋值时，根据前面的论述，JS 引擎会尝试重新分配新的内存空间，所以会被拒绝，便会抛出异常。
+
+2019-05-25
+
+> 第 82 题：算法题「移动零」，给定一个数组 nums，编写一个函数将所有 0 移动到数组的末尾，同时保持非零元素的相对顺序
+
+说明:
+
+必须在原数组上操作，不能拷贝额外的数组。
+
+尽量减少操作次数。
+
+ A:
+
+```js
+// me
+let temp = [0,1,0,3,12]
+temp.filter(x => x).concat(temp.filter(x => !x))
+
+这个不符合要求
+
+function zeroMove(arr) {
+  let len = arr.length
+  let j = 0
+  for (let i = 0; i < len - j; i++) {
+    if (arr[i] === 0) {
+      arr.push(0)
+      arr.splice(i, 1)
+      i--
+      j++
+    }
+  }
+}
+// 自己的想法还是太简单。有点坐享其成的看别人的思路。自己懒于动脑了
+```
+
+
+2019-05-24
+
+> 第 81 题：打印出 1 - 10000 之间的所有对称数 例如：121、1331 等
+
+ A:
+
+```js
+function smp() {
+  let arr = Array.from({length: 10000}, (_, item) => String(item + 1))
+  let ret = arr.filter(item => {
+    return item.length > 1 && item == item.split('').reverse().join('')
+  })
+  return ret
+}
+
+```
+
+2019-05-23
+
+> 第 80 题：介绍下 Promise.all 使用、原理实现及错误处理
+
+ A:
+
+Promise.all()方法将多个Promise实例包装成一个Promise对象（p），接受一个数组（p1,p2,p3）作为参数，数组中不一定需要都是Promise对象，但是一定具有`Iterato`接口，如果不是的话，就会调用Promise.resolve将其转化为Promise对象之后再进行处理。
+使用Promise.all()生成的Promise对象（p）的状态是由数组中的Promise对象（p1,p2,p3）决定的；
+1、如果所有的Promise对象（p1,p2,p3）都变成fullfilled状态的话，生成的Promise对象（p）也会变成fullfilled状态，p1,p2,p3三个Promise对象产生的结果会组成一个数组返回给传递给p的回调函数；
+2、如果p1,p2,p3中有一个Promise对象变为rejected状态的话，p也会变成rejected状态，第一个被rejected的对象的返回值会传递给p的回调函数。
+Promise.all()方法生成的Promise对象也会有一个catch方法来捕获错误处理，但是如果数组中的Promise对象变成rejected状态时，并且这个对象还定义了catch的方法，那么rejected的对象会执行自己的catch方法，并且返回一个状态为fullfilled的Promise对象，Promise.all()生成的对象会接受这个Promise对象，不会返回rejected状态。
+
 2019-05-22
 
 > 如何遍历一个dom树
