@@ -1,5 +1,40 @@
 # inter-http
 
+## 请求报文示例
+
+![请求报文](https://github.com/semlinker/awesome-http/raw/master/images/http-resource-3.png)
+
+```js
+GET / HTTP/1.1          <----请求行： 请求方法、URL 和 HTTP 协议版本组成，它们之间用空格分开
+Host: www.baidu.com     <----请求头： 由 key-value 对组成，每行一对，key (键) 和 value (值)用英文冒号 : 分隔
+Connection: keep-alive
+Cache-Control: max-age=0
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.110 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+Accept-Encoding: gzip, deflate, sdch, br
+Accept-Language: zh-CN,zh;q=0.8,en;q=0.6,id;q=0.4
+Cookie: PSTM=1490844191; BIDUPSID=2145FF54639208435F60E1E165379255; BAIDUID=CFA344942EE2E0EE081D8B13B5C847F9:FG=1;
+                        <-----空行: 最后一个请求头之后是一个空行，发送回车符和换行符，通知服务器以下不再有请求头
+```
+
+## 常见状态代码、状态描述
+
+常见状态代码、状态描述的说明如下：
+
+200 OK：客户端请求成功
+204 No Content：没有新文档，浏览器应该继续显示原来的文档
+206 Partial Content：客户发送了一个带有Range头的GET请求，服务器完成了它
+301 Moved Permanently：所请求的页面已经转移至新的url
+302 Found：所请求的页面已经临时转移至新的url
+304 Not Modified：客户端有缓冲的文档并发出了一个条件性的请求，服务器告诉客户，原来缓冲的文档还可以继续使用。
+400 Bad Request：客户端请求有语法错误，不能被服务器所理解
+401 Unauthorized：请求未经授权，这个状态代码必须和WWW-Authenticate报头域一起使用
+403 Forbidden：对被请求页面的访问被禁止
+404 Not Found：请求资源不存在
+500 Internal Server Error：服务器发生不可预期的错误
+503 Server Unavailable：请求未完成，服务器临时过载或当机，一段时间后可能恢复正常
+
 ## 输入 url 后发生了什么。简易版
 
 1. 在chrome的地址栏输入http://baidu.com

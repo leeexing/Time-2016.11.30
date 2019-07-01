@@ -2,7 +2,32 @@
 
 REFER: 常见的mongodb配置 https://www.jianshu.com/p/f9f1454f251f
 
-## 使用注意事项
+TOC
+
+* mongdb时区问题
+
+## mongdb时区问题
+
+使用 flask + mongodb 进行查询时
+
+```py
+
+from bson.codec_options import CodecOptions
+from pytz import timezone
+
+list(db.images.with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=timezone('Asia/Shanghai'))).find())
+
+# 查询的结果中，时间相关的字段就自动转为上海时区的时间了
+
+# 或者
+
+shc_tz = timezome('Asia/Shanghai')
+client = pymongo.MongoClient(host, port, tz_aware=True, tzinfo=shc_tz)
+
+# 再或者
+
+list(db.images.find({'rcTime': {'$gte': datetime(2019, 6, 27, 12, 9, 0, tzinfo=shc_tz)}))
+```
 
 ### 开启mongodb.service 启动
 

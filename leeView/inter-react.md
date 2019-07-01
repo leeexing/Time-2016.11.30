@@ -1,6 +1,53 @@
 # inter-react
 
-## 和 vue 的本质区别
+## 代码规范
+
+REFER: https://github.com/lzbSun/react-native-coding-style
+
+对于JSX的字符串属性使用双引号(")，其他情况下使用单引号
+
+```js
+// bad
+<Foo bar='bar' />
+
+// good
+<Foo bar="bar" />
+
+// bad
+<Foo style={{ left: "20px" }} />
+
+// good
+<Foo style={{ left: '20px' }} />
+```
+
+### 对象结构
+
+```js
+const anakinSkywalker = 'Anakin Skywalker';
+const lukeSkywalker = 'Luke Skywalker';
+
+// bad
+const obj = {
+  episodeOne: 1,
+  twoJediWalkIntoACantina: 2,
+  lukeSkywalker,
+  episodeThree: 3,
+  mayTheFourth: 4,
+  anakinSkywalker,
+};
+
+// good
+const obj = {
+  lukeSkywalker,
+  anakinSkywalker,
+  episodeOne: 1,
+  twoJediWalkIntoACantina: 2,
+  episodeThree: 3,
+  mayTheFourth: 4,
+};
+```
+
+## react 和 vue 的本质区别
 
 1.React严格上只针对MVC的view层,Vue则是MVVM模式
 
@@ -311,4 +358,191 @@ const mapDispatchToProps = (
     }
   };
 }
+```
+
+### 使用 immutable
+
+```js
+import * as pro from './action-type';
+import Immutable from 'immutable';
+
+let defaultState = {
+  /**
+   * 商品数据
+   * @type {Array}
+   * example: [{
+   *    product_id: 1, 商品ID
+   *    product_name: "PaiBot（2G/32G)", 商品名称
+   *    product_price: 2999, 商品价格
+   *    commission: 200, 佣金
+   *    selectStatus: false, 是否选择
+   *    selectNum: 0, 选择数量
+   * }]
+   */
+  dataList: [],
+}
+
+export const proData = (state = defaultState, action) => {
+  let imuDataList;
+  let imuItem;
+  switch(action.type){
+    case pro.GETPRODUCTION:
+      return {...state, ...action}
+    case pro.TOGGLESELECT:
+      //避免引用类型数据，使用immutable进行数据转换
+      imuDataList = Immutable.List(state.dataList);
+      imuItem = Immutable.Map(state.dataList[action.index]);
+      imuItem = imuItem.set('selectStatus', !imuItem.get('selectStatus'));
+      imuDataList = imuDataList.set(action.index, imuItem);
+      // redux必须返回一个新的state
+      return {...state, ...{dataList: imuDataList.toJS()}};
+    case pro.EDITPRODUCTION:
+      //避免引用类型数据，使用immutable进行数据转换
+      imuDataList = Immutable.List(state.dataList);
+      imuItem = Immutable.Map(state.dataList[action.index]);
+      imuItem = imuItem.set('selectNum', action.selectNum);
+      imuDataList = imuDataList.set(action.index, imuItem);
+      // redux必须返回一个新的state
+      return {...state, ...{dataList: imuDataList.toJS()}};
+    // 清空数据
+    case pro.CLEARSELECTED:
+      imuDataList = Immutable.fromJS(state.dataList);
+      for (let i = 0; i < state.dataList.length; i++) {
+        imuDataList = imuDataList.update(i, item => {
+          item = item.set('selectStatus', false);
+          item = item.set('selectNum', 0);
+          return item
+        })
+      }
+      return {...state, ...{dataList: imuDataList.toJS()}};
+    default:
+      return state;
+  }
+}
+```
+
+### 使用 thunk 进行异步获取数据
+
+```js
+import * as pro from './action-type';
+import API from '@/api/api';
+
+// 初始化获取商品数据，保存至redux
+export const getProData = () => {
+  // 返回函数，异步dispatch
+  return async dispatch => {
+    try{
+      let result = await API.getProduction();
+      result.map(item => {
+        item.selectStatus = true;
+        item.selectNum = 0;
+        return item;
+      })
+      dispatch({
+        type: pro.GETPRODUCTION,
+        dataList: result,
+      })
+    }catch(err){
+      console.error(err);
+    }
+  }
+}
+
+
+// 配合 thunk 使用
+
+import {createStore, combineReducers, applyMiddleware} from 'redux';
+import * as home from './home/reducer';
+import * as production from './production/reducer';
+import thunk from 'redux-thunk';
+
+let store = createStore(
+  combineReducers({...home, ...production}),
+  applyMiddleware(thunk)    <---- 这里使用中间件❗❗❗
+);
+
+export default store;
+```
+
+## react-router
+
+### 子路由在父路由下的配置使用【比较有意思】
+
+> 需要使用 Redirect 在父路由下面进行重定向
+
+```js
+  render() {
+    return (
+      <main className="common-con-top">
+        <PublicHeader title='记录' />
+        <section className="record-nav-con">
+          <nav className="record-nav">
+            <NavLink to={`${this.props.match.path}/passed`} className="nav-link">已通过</NavLink>
+            <NavLink to={`${this.props.match.path}/audited`} className="nav-link">待审核</NavLink>
+            <NavLink to={`${this.props.match.path}/failed`} className="nav-link">未通过</NavLink>
+          </nav>
+          <i className="nav-flag-bar" style={{left: this.state.flagBarPos}}></i>
+        </section>
+        {/* 子路由在父级配置，react-router4新特性，更加灵活 */}
+        <Switch>
+          <Route path={`${this.props.match.path}/:type`} component={RecordList} />
+          <Redirect from={`${this.props.match.path}`} to={`${this.props.match.path}/passed`} exact component={RecordList} />
+        </Switch>
+      </main>
+    );
+  }
+}
+
+```
+
+## 优秀代码学习 👍👍👍👍👍 重点推介
+
+### 号码分割
+
+```js
+/**
+ * 字符串填充函数
+ * @param  {string} value      目标字符串
+ * @param  {array} position 需要填充的位置
+ * @param  {string} padstr   填充字符串
+ * @return {string}          返回目标字符串
+ */
+export const padStr = (value, position, padstr, inputElement) => {
+  position.forEach((item, index) => {
+    if (value.length > item + index) {
+      value = value.substring(0, item + index) + padstr + value.substring(item + index)
+    }
+  })
+  value = value.trim();
+  // 解决安卓部分浏览器插入空格后光标错位问题
+  requestAnimationFrame(() => {
+    inputElement.setSelectionRange(value.length, value.length);
+  })
+  return value;
+}
+
+// NOTE: 使用
+
+<input type="text" maxLength="13" placeholder="请输入客户电话" value={this.props.formData.phoneNo} onChange={this.handleInput.bind(this, 'phoneNo')}/>
+
+/**
+   * 将表单数据保存至redux，保留状态
+   * @param  {string} type  数据类型 orderSum||name||phoneNo
+   * @param  {object} event 事件对象
+   */
+  handleInput = (type, event) => {
+    let value = event.target.value;
+    switch(type){
+      case 'orderSum':
+        value = value.replace(/\D/g, '');
+      break;
+      case 'name':
+      break;
+      case 'phoneNo':
+        value = this.padStr(value.replace(/\D/g, ''), [3, 7], ' ', event.target);
+      break;
+      default:;
+    }
+    this.props.saveFormData(value, type);
+  }
 ```

@@ -1,5 +1,16 @@
 # 探寻Git
 
+[TOC]
+
+* git bash 中 git status 显示中文乱码
+* 提交规范
+
+## git bash 中显示中文乱码
+
+```js
+git config --global core.quotepath false
+```
+
 ## 提交规范
 
 1. type

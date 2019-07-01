@@ -116,3 +116,95 @@ locaton / {
 }
 
 ```
+
+### plot.conf
+
+```conf
+# 在线标注平台
+
+# upstream sourceData {
+    # weigth参数表示权值，权值越高被分配到的几率越大
+    # max_fails 当有#max_fails个请求失败，就表示后端的服务器不可用，默认为1，将其设置为0可以关闭检查
+    # fail_timeout 在以后的#fail_timeout时间内nginx不会再把请求发往已检查出标记为不可用的服务器
+    # 这里指定多个源服务器，ip:端口,80端口的话可写可不写
+
+    # server 192.168.1.78:8080 weight=5 max_fails=2 fail_timeout=600s;
+    # server 192.168.1.222:8080 weight=3 max_fails=2 fail_timeout=600s;
+    # server 132.232.18.77:7012;
+# }
+
+server {
+    listen 80;
+    server_name plot.anjianba.cn;
+    rewrite ^(.*)$ https://${server_name}$1 permanent;
+}
+
+server {
+    listen 443 ssl;
+    server_name plot.anjianba.cn;
+    ssl_certificate D:\\cert\\2412747__anjianba.cn_nginx\\2412747__anjianba.cn.pem;
+    ssl_certificate_key D:\\cert\\2412747__anjianba.cn_nginx\\2412747__anjianba.cn.key;
+    ssl_session_timeout 5m;
+    ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4;
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+    ssl_prefer_server_ciphers on;
+    root D:\\projects\\plot_web;
+    index index.html index.htm;
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+    location = /50x.html {
+        root html;
+    }
+    error_page 404              /404.html;
+    error_page 500 502 503 504  /50x.html;
+}
+
+server {
+    listen 443 ssl;
+    server_name plotapi.anjianba.cn;
+    ssl_certificate D:\\cert\\2412747__anjianba.cn_nginx\\2412747__anjianba.cn.pem;
+    ssl_certificate_key D:\\cert\\2412747__anjianba.cn_nginx\\2412747__anjianba.cn.key;
+    ssl_session_timeout 5m;
+    ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4;
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+    ssl_prefer_server_ciphers on;
+    location /v1/api/ {
+        proxy_pass http://52.81.103.142:5281/v1/api/;
+        if ($request_method = OPTIONS ) {
+            add_header Access-Control-Allow-Origin "$http_origin";
+            add_header Access-Control-Allow-Methods "POST, GET, PUT, OPTIONS, DELETE";
+            add_header Access-Control-Allow-Credentials "true";
+            add_header Access-Control-Allow-Headers "$http_access_control_request_headers";
+            add_header Access-Control-Max-Age "3600";
+            return 204;
+        }
+        add_header Access-Control-Allow-Origin "$http_origin" always;
+        add_header Access-Control-Allow-Methods "GET, PUT, POST, DELETE, OPTIONS" always;
+        add_header Access-Control-Allow-Credentials "true" always;
+        add_header backendIP $upstream_addr;
+        add_header backendCode $upstream_status;
+        proxy_set_header Host $host;
+        proxy_set_header REMOTE-HOST $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+    location /downloads/ {
+        proxy_pass http://127.0.0.1:5282/downloads/;
+    }
+    location /images/ {
+        proxy_pass http://127.0.0.1:5282/images/;
+        if ($request_method = OPTIONS ) {
+            add_header Access-Control-Allow-Origin "$http_origin";
+            add_header Access-Control-Allow-Methods "POST, GET, PUT, OPTIONS, DELETE";
+            add_header Access-Control-Allow-Credentials "true";
+            add_header Access-Control-Allow-Headers "$http_access_control_request_headers";
+            add_header Access-Control-Max-Age "3600";
+            return 204;
+        }
+        add_header Access-Control-Allow-Origin "$http_origin";
+        add_header Access-Control-Allow-Methods "GET, PUT, POST, DELETE, OPTIONS";
+        add_header Access-Control-Allow-Credentials "true";
+    }
+}
+```
