@@ -122,57 +122,6 @@ mongorestore -h dbhost -d dbname --dir dbdirectory
 mongorestore -h 192.168.17.129:27017 -d itcast_restore --dir /home/mongodump/itcast/
 ```
 
-## 基本使用
-
-### $elelMatch
-
-当我们需要匹配多个或者更多属性的子文档才使用 `$elemMatch`
-
-```js
-db.users.find({
-  'address': {
-    name: 'home',
-    state: 'NY'
-  }
-})
-```
-
-### $size
-
-通过大小查询数组
-
-```js
-db.users.find({address: {$size: 3}})
-```
-
-### js查询运算符
-
-可以使用特定的`$where`运算符传递js表达式应对任何查询
-
-```js
-db.users.find({
-  $where: 'function(){ return this.helpful_votes > 3; }'
-})
-
-// or 简单表达式的缩写形式
-
-db.users.find({
-  $where: 'this.helpful_votes > 3'
-})
-```
-
-### 正则表达式。需要区分大小写的时候
-
-```js
-db.reviews.find({
-  user_id: '4546'
-  text: {
-    $regex: 'best|worst',
-    $options: 'i'
-  } // 相当于 /best|worst/i
-})
-```
-
 ## 聚合 - aggregate
 
 聚合框架就是要定义一系列 聚合管道（aggregation pipeline）
@@ -1153,3 +1102,56 @@ db.getCollection('EventTracking').find({}).skip(5000).limit(5000).forEach(functi
 ```
 
 ### 聚合语句
+
+待补充
+
+## 基本使用
+
+### $elelMatch
+
+当我们需要匹配多个或者更多属性的子文档才使用 `$elemMatch`
+
+```js
+db.users.find({
+  'address': {
+    name: 'home',
+    state: 'NY'
+  }
+})
+```
+
+### $size
+
+通过大小查询数组
+
+```js
+db.users.find({address: {$size: 3}})
+```
+
+### js查询运算符
+
+可以使用特定的`$where`运算符传递js表达式应对任何查询
+
+```js
+db.users.find({
+  $where: 'function(){ return this.helpful_votes > 3; }'
+})
+
+// or 简单表达式的缩写形式
+
+db.users.find({
+  $where: 'this.helpful_votes > 3'
+})
+```
+
+### 正则表达式。需要区分大小写的时候
+
+```js
+db.reviews.find({
+  user_id: '4546'
+  text: {
+    $regex: 'best|worst',
+    $options: 'i'
+  } // 相当于 /best|worst/i
+})
+```

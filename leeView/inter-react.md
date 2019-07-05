@@ -495,6 +495,80 @@ export default store;
 
 ```
 
+### React-Router 4.0 withRouter作用
+
+1、**目的就是让被修饰的组件可以从属性中获取history,location,match**
+路由组件可以直接获取这些属性，而非路由组件就必须通过withRouter修饰后才能获取这些属性了
+
+```js
+<Route path='/' component={App}/>
+```
+
+App组件就可以直接获取路由中这些属性了，但是，如果App组件中如果有一个子组件Foo，那么Foo就不能直接获取路由中的属性了，必须通过withRouter修饰后才能获取到。
+
+2、**withRouter是专门用来处理数据更新问题的**
+在使用一些redux的的connect()或者mobx的inject()的组件中，如果依赖于路由的更新要重新渲染，会出现路由更新了但是组件没有重新渲染的情况
+这是因为redux和mobx的这些连接方法会修改组件的shouldComponentUpdate
+
+在使用`withRouter`解决更新问题的时候，一定要`保证withRouter在最外层`，比如 `withRouter(connect(Component))`
+
+## react 基础
+
+### react.createPortal
+
+REFER: http://www.ptbird.cn/react-portal-createPortal.html
+
+一般使用 React 的组件都是挂到父组件的 `this.props.children` 上面，总是被最近的父组件所捕获，最终到 React 根组件上。
+而 Protals 则提供了一种将组件直接挂载到直接父组件 DOM 层次之外的一类方式。
+
+react-dom 提供的具体方法是 `ReactDOM.createPortals(child, container)`，这个方法需要两个参数，第一个参数是需要挂载的组件实例，而第二个参数则是要挂载到的DOM节点。一般来说第一个参数可能传递的是需要挂载的 this.props.children
+
+```js 示例
+const loadingRoot = document.getElementById('component-loading')
+const antIcon = <Icon type="loading" style={{ fontSize: 24 }} spin />
+
+const SpinStyle = {
+  position: 'absolute',
+  right: '20px',
+  top: '20px'
+}
+
+// Spin loading
+export const SpinLoading = () => {
+  return ReactDOM.createPortal(<Spin indicator={antIcon} style={SpinStyle} />, loadingRoot)
+}
+
+// 图片 loading
+const Loading = () => <img src={loadingPic} alt="" className="loading" />
+
+export default Loading
+```
+
+### react.getDerivedStateFromProps
+
+REFER: https://www.jianshu.com/p/50fe3fb9f7c3
+
+这个生命周期的意思就是从props中获取state，可以说是太简单易懂了。
+可以说，这个生命周期的功能实际上就是`将传入的props映射到state上面`
+
+由于16.4的修改，这个函数会在每次`re-rendering`之前被调用，这意味着什么呢
+
+这个生命周期函数是为了替代componentWillReceiveProps存在的，所以在你需要使用componentWillReceiveProps的时候，就可以考虑使用getDerivedStateFromProps来进行替代了。
+两者的参数是不相同的，而getDerivedStateFromProps是一个静态函数，也就是这个函数不能通过this访问到class的属性，也并不推荐直接访问属性。而是应该通过参数提供的nextProps以及prevState来进行判断，根据新传入的props来映射到state。
+
+需要注意的是，**如果props传入的内容不需要影响到你的state，那么就需要返回一个null**，这个返回值是必须的，所以尽量将其写到函数的末尾。
+
+```js
+class LoginModel extends Component {
+  state = { type: 'login' } // 模态框类型
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (nextProps.loginModalVisible) return { type: 'login' }
+    if (nextProps.registerModalVisible) return { type: 'register' }
+    return null
+  }
+```
+
 ## 优秀代码学习 👍👍👍👍👍 重点推介
 
 ### 号码分割
@@ -546,3 +620,14 @@ export const padStr = (value, position, padstr, inputElement) => {
     this.props.saveFormData(value, type);
   }
 ```
+
+### 这样也可以啊 😄😄😄
+
+```js
+componentDidMount() {
+    const params = this.decodeQuery(this.props)
+    this.setState({ type: params.type }, this.fetchList({ page: 1, ...params }))
+  }
+```
+
+没有使用回调啊。居然可以i这么写
