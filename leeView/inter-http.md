@@ -163,7 +163,13 @@ http:// www  .  abc.com :  8080    /uer/detail
 
 > 由于TCP连接是全双工的，因此每个方向都必须单独进行关闭，所以即使没有最后一个包，也需要先回复断开连接的请求，然后再发送关闭请求
 
-## 缓存策略
+## 缓存策略 & web缓存机制
+
+### 相关阅读文章
+
+[web缓存机制系列文章](http://www.alloyteam.com/2012/03/web-cache-2-browser-cache/)
+
+### 相关知识点摘要
 
 > 可分为 强缓存 和 协商缓存
 
@@ -180,6 +186,13 @@ Last-Modified 缺点
 * 最小粒度只到 s， s 以内的改动无法检测到
 
 Etag 的优先级高于 Last-Modified
+
+**哪些请求不能被缓存**：
+1、HTTP信息头中包含 cache-control: no-cache/store, pragma: no-cache, cache-control: max-age=0等告诉浏览器不用缓存的请求
+2、需要根据 Cookie，认证信息等决定输入内容的动态请求是不能被缓存的
+3、经过https安全加密的请求
+4、POST请求不能被缓存
+5、http响应头中不包含 last-modified/Etag，也不包含Cache-control/Expires的请求无法缓存
 
 ## 应用层
 
