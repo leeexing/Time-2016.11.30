@@ -138,6 +138,26 @@ react中render函数是支持闭包特性的，所以我们import的组件在ren
 
 而这两点的区别，其实也是因为 React 和 Vue的设计理念上的区别。React更偏向于构建稳定大型的应用，非常的科班化。相比之下，Vue更偏向于简单迅速的解决问题，更灵活，不那么严格遵循条条框框。因此也会给人一种大型项目用React，小型项目用 Vue 的感觉。
 
+## setReact
+
+> 两种使用方式
+
+第一种setstate（）格式  第一个参数是一个对象，第二个参数是一个回调函数，这个回调函数是在setstate执行完并页面渲染了之后再执行
+
+setstate的第二种格式，接收一个回调函数，而不是一个对象，这个回调函数有两个参数，
+
+```js
+onChangeHandler () {
+  this.setState((prevState) => {
+    return {
+      isActive: !prevState.isActive
+    }
+  }, () => {
+    console.log(this.state.isActive)
+  })
+}
+```
+
 ## hooks
 
 REFER: https://github.com/dt-fe/weekly/blob/master/80.%E7%B2%BE%E8%AF%BB%E3%80%8A%E6%80%8E%E4%B9%88%E7%94%A8%20React%20Hooks%20%E9%80%A0%E8%BD%AE%E5%AD%90%E3%80%8B.md

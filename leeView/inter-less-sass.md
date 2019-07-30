@@ -1,8 +1,10 @@
-# inter-less
+# inter-less-sass
 
 > 加深学习less的使用
 
-## @import
+## less
+
+### @import
 
 @import "foo";      // foo.less 导入为less文件
 @import "foo.less"; // foo.less 导入为less文件
@@ -19,7 +21,7 @@ once: 该文件仅可导入一次 (默认)
 multiple: 该文件可以多次导入
 optional: 当没有发现文件时仍然编译
 
-## extend 继承
+### extend 继承
 
 ```less
 <selector>:extend(<parentSelector>) { }
@@ -38,7 +40,7 @@ optional: 当没有发现文件时仍然编译
 
 语法： 获得继承名：extend（继承部分名 all）{…}
 
-## Color 函数
+### Color 函数
 
 lighten(@color, 10%);     // return a color which is 10% *lighter* than @color
 darken(@color, 10%);      // return a color which is 10% *darker* than @color
@@ -64,7 +66,7 @@ mix(@color1, @color2);    // return a mix of @color1 and @color2
 }
 ```
 
-## 命名空间
+### 命名空间
 
 有时候，你可能为了更好组织CSS或者单纯是为了更好的封装，将一些变量或者混合模块打包起来, 你可以像下面这样在`#bundle`中定义一些属性集之后可以重复使用:
 
@@ -88,7 +90,7 @@ mix(@color1, @color2);    // return a mix of @color1 and @color2
 }
 ```
 
-## 作用域
+### 作用域
 
 LESS 中的作用域跟其他编程语言非常类似，首先会从本地查找变量或者混合模块，如果没找到的话会去父级作用域中查找，直到找到为止.
 
@@ -107,7 +109,7 @@ LESS 中的作用域跟其他编程语言非常类似，首先会从本地查找
 }
 ```
 
-## 运算
+### 运算
 
 ```less
 @base: 5%;
@@ -115,7 +117,7 @@ LESS 中的作用域跟其他编程语言非常类似，首先会从本地查找
 @other: @base + @filler;
 ```
 
-## 混合 mixin
+### 混合 mixin
 
 ```less
 .mixin (@s, @color) { ... }
@@ -143,7 +145,7 @@ LESS 中的作用域跟其他编程语言非常类似，首先会从本地查找
 }
 ```
 
-### 带括号的mixin不会输出
+#### 带括号的mixin不会输出
 
 ```less
 .my-mixin {
@@ -167,7 +169,7 @@ LESS 中的作用域跟其他编程语言非常类似，首先会从本地查找
 }
 ```
 
-## when
+### when
 
 ```less
 @media: mobile;
@@ -198,7 +200,7 @@ isstring
 iskeyword
 isurl
 
-## maps
+### maps
 
 ```less
 #colors() {
@@ -217,3 +219,60 @@ isurl
   border: 1px solid green;
 }
 ```
+
+## sass
+
+### for循环
+
+> 语法
+
+```js
+方式1：@for $i from 开始值 through 结束值
+方式2：@for $i from 开始值 to 结束值
+```
+
+这2种方式是相似的，唯一的区别是：方式1包括结束值，方式2不包括结束值。其中“开始值”和“结束值”都是正整数。
+
+```css 示例
+@for $i from 0 to 5 {
+  .dog.action-#{$i} {
+    transition: all #{$i}s ease .2s;
+  }
+}
+
+.dog.action-0 {
+  transition: all 0s ease 0.2s; }
+
+.dog.action-1 {
+  transition: all 1s ease 0.2s; }
+
+.dog.action-2 {
+  transition: all 2s ease 0.2s; }
+
+.dog.action-3 {
+  transition: all 3s ease 0.2s; }
+
+.dog.action-4 {
+  transition: all 4s ease 0.2s; }
+
+```
+
+### 继承
+
+> 注意交叉继承的问题
+
+.meng a {
+    font-weight:bold;
+}
+
+.long .link {
+    @extend a;
+}
+
+编译后的CSS代码
+
+.meng a, .meng .long .link, .long .meng .link {
+  font-weight: bold;
+}
+
+类名“.meng”中的“a”选择器被类名“.long”中的类名“.link”继承了，但是由于没有在同一个父级下，会产生交叉合并的编译结果。这种其实是可以解决的，就是把父级改成相同的即可。若父级不能改的话，那么就乖乖的在写一遍，或者将“.meng a”直接换成类名，继承这个类名也可以。

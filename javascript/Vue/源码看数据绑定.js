@@ -208,3 +208,37 @@ const arrayMethods = Object.create(arrayProto)
     return result
   })
 })
+
+
+/**
+ * !观察者对象
+ * 依赖收集以后Watcher对象会被保存再deps中，数据变动的时候会由Deps通知Watcher实例，然后由Watcher实例回调cb进行视图的更新
+*/
+class Watcher {
+  constructor(vm, expOrFn, cb, options) {
+    this.vm = vm
+    // watchers存放订阅者实例
+    vm._watchers.push(this)
+    if (options) {
+      this.deep = !!options.deep
+      this.user = !!options.user
+      this.lazy = !!options.lazy
+      this.sync = !!options.sync
+    } else {
+      this.deep = this.user = this.lazy = this.sync = false
+    }
+    this.cb = cb
+    this.id = ++uid
+    this.active = true
+    this.dirty = this.lazy
+    this.newDeps = []
+    this.newDepIds = new Set()
+    this.expression = process.env.NODE_ENV !== 'production' ? expOrFn.toString() : ''
+
+    // 把表达式 expOrFn 解析成getter
+    if (typeof expOrFn === 'function') {
+
+    }
+
+  }
+}

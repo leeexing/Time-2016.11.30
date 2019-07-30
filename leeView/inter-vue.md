@@ -462,6 +462,12 @@ computed是响应式的
 
 ### 使用
 
+### 在vue中获取dom元素的宽高
+
+> getBoundingClientRect
+
+该方法返回一个矩形对象，包含四个属性：left、top、right、botton。分别表示元素各边与页面上边和左边的距离
+
 #### sync
 
 ```vue
@@ -613,16 +619,16 @@ mounted: function () {
 mounted: function () {
   this.attachDatepicker('startDateInput')
   this.attachDatepicker('endDateInput')
+
+  this.$once('hook:beforeDestroy', function () {
+    picker.destroy()
+  })
 },
 methods: {
   attachDatepicker: function (refName) {
     var picker = new Pikaday({
       field: this.$refs[refName],
       format: 'YYYY-MM-DD'
-    })
-
-    this.$once('hook:beforeDestroy', function () {
-      picker.destroy()
     })
   }
 }

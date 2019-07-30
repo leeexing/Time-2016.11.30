@@ -10,6 +10,7 @@ class DrBluePrint {
       cacheMemory: true,
       cacheCount: 100,
       containerClass: '.dr-wrap',
+      canvasId: 'drcanvas',
       strokeColor: '#f00',
       maxScale: 5,
       minScale: 0.5
@@ -48,7 +49,7 @@ class DrBluePrint {
     this.userSelectRegion = null
     this.userMarkedRectangles = []
 
-    this.containerCanvas = document.getElementById('drcanvas')
+    this.containerCanvas = document.getElementById(this.options.canvasId)
     this.containerCanvas.width = this.width
     this.containerCanvas.height = this.height
     this.containerCanvas.context = this.containerCanvas.getContext('2d')
@@ -417,6 +418,7 @@ class DrBluePrint {
       let startY = item[1]
       let distance = Math.sqrt((reletaX - endX)**2 + (relateY - startY)**2)
       if (distance < (this.isMobile ? 0.02 : 0.012)) {
+        this.removeMarkedRectanglesCallback(item[4])
         this.userMarkedRectangles.splice(index, 1)
       }
     })
@@ -456,6 +458,9 @@ class DrBluePrint {
   }
   setMiddleMouseSelectCallback (fn) {
     this.middleMouseSelectCallback = fn
+  }
+  setRemoveMarkedRectanglesCallback(fn) {
+    this.removeMarkedRectanglesCallback = fn
   }
   toImageCoordinateNum (pt1x, pt1y, pt2x, pt2y) {
     let relateX1 = (pt1x - this.dx) / this.width

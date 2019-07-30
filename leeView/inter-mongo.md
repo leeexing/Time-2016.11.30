@@ -47,17 +47,18 @@ REFER: https://www.cnblogs.com/qingtianyu2015/p/5968400.html
 > mongoexport
 
 ```conf
-mongoexport -d dbname -c collectionname -o file --type json/csv -f field
+mongoexport -d dbname -c collectionname -q -o file --type json/csv -f field
 ```
 
 参数说明：
             -d ：数据库名
             -c ：collection名
+            -q : 查询条件。ISODate需要使用Date(毫秒数)进行查询
             -o ：输出的文件名
             --type ： 输出的格式，默认为json
             -f ：输出的字段，如果-type为csv，则需要加上-f "字段名"
 
-```conf
+```js
 sudo mongoexport -d mongotest -c users -o /home/python/Desktop/mongoDB/users.json --type json -f  "_id,user_id,user_name,age,status"
 ```
 
@@ -65,7 +66,7 @@ sudo mongoexport -d mongotest -c users -o /home/python/Desktop/mongoDB/users.jso
 
 > mongoimport
 
-```conf
+```js
 mongoimport -d dbname -c collectionname --file filename --headerline --type json/csv -f field
 ```
 
@@ -77,7 +78,7 @@ mongoimport -d dbname -c collectionname --file filename --headerline --type json
             --headerline ：如果导入的格式是csv，则可以使用第一行的标题作为导入的字段
             --file ：要导入的文件
 
-```conf
+```js
 sudo mongoimport -d mongotest -c users --file /home/mongodump/articles.json --type json
 ```
 

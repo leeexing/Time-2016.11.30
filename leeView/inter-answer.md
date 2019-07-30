@@ -4,9 +4,212 @@
 
 ## 今日答疑
 
+2019-07-19
+
+第一百题：`let arr = [{a: 1, i: {b: 2, c: 3, d: 4}}]` 怎么实现不用 `i` 取到 b, c, d 的值？
+
+ A:
+
+```js 数据结构
+let {a, b, c} = arr[0][String.fromCharCode(105)]
+
+console.log(a, b, c)
+```
+
+```js 方法二
+let {a, b, c} = Object.entries(arr[0][1][1])
+
+// 不过这个方法不稳定，i 的顺序不能保证
+```
+
+```js 方法三
+for (let key in arr[0]) {
+  if (typeof arr[0][key] === 'object') {
+    var {b, c, d} = arr[0][key]
+  }
+}
+console.log(a, b, c)
+```
+
+ TIP: -
+需要好好的学习
+
+2019-07-18
+
+分别写出如下代码的返回值
+
+```js
+String('11') == new String('11)
+
+String('11') === new String('11')
+```
+
+ A:
+new String 返回的是一个对象
+== 的时候，有一个类型隐式转换的过程
+`String('11') == new String('11').toString()`
+=== 严格判断
+
+2019-07-17
+
+第 109 题：写出如下代码的打印结果
+
+```js
+var name = 'Tom';
+(function() {
+    if (typeof name == 'undefined') {
+        name = 'Jack';
+        console.log('Goodbye ' + name);
+    } else {
+        console.log('Hello ' + name);
+    }
+})();
+```
+
+ TIP: -
+这里有一个概念需要立即，js编译运行。函数内部的变量还没有在函数执行前，是不会进行变量提升的。
+当进入到函数内部，构建执行环境时，如果在当前的函数作用域中找不到相应的变量，就会从作用域链上找，直到 window 作用域。
+
+2019-07-17
+
+> 第 108 题：请写出返回结果
+
+```js
+var name = 'Tom';
+(function() {
+    if (typeof name == 'undefined') {
+        var name = 'Jack';
+        console.log('Goodbye ' + name);
+    } else {
+        console.log('Hello ' + name);
+    }
+})();
+```
+
+ A:
+存在变量提升的问题。但是呢，里面定义的两个 `var name` ，在执行过程还没有进行到自执行环境中时，函数内部的变量不会参与执行环境的构建。不会说，一起 生命两个变量 name ，同时将 `var name` 提升到最顶层的编译环境中，然后进入到 function 中的时候，不再进行 var name 的变量申明和赋值操作。这样的理解的错误的
+进入到函数中的执行栈中时，会有一个构建作用域的过程，先对函数体内的变量进行一个变量申明。var 有提升的功能，但是赋值是在执行到赋值语句的时候才执行。所以刚开始的时候， name 就是 undefined
+
+2019-07-16
+
+> 第 107 题：考虑到性能问题，如何快速从一个巨大的数组中随机获取部分元素
+
+比如有个数组有100K个元素，从中不重复随机选取10K个元素。
+
+ A:
+
+有很多中解法和思考角度，百花齐放的感觉！！！
+
+```js
+const arr = Array.from({length: 1000000}, i => i)
+```
+
+```js 洗牌算法
+let ret = []
+let set = new Set()
+let randomNum = 10000
+let len = arr.length
+
+for (let i = 0; i < randomNum; i++) {
+  let idx = Math.floor(Math.random() * (len - i))
+  let temp = arr[idx]
+  ret.push(temp)
+  arr[randomNum] = arr[len - i - 1]
+  arr[len - i - 1] = temp
+}
+
+
+// ret = Array.from(set)
+
+console.timeEnd('time used')
+
+console.log(ret.length)
+console.log(new Set(ret).size)
+// 这个方法有点问题，不能保证有10k个不同的数据
+```
+
+```js 分而治之
+由于随机从100K个数据中随机选取10k个数据，可采用统计学中随机采样点的选取进行随机选取，
+如在0-50之间生成五个随机数，然后依次将每个随机数进行加50进行取值，性能应该是最好的。
+
+function sliceArray(array, size) {
+    var result = [];
+    for (var x = 0; x < Math.ceil(array.length / size); x++) {
+        var start = x * size;
+        var end = start + size;
+        result.push(array.slice(start, end));
+    }
+    return result;
+}
+
+var arr =[1,2,3,4...,100k];
+var result = [];
+var randomNum = 10k;
+var newArr = sliceArray(arr,randomNum);
+for (var i = 0; i<newArr.length;i++) {
+  var element = newArr[i];
+  var luckyDog = Math.floor(Math.random() * (element.length - 1));
+  result.push(element[luckyDog]);
+}
+```
+
+```js 巧妙
+let ret = []
+let randomNum = 100
+
+for (let i = 0; i < randomNum; i++) {
+  let index = Math.floor(Math.random() * (arr.length - i))
+  ret.push(arr[index])
+  arr[index] = arr[arr.length - i - 1]
+}
+console.log(new Set(ret).size)
+```
+
+```js set
+let ret = []
+let set = new Set()
+let randomNum = 100
+
+for (let i = 0; i < randomNum; i++) {
+  run()
+}
+
+function run() {
+  let random = Math.floor(Math.random() * arr.length)
+  let val = arr[random]
+  if (set.has(val)) {
+    run()
+  } else {
+    set.add(val)
+  }
+}
+// 还有一个中方法就是，先通过set获取不同的索引值，然后通过这个索引值数组拿到具体的值push到ret结果中
+// 获取索引的数组可以使用 while 去循环遍历
+```
+
+```js while
+let ret = []
+let set = new Set()
+let randomNum = 10000
+let len = arr.length
+
+while (true) {
+  if (set.size >= randomNum) break
+  let index = Math.floor(Math.random() * len)
+  if (set.has(arr[index])) continue
+  set.add(arr[index])
+}
+
+while (set.size < randomNum) {
+  let index = Math.floor(Math.random() * len)
+  set.add(index)
+}
+// 我很喜欢能够自如使用while循环的实现
+```
+
 2019-07-05
 
-第 99 题：编程算法题
+> 第 99 题：编程算法题
 
 用 JavaScript 写一个函数，输入 int 型，返回整数逆序后的字符串。如：输入整型 1234，返回字符串“4321”。要求必须使用递归函数调用，不能用全局变量，输入函数必须只有一个参数传入，必须返回字符串。
 
