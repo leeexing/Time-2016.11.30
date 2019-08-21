@@ -1,5 +1,14 @@
 # inter-css
 
+> css杂谈
+
+## Normalize.css
+
+只是一个很小的css文件。但它在默认的HTML元素样式上提供了跨浏览器的高度一致性
+`Normalize.css`是一种 `reset css` 的替代方案。
+
+REFER: https://jerryzou.com/posts/aboutNormalizeCss/
+
 ## New Tech
 
 > css3中的新技术

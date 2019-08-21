@@ -109,4 +109,49 @@ def main():
 
 看需求，还是需要和 src 源目录地址保持一个维度的目录结构才比较好
 
-## todo
+## argparse
+
+> 脚本参数解析
+
+还有一个选项就是`optparse`
+
+综合比较之后，选择使用 `argparse`
+
+理由如下：
+1、可以有位置参数
+2、可以有可选参数。兼顾optparse 的功能
+3、提供更多的信息给使用者
+
+### 基本使用
+
+```py
+import argparse
+
+parser = argparse.ArgumentParse(description='This is a example test')
+
+parser.add_argument('input', help='这是一个位置参数')
+parser.add_argument('output', help='这是另一个位置参数')
+
+parser.add_argument('-i', '--imagesrc', dest='imagesrc', help='这是一个可选参数')
+parser.add_argument('-s', '--savesrc', dest='savesrc', help='这是另个一个可选参数')
+
+parser.parse_know_args()
+```
+
+### add_argument()常用参数
+
+dest：如果提供dest，例如dest="a"，那么可以通过args.a访问该参数
+default：设置参数的默认值
+action：参数触发的动作
+store：保存参数，默认
+store_const：保存一个被定义为参数规格一部分的值（常量），而不是一个来自参数解析而来的值。
+store_ture/store_false：保存相应的布尔值
+append：将值保存在一个列表中。
+append_const：将一个定义在参数规格中的值（常量）保存在一个列表中。
+count：参数出现的次数
+parser.add_argument("-v", "--verbosity", action="count", default=0, help="increase output verbosity")
+version：打印程序版本信息
+type：把从命令行输入的结果转成设置的类型
+choice：允许的参数值
+parser.add_argument("-v", "--verbosity", type=int, choices=[0, 1, 2], help="increase output verbosity")
+help：参数命令的介绍

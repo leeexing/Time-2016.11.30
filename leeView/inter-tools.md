@@ -16,3 +16,13 @@ REFER: https://dummyimage.com/250x150/ff000
 ## 自动生成小头像
 
 REFER: 再找一找
+
+## 新手引导
+
+https://github.com/kamranahmedse/driver.js
+
+这个可以很好的做到按步骤新手引导
+
+## 复制粘贴类库
+
+clipboard

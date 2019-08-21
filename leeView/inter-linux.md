@@ -2,6 +2,18 @@
 
 ## 基本使用
 
+### 全家桶安装
+
+1. wget
+2. mongodb
+3. nginx
+4. python
+5. supervisor
+6. virtualenvwrapper
+7. mysql
+8. git
+9. iptables
+
 ### 文件内容查看
 
 * cat  由第一行开始显示文件内容  : cat [-AbEnTv]
@@ -18,6 +30,14 @@
 
 chmod 751 file                　　　   给file的属主分配读、写、执行(7)的权限，给file的所在组分配读、执行(5)的权限，给其他用户分配执行(1)的权限
 chmod u+x file                　　　   给file的属主增加执行权限
+
+## mysql
+
+启动：
+
+```js
+mysql -u root -p
+```
 
 ## shell
 

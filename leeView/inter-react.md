@@ -1,5 +1,41 @@
 # inter-react
 
+## 常用的react类库
+
+1. redux-actions
+
+使用简便
+
+```js
+const initialState = {
+  list: tabList ? tabList.list : [],
+  activeKey: tabList ? tabList.activeKey : '',
+}
+
+const tabListResult = handleActions({
+  'request tab list'(state, action) {
+    return { ...state, loading: false }
+  },
+  'update tab list'(state, action) {
+    const data = action.payload
+    const findList = state.list.find(tab => tab.key === data.key)
+    const list = findList === undefined ? [...state.list, data] : state.list
+    sessionStorage.setItem('tabList', JSON.stringify({ list, activeKey: data.key, loading: false }))
+    return { list, activeKey: data.key, loading: false }
+  },
+  'update tab checked'(state, action) {
+    const { activeKey } = action.payload;
+    sessionStorage.setItem('tabList', JSON.stringify({ ...state, activeKey, loading: false }))
+    return { ...state, activeKey, loading: false }
+  },
+  'delete tab from list'(state, action) {
+    const { targetKey } = action.payload
+    // 。。。
+    return { list, activeKey, loading: false }
+  },
+}, initialState)
+```
+
 ## 代码规范
 
 REFER: https://github.com/lzbSun/react-native-coding-style
@@ -344,6 +380,206 @@ return isMount;
 
 REFER: https://github.com/ctrlplusb/easy-peasy
 
+### 利用 useState 创建 Redux
+
+Redux的精髓就是 reducer，而利用 react hooks 可以轻松创建一个 redux 机制
+
+```js
+function useReducer(reducer, initialState) {
+  const [state, setState] = useState(initialState)
+
+  function dispatch(action) {
+    const nextState = reducer(state, action)
+    setState(nextState)
+  }
+
+  retrun [state, dispatch]
+}
+```
+
+ TIP: 竟然是这样地简洁
+
+ ```js
+// 一个action
+function useTodos() {
+  const [todos, dispatch] = useReducer(todosRecuder, [])
+
+  function handleAddClick(text) {
+    dispatch({ type: 'add', text })
+  }
+
+  return [todos, { handleAddClick }]
+}
+
+function TodosUI() {
+  const [todos, actions] = useTodos()
+
+  return (
+    <div>
+    {
+      todos.map((todo, index) => {
+        <div>{ todo.text }</div>
+      })
+      <button onClick={actions.handleAddClickshenme}>Add Tofo</button>
+    }
+    </div>
+  )
+}
+ ```
+
+### useEffect
+
+useEffect是处理副作用的，其执行时机在 **每次render渲染完毕后** ，换句话说就是每次渲染都会执行，只是实际在真是 DOM 操作完毕后。
+
+需要注意的是，useEffect 也随着每次渲染而不同，**同一个组件不同渲染之间，useEffect 内 闭包环境完全独立**。
+
+就是 useEffect 的第二个参数，dependences。dependences 这个参数定义了 useEffect 的依赖，在新的渲染中，只要所有依赖项的引用都不发生变化，useEffect 就不会被执行，且当依赖项为 [] 时，useEffect 仅在初始化执行一次，后续的 Rerender 永远也不会被执行。
+
+**尽量将函数写在 useEffect 内部**：
+为了避免遗漏依赖，必须将函数写在 useEffect 内部。这样才能通过一些插件静态分析补齐依赖
+
+```js
+function Counter() {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    function getFetchUrl() {
+      return "https://v?query=" + count;
+    }
+
+    getFetchUrl();
+  }, [count]);
+
+  return <h1>{count}</h1>;
+}
+```
+
+getFetchUrl 这个函数依赖了count，而如果将这个函数定义在 useEffect 外部，无论是机器还是人眼都很难看出 useEffect 的依赖包含了 count。
+
+### useCallback
+
+> 如果非要把 Function 写在 Effect 外面
+
+有点像 vue 里面的 computed
+
+**useCallback 比 componentDidUpdate 更好用**。
+
+```js
+function Parent() {
+  const [query, setQuery] = useState('react')
+
+  const fetchData = useCallback(() => {
+    const url = 'xxx' + query
+    // ... fetch data and return it
+  }, [query])
+
+  return <Child fetchData={fetchData} />
+}
+
+function Child({ fetchData }) {
+  let [data, setData] = useData(null)
+
+  useEffect(() => {
+    fetchData().then(setData)
+  }, [fetchData]) // Effect deps are ok
+
+  /// ...
+}
+```
+
+ TIP: 由于函数也具有 `Capture Value` 特性，经过 `useCallback` 包装过的函数可以当作**普通变量**作为 useEffect 的依赖， useCallback 做的事情
+ 就是在其依赖变化时，返回一个新的函数，出发 useEffect 的依赖变化，并激活其重新执行
+
+ 利用 useCallback 封装的取数函数，可以直接作为依赖传入 useEffect， useEffect 只要关心取数函数是否变化，而**取数参数**的变化在 useCallback 时关心，做到 依赖不丢，逻辑内聚，从而更加容易维护
+
+### useMemo
+
+> 用 useMemo 做局部 PureRender
+
+使用useMemo方法，避免无用方法的调用
+
+```js
+function Button({ name, children }) {
+  function changeName(name) {
+    console.log('11')
+    return name + '改变name的方法'
+  }
+
+const otherName =  useMemo(()=>changeName(name),[name]) // -依赖 name 值得变化，只有变化的时候才去调用该方法，避免性能的损耗
+  return (
+      <div>
+        <div>{otherName}</div>
+        <div>{children}</div>
+      </div>
+  )
+}
+
+作者：DoJustForlove
+链接：https://juejin.im/post/5c9d7968f265da610b3a2153
+```
+
+### useRef
+
+通过 useRef 创建的对象，其值只有一份，而且在所有 Rerender 之间共享
+
+```js
+function Counter() {
+  const count = useRef()
+
+  const log = () => {
+    count.current++
+    setTimeout(() => {
+      console.log(count.current)
+    }, 3000)
+  }
+
+  return (
+    <div>
+      <p>you click {count.current} times</p>
+      <button onClick={log}>Click me</button>
+    </div>
+  )
+}
+```
+
+对 count.current 赋值或者读取，读到的永远是其最新值，而与渲染闭包无关
+
+可以自定义一下上面的逻辑。简化操作
+
+```js
+function useCurrentValue(value) {
+  const ref = useRef(0)
+
+  useEffect(() => {
+    ref.current = value
+  }, [value])
+
+  return ref
+}
+```
+
+```js
+function Counter() {
+  const [count, setCount] = useState(0);
+  const currentCount = useCurrentValue(count);  <---------只要理解这个自定义的 hooks 就可以了。代码清爽很多
+
+  const log = () => {
+    setCount(count + 1);
+    setTimeout(() => {
+      console.log(currentCount.current);
+    }, 3000);
+  };
+
+  return (
+    <div>
+      <p>You clicked {count} times</p>
+      <button onClick={log}>Click me</button>
+    </div>
+  );
+}
+
+```
+
 ## redux
 
 ### mapDispatchToProps
@@ -532,6 +768,115 @@ App组件就可以直接获取路由中这些属性了，但是，如果App组�
 
 在使用`withRouter`解决更新问题的时候，一定要`保证withRouter在最外层`，比如 `withRouter(connect(Component))`
 
+### 路由中组件按需加载的方案
+
+> react-loadable
+
+1、代码拆分 spliting
+2、避免组件加载闪烁。 Loading 组件
+3、预加载。preload 属性
+
+```jsx
+import Loadable from 'react-loadable';
+import Loading from './Loading';
+
+const LoadableComponent = Loadable({
+  loader: () => import('./Dashboard'),
+  loading: Loading,
+})
+
+export default class LoadableDashboard extends React.Component {
+  render() {
+    return <LoadableComponent />;
+  }
+}
+```
+
+## Immutable.js 的常用API
+
+### fromJS()
+
+> 将一个js数据转换为Immutable类型的数据。fromJS(value, converter) 第二个参数可不填，默认情况会将数组准换为List类型，将对象转换为Map类型，其余不做操作
+
+```js
+const obj = Immutable.fromJS({a:'123',b:'234'},function (key, value, path) {
+        console.log(key, value, path)
+        return isIndexed(value) ? value.toList() : value.toOrderedMap())
+    })
+```
+
+### toJS()
+
+> 将一个Immutable数据转换为js类型的数据。value.toJS()
+
+### is()
+
+> 对两个对象进行比较。is(map1, map2).和js中对象的比较不同，在js中比较两个对象比较的是地址，但是在Immutable中比较的是这个对象hashCode和valueOf，只要两个对象的hashCode相等，值就是相同的，避免了深度遍历，提高了性能
+
+```js
+import { Map, is } from 'immutable'
+const map1 = Map({ a: 1, b: 1, c: 1 })
+const map2 = Map({ a: 1, b: 1, c: 1 })
+map1 === map2   //false
+Object.is(map1, map2) // false
+is(map1, map2) // true
+```
+
+### List() 和 Map()
+
+> 用来创建一个新的List/Map对象
+
+```js
+//List
+Immutable.List(); // 空List
+Immutable.List([1, 2]);
+
+//Map
+Immutable.Map(); // 空Map
+Immutable.Map({ a: '1', b: '2' });
+```
+
+### size
+
+> 属性，获取List/Map的长度，等同于ImmutableData.count();
+
+### get() 、 getIn()
+
+> 获取数据结构中的数据
+
+```js
+//获取List索引的元素
+ImmutableData.get(0);
+
+// 获取Map对应key的value
+ImmutableData.get('a');
+
+// 获取嵌套数组中的数据
+ImmutableData.getIn([1, 2]);
+
+// 获取嵌套map的数据
+ImmutableData.getIn(['a', 'b']);
+```
+
+### set()
+
+> 设置第一层key、index的值
+
+```js
+const originalList = List([ 0 ]);
+// List [ 0 ]
+originalList.set(1, 1);
+// List [ 0, 1 ]
+originalList.set(0, 'overwritten');
+// List [ "overwritten" ]
+originalList.set(2, 2);
+// List [ 0, undefined, 2 ]
+```
+
+其余的参考相关文档：
+
+REFER: https://www.jianshu.com/p/0fa8c7456c15
+
 ## react 基础
 
 ### react.createPortal
@@ -588,6 +933,30 @@ class LoginModel extends Component {
     return null
   }
 ```
+
+## emotion
+
+> CSS in JS 方案
+
+从写法上看, 侵入性比较小, 直接就是 className:
+
+```js
+import styled, { css } from 'react-emotion';
+
+const Container = styled('div')`
+  background: #333;
+`
+const myStyle = css`
+  color: rebeccapurple;
+`
+const app = () => (
+<Container>
+  <p className={myStyle}>Hello World</p>
+</Container>
+);
+```
+
+生产的CSS是基于 **hash** 的 className 包裹的。插入在 `<head />>` 当中的。这样运行时甚至热替换时没有问题
 
 ## 优秀代码学习 👍👍👍👍👍 重点推介
 
@@ -651,3 +1020,64 @@ componentDidMount() {
 ```
 
 没有使用回调啊。居然可以i这么写
+
+### 显示富文本中的内容。保持原有的标签样式
+
+> _html
+
+```js
+<div dangerouslySetInnerHTML = {{ __html: checkMessages.details }} />
+```
+
+如果是直接调用接口中的值，则是以上的写法，如果是单纯的显示固定的内容，用如下的写法：
+
+```js
+<div dangerouslySetInnerHTML={{ __html: '<div>123</div>' }} />
+```
+
+原理：
+
+1.dangerouslySetInnerHTMl 是React标签的一个属性，类似于angular的ng-bind；
+
+2.有2个{{}}，第一{}代表jsx语法开始，第二个是代表dangerouslySetInnerHTML接收的是一个对象键值对;
+
+3.既可以插入DOM，又可以插入字符串；
+
+4.不合时宜的使用 innerHTML 可能会导致 cross-site scripting (XSS) 攻击。 净化用户的输入来显示的时候，经常会出现错误，不合适的净化也是导致网页攻击的原因之一。dangerouslySetInnerHTML 这个 prop 的命名是故意这么设计的，以此来警告，它的 prop 值（ 一个对象而不是字符串 ）应该被用来表明净化后的数据。
+
+### useInterval
+
+> 自定义 hooks
+
+```js
+import React, { useState, useEffect, useRef } from 'react'
+
+function useInterval(callback, delay) {
+  const savedCallback = useRef()
+
+  // 保留新回调
+  useEffect(() => {
+    savedCallback = callback
+  })
+
+  // 建立interval
+  useEffect(() => {
+    function tick() {
+      savedCallback.current()
+    }
+
+    if (delay !== null) {
+      let id = setInterval(tick, delay)
+      return () => clearInterval(id)
+    }
+  }, [delay])
+}
+
+// 可以暂停的 interval
+const [delay, setDelay] = useState(100)
+const [isRunning, setIsRunning] = useState(true)
+
+useInterval(() => {
+  setCount(count + 1)
+}, isRuning ? delay : null)
+```

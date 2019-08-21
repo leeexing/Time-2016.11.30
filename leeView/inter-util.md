@@ -43,3 +43,23 @@ class LazyLoad {
 const lazy = new LazyLoad('.lazy')
 
 ```
+
+## 对象深拷贝
+
+```js
+const deepCopy = input => {
+  if (input instanceof Object) {
+    if (Array.isArray(input)) {
+      return input.map(deepCopy)
+    }
+    let output = {}
+    Object.entries(input).forEach([key, value] => {
+      output[key] = deepCopy(value)
+    })
+    return output
+  }
+  return input
+}
+
+// 挺新奇的一种写法。学习了
+```
