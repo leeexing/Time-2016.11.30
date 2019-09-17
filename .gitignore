@@ -13,6 +13,9 @@ core/
 test/
 test.*
 
+# 工作文件
+work/
+
 # 思维导图等
 LeeMap/
 project/phaser

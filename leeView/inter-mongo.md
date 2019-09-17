@@ -772,6 +772,14 @@ config.member[n].priority=...
 rs.reconfig(config,{"force":true})
 ```
 
+## 主从集
+
+1. ./mongod --port 27018
+2. use admin
+3. db.auth('root', 'xxx!ok.')
+4. rs.slaveOk() // 从库验证
+5. show dbs
+
 ## 分片(集群)
 
 REFER: https://www.cnblogs.com/clsn/p/8214345.html

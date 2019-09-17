@@ -1,5 +1,7 @@
 # inter-linux
 
+
+
 ## 基本使用
 
 ### 全家桶安装
@@ -30,6 +32,24 @@
 
 chmod 751 file                　　　   给file的属主分配读、写、执行(7)的权限，给file的所在组分配读、执行(5)的权限，给其他用户分配执行(1)的权限
 chmod u+x file                　　　   给file的属主增加执行权限
+
+### 环境变量 ~/.bashrc 、~/.profile
+
+**区别**：
+
+/etc/*和~/.*区别：
+
+/etc/profile，/etc/bashrc 是系统全局环境变量设定
+
+~/.profile，~/.bashrc是用户家目录下的私有环境变量设定
+
+~/.profile与~/.bashrc的区别:
+
+都具有个性化定制功能
+
+~/.profile可以设定本用户专有的路径，环境变量等，它只在登入的时候执行一次
+
+~/.bashrc也是某用户专有设定文档，可以设定路径，命令别名，每次shell script的执行都会使用它一次
 
 ## mysql
 

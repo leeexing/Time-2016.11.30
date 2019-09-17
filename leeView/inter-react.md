@@ -580,6 +580,44 @@ function Counter() {
 
 ```
 
+### useDebounce
+
+很厉害的封装
+
+```js
+import { useState } from 'react'
+
+function useDebounce(value, delay) {
+  const [debounceValue, setDebounceValue] = useState(value)
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebounceValue(value)
+    }, delay)
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [value, delay]) // only re-call effect if value or delay changes
+
+  return debounceValue
+}
+```
+
+使用
+
+```js
+const App:React.FC = ({ text }) => {
+  // 无论 text 变化多快，textDebounce 最多 1 秒修改一次
+  const textDebounce = useDebounce(text, 1000)
+
+  return useMemo(() => {
+    // 使用 textDebounce, 但渲染速度很慢的一堆代码
+  }, [textDebounce])
+}
+```
+
+使用 textDebounce 替代 text 可以将渲染频率控制在我们指定的范围内
+
 ## redux
 
 ### mapDispatchToProps
