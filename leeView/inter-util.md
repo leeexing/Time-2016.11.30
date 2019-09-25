@@ -1,5 +1,43 @@
 # inter-util
 
+## 播放音频
+
+> 需要考虑兼容性
+
+```js
+const audio = new Audio()
+const fileReader = new FileReader()
+const audioContext = new AudioContext()
+
+  playMusic(src) {
+    audio.src = src
+    return audio.play()
+  },
+  pauseMusic() {
+    audio.pause()
+  },
+  playSound(src) {
+    const xhr = new XMLHttpRequest()
+    xhr.open('GET', src)
+    xhr.responseType = 'blob'
+    xhr.onload = () => fileReader.readAsArrayBuffer(xhr.response)
+    xhr.send()
+    fileReader.onload = () => {
+      audioContext.decodeAudioData(fileReader.result, result => {
+        //创建播放源
+        const source = audioContext.createBufferSource()
+        source.buffer = result
+        //连接输出终端
+        source.connect(audioContext.destination)
+        //开始播放
+        source.start()
+      })
+    }
+  },
+```
+
+REFER: https://juejin.im/post/5cbfdd4ee51d456e6f45c721
+
 ## 图片懒加载
 
 ```js
