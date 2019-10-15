@@ -79,7 +79,7 @@ mongoimport -d dbname -c collectionname --file filename --headerline --type json
             --file ：要导入的文件
 
 ```js
-sudo mongoimport -d mongotest -c users --file /home/mongodump/articles.json --type json
+sudo mongoimport -d mongotest -c users --file /home/mongodump/articles.json --type json --port 27018 -u root -p 'Train!ok.' --autenticationDatabase admin --upsert
 ```
 
 ## 备份与恢复

@@ -307,6 +307,7 @@ class DrBluePrint {
       this.isLeftMouseDown = false
       this.isRightMouseDown = false
     }, false)
+
     this.container.addEventListener(this.getMouseOrTouchEventName('mousewheel'), event => {
       event.preventDefault &&	event.preventDefault()
       event.returnValue = false
@@ -469,6 +470,27 @@ class DrBluePrint {
     let relateY2 = (pt2y - this.dy) / this.height
     return [relateX1, relateY1, relateX2, relateY2]
   }
+  getRotateImage() {
+    this.offlineCanvas.width = this.originImageW
+    this.offlineCanvas.height = this.originImageH
+    this.reset()
+    console.log(this.width, this.originImageW)
+    let angle = 10 * Math.PI / 180
+    // this.offlineCanvas.context.translate(100, this.height / 2)
+    this.offlineCanvas.context.rotate(angle)
+    this.offlineCanvas.context.drawImage(this.containerCanvas, this.dx, this.dy, this.width, this.height, 0, 0, this.originImageW, this.originImageH)
+    // this.drawUserMarkedRectangles(false)
+    // this.offlineCanvas.context.drawImage(this.overlappedCanvas, this.dx, this.dy, this.width, this.height, 0, 0, this.originImageW, this.originImageH)
+    let imageSrc = this.offlineCanvas.toDataURL()
+    let image = new Image()
+    image.onload = () => {
+      let img = document.querySelector('img')
+      img && document.body.removeChild(img)
+      document.body.appendChild(image)
+    }
+    image.src = imageSrc
+    console.log('rotate', this.getUserMarkedRectanglesInfo())
+  }
   reset () {
     this.dx = this.initDx
     this.dy = this.initDy
@@ -558,5 +580,9 @@ $(() => {
 
   $('.get').click(() => {
     drBluePrint.getMarkedImage()
+  })
+
+  $('.rotate').click(() => {
+    drBluePrint.getRotateImage()
   })
 })

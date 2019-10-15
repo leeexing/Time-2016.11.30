@@ -810,12 +810,17 @@ Vue.directive('focus', {
 * vnode：Vue 编译生成的虚拟节点。移步 VNode API 来了解更多详情。
 * oldVnode：上一个虚拟节点，仅在 update 和 componentUpdated 钩子中可用。
 
-### 选项 / 生命周期钩子
+### 选项 / 生命周期钩子 (created、activated、errorCaptured)
 
-所有的生命周期钩子自动绑定 this 上下文到实例中，因此你可以访问数据，对属性和方法进行运算。这意味着`你不能使用箭头函数来定义一个生命周期方法` (例如 created: () => this.fetchTodos())。这是因为箭头函数绑定了父上下文，因此 this 与你期待的 Vue 实例不同，this.fetchTodos 的行为未定义。
+所有的生命周期钩子自动绑定 this 上下文到实例中，因此你可以访问数据，对属性和方法进行运算。
+这意味着`你不能使用箭头函数来定义一个生命周期方法` (例如 created: () => this.fetchTodos())。这是因为箭头函数绑定了父上下文，因此 this 与你期待的 Vue 实例不同，this.fetchTodos 的行为未定义。
 
 **activated**
 keep-alive 组件激活时调用。
+
+created()：在创建vue对象时，当html渲染之前就触发；但是注意，全局vue.js不强制刷新或者重启时只创建一次，也就是说，created()只会触发一次；
+
+activated()：在vue对象存活的情况下，进入当前存在activated()函数的页面时，一进入页面就触发；可用于初始化页面数据等
 
 **errorCaptured**
 当捕获一个来自子孙组件的错误时被调用。此钩子会收到三个参数：错误对象、发生错误的组件实例以及一个包含错误来源信息的字符串。此钩子可以返回 false 以阻止该错误继续向上传播
@@ -837,39 +842,6 @@ Vue 实例使用的根 DOM 元素。
 
 vm.$refs
 一个对象，持有注册过 ref 特性 的所有 DOM 元素和组件实例。
-
-### 容器属性
-
-grid-template 系列
-
-grid-template-columns
-grid-template-rows
-grid-template-areas
-
-
-grid-gap 系列
-
-grid-column-gap
-grid-row-gap
-
-
-place-items 系列
-
-justify-items
-align-items
-
-
-place-content 系列
-
-justify-content
-align-content
-
-
-grid 系列
-
-grid-auto-columns
-grid-auto-rows
-grid-auto-flow
 
 ### keep-alive
 
@@ -987,17 +959,29 @@ const unWatch = app.$watch('text', (newVal, oldVal) => {
 unWatch(); // 手动注销watch
 ```
 
-### Attrs 和 Listeners
+### $Attrs 和 $listeners
 
-REFER: https://juejin.im/post/5ae4288a5188256712784787
+REFER: [Vue 父子组件数据传递( inheritAttrs + $attrs + $listeners)](https://juejin.im/post/5ae4288a5188256712784787)
 REFER: [vue组件间通信的六种方式](https://juejin.im/post/5cde0b43f265da03867e78d3#heading-11)
 
-$attrs--继承所有的父组件属性（除了prop传递的属性、class 和 style ）
-inheritAttrs--默认值true,继承所有的父组件属性（除props的特定绑定）作为普通的HTML特性应用在子组件的根元素上，如果你不希望组件的根元素继承特性设置inheritAttrs: false,但是class属性会继承
-$listeners--属性，它是一个对象，里面包含了作用在这个组件上的所有监听器，你就可以配合 v-on="$listeners" 将所有的事件监听器指向这个组件的某个特定的子元素。
+* $attrs--继承所有的父组件属性（除了prop传递的属性、class 和 style ）
+
+* inheritAttrs--默认值true,继承所有的父组件属性（除props的特定绑定）作为普通的HTML特性应用在子组件的根元素上，
+    如果你不希望组件的根元素继承特性设置  inheritAttrs: false,但是class属性会继承
+
+* $listeners--属性，它是一个对象，里面包含了作用在这个组件上的所有监听器，你就可以配合 v-on="$listeners"
+  将所有的事件监听器指向这个组件的某个特定的子元素。
 
 **主要用途**
 用在父组件传递数据给子组件或者孙组件
+
+```js 项目中看到的代码
+<template>
+  <el-select ref="dragSelect" v-model="selectVal" v-bind="$attrs" class="drag-select" multiple v-on="$listeners">
+    <slot />
+  </el-select>
+</template>
+```
 
 ### provide 和 inject
 
@@ -1053,6 +1037,7 @@ self是只执行子级本身的函数
 
 > 这个也是 vue 2.3 之后新加的一个语法糖。这也是平时在分装组件的时候很好用的一个语法糖，它的实现机制和v-model是一样的。
 
+
 ```js
 <comp :foo.sync="bar" />
 
@@ -1063,6 +1048,18 @@ self是只执行子级本身的函数
 // 更新方式
 this.$emit('update:foo', newVal)
 ```
+
+2.当我们用一个对象同时设置多个 prop 的时候，也可以将这个 .sync 修饰符和 v-bind 配合使用：
+
+```js
+<text-document v-bind.sync="doc"></text-document>
+```
+
+这样会把 `doc` **对象**中的每一个属性 (如 title) 都作为一个独立的 prop 传进去，然后各自添加用于更新的 v-on 监听器。
+
+注意：doc 必须是一个对象，不能是一个单独的基本类型
+
+将 v-bind.sync 用在一个字面量的对象上，例如 v-bind.sync=”{ title: doc.title }”，是无法正常工作的
 
 ### Object.freeze
 

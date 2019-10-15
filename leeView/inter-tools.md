@@ -9,6 +9,13 @@ TOC
 
 ## 前端
 
+### vue类库
+
+1. [path-to-regexp](https://www.npmjs.com/package/path-to-regexp). Turn a path string such as /user/:name into a regular expression.
+2. [dropzonejs](https://www.dropzonejs.com/)
+3. [fusejs](https://fusejs.io/) -- 轻量级的模糊搜索
+4. [screenfull](https://www.npmjs.com/package/screenfull) -- 更加便捷的全屏唤起
+
 ### Audio/Video
 
 REFER:

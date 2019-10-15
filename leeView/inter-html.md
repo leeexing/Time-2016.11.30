@@ -281,6 +281,24 @@ class Music {
 
 > 交叉观察者
 
+### 使用
+
+函数接受两个参数：callback、option
+callback：函数被调用时，回传给他一个数组，这个数组里面的每个对象就是当前`进入可视区域`或者`离开可视区域`的对象（intersectionObserverEntry 对象）
+这个对象有很多的属性。其中常用的属性是：
+
+* target：被观察的目标元素。是一个DON节点对象
+* isIntersecting: 是否进入可视区域
+* intersectionRatio：相交区域和目标元素的比例值。进入可视区域，值大于0，否则等于零
+
+**注意**：callback 一般会触发两次，一次是目标元素刚进入视口（开始可见），另一次是完全离开视口（开始不可见）
+
+option：主要是一些配置信息
+
+* threshold 决定什么时候触发回调函数，它是一个数组，每个成员都是一个门槛值，默认为 [0]，即交叉比例达到0时触发回调函数
+* root 用于观察的根元素，默认是浏览器的视口，也可以指定具体元素，指定元素的时候用于观察的元素`必须是指定元素的子元素` DOM节点
+* rootMargin 用来扩大或者缩小视窗的大小，使用css的定义方法 10px 10px 30px 20px.表示 top\right\bottom和left的值
+
 ```js
 const box = document.querySelector('.box');
 const intersectionObserver = new IntersectionObserver((entries) => {
@@ -293,3 +311,6 @@ const intersectionObserver = new IntersectionObserver((entries) => {
 intersectionObserver.observe(box);
 
 ```
+
+REFER:
+[IntersectionObserver API 使用教程](http://www.ruanyifeng.com/blog/2016/11/intersectionobserver_api.html)
