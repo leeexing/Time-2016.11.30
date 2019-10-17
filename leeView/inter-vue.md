@@ -1096,6 +1096,64 @@ export default router
 
 ## vuex
 
+## vue proxy 遇到的坑
+
+```js config/index.js
+dev: {
+  // Paths
+  assetsSubDirectory: 'static',
+  assetsPublicPath: '/',
+  proxyTable: {
+    '/v2/api/': {
+      target: 'http://127.0.0.1:5281/v2/api',
+      secure: false,
+      changeOrigin: true,
+      onProxyReq: ProxyReq => {
+        console.log('%c PROXY ...', 'color: teal')
+        // proxyReq.removeHeader('origin')
+      },
+      pathRewrite: {
+        '^/v2/api/': ''
+      }
+    },
+    '/v2/smartApi/': {
+      target: 'http://10.15.225.12:8848/api',
+      secure: false,
+      changeOrigin: true,
+      onProxyReq: ProxyReq => {
+        console.log('%c PROXY ...', 'color: teal')
+        // proxyReq.removeHeader('origin')
+      },
+      pathRewrite: {
+        '^/v2/smartApi/': ''
+      }
+    },
+  },
+  // ...
+}
+```
+
+然后控制台之中出现不了
+
+```js
+ I  Your application is running here: http://localhost:7014
+%c PROXY ... color: teal
+%c PROXY ... color: teal
+%c PROXY ... color: teal
+%c PROXY ... color: teal
+```
+
+注意：
+主要原因在于，我的 axios 请求的端口使用的是 5280 而我的前端站点使用的端口是 7014.
+本来 proxy 代理的就是前端页面的路由，也就是代理默认端口 7014 下的接口请求
+而我之前的路由已经有了一个后台服务的5280端口.
+这样的话，也就不起作用了。
+
+解决方案：
+
+1. 前端站点的端口和接口请求的端口保持一致
+2. 使用 nginx 反向代理。需要注意的是，代理的服务端口不能和已经开启的python服务端口一样。一样的话就不能是实现反向代理
+
 ## vue-cli3 遇到的问题
 
 ### 不能再IE11上显示

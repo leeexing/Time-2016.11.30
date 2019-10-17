@@ -3,7 +3,7 @@ title: typescript learn
 tags: javascript, typescript
 ---
 
-## 基本语法使用
+## 1、基本语法使用
 
 知道的简单的略过，这里重点学习比较难理解的
 
@@ -150,7 +150,276 @@ export declare type Position = 'left' | 'right' | 'top' | 'bottom'
 * /* tslint:disable:no-any */ disable tslint restriction on no-any when you WANT to use any
 * /* tslint:disable:max-line-length */ disable line wrapping linting
 
-## 一些简单的例子|分析|理解
+## 2、interface 和 type 的不同
+
+2.1 接口有几种类型：
+
+* 属性类接口
+* 函数类接口
+* 可索引接口
+* 类类型接口
+
+其他还有 接口继承接口，接口继承类
+
+```ts 属性类接口。type也可以
+interface Person {
+  name: string;
+  age: numver;
+}
+
+type Person = {
+  name: string
+  age: number
+}
+
+function printPerson(person: Person) {
+  console.log(person.name + ' ' + person.age)
+}
+
+```
+
+```ts 函数类接口. type 也可以
+interface encrypt {
+  (key: string, value: string): string;
+}
+
+type encrypt = (key: string, value: string) => string;
+
+let md5: encrypt = function(key: string, value: string): string {
+  return key + value
+}
+```
+
+```ts 可索引接口：对数组和对象的约束。不常用
+interface UserArr {
+  [index: number]: string;
+}
+
+interface UserObj {
+  [index: string]: string;
+}
+```
+
+```ts 类类型接口
+interface Animal {
+  name: string;
+  eat(str: string): void;
+}
+
+class Dog implements Animal {
+  name: string;
+  constructor(name: string) {
+    this.name = name
+  }
+
+  eat(str: string) {
+    console.log(this.name + 'eat shit')
+  }
+}
+
+interface ClockConstructor {
+  new (hour: number, minute: number);
+}
+
+class Clock implements ClockConstructor {
+  currentTime: Data;
+  constructor(h: number, m: number) {}
+}
+```
+
+2.2 interface 和 type 使用的区别
+
+```ts
+interface CreateArr<T> {
+  (len: number, value: T): Array<T>;
+}
+
+//  TIP: 这样是报错的
+type CreateArray<T> {
+  (len: number, value: T): Array<T>;
+}
+// 这样写才对
+type CreateArray<T> = (len: number, value: T) => Array<T>;
+
+```
+
+看到上面的代码，可以明白 interface 使用的是 `{}`; type 使用的是 `=`
+
+下面这段代码需要说明的是。两种不同的声明函数需要符合的形状的方式
+
+```ts
+interface Counter {
+  (start: number): string
+}
+
+type Count = (start: number) => number;
+
+let getCounter: Count
+getCounter = function(start: number) {
+  console.log(223)
+  return 'heelp'
+}
+```
+
+都允许扩展（Extends）
+
+```ts
+interface Name {
+  name: string;
+}
+interface User extends Name {
+  age: number;
+}
+
+type Name = {
+  name: string;
+}
+type User = Name & { age: string }
+
+// 可以相互继承
+type Name = {
+  name: string;
+}
+interface User extends Name {
+  age: number;
+}
+```
+
+不同点：
+
+* type可以生命基本类型别名，联合类型，元组等类型
+* type 语句中还可以使用 `typeof` 获取实例的 类型 进行赋值
+* 其他骚操作
+
+```ts
+type Name = string;
+
+interface Dog {
+  wong()
+}
+interface Cat {
+  miao()
+}
+type Pet = Dog | Cat
+type PetList = [Dog, Cat]
+
+let div = document.createElement('div')
+type B = typeof div
+
+// 骚操作
+type StringOrNumber = string | number;
+type Text = string | { text: string }
+type NameLookup = Dictionary<string, Person>
+type callback<T> = (data: T) => void;
+type Pair<T> = [T, T]
+type Coordinates = Pair<number>
+type Tree<T> = T | { left: Tree<t>, right: Tree<T>}
+```
+
+其中,类似 `(v: T) => boolean` 这样的代码，就是将逻辑复用，声明成一个类型
+
+```ts
+// 声明泛型类，类型变量为 T
+class FilteredList<T> {
+    // 声明过滤器是以 T 为参数类型，返回 boolean 的函数表达式
+    filter: (v: T) => boolean;
+    // 声明数据是 T 数组类型
+    data: T[];
+    constructor(filter: (v: T) => boolean) {
+        this.filter = filter;
+    }
+
+    add(value: T) {
+        if (this.filter(value)) {
+            this.data.push(value);
+        }
+    }
+
+    get all(): T[] {
+        return this.data;
+    }
+}
+
+// 处理 string 类型的 FilteredList
+const validStrings = new FilteredList<string>(s => !s);
+
+// 处理 number 类型的 FilteredList
+const positiveNumber  = new FilteredList<number>(n => n > 0);
+
+
+// 优化之后
+type Predicate<T> = (v: T) => boolean;
+
+class FilteredList<T> {
+    filter: Predicate<T>;
+    data: T[];
+    constructor(filter: Predicate<T>) { ... }
+    add(value: T) { ... }
+    get all(): T[] { ... }
+}
+```
+
+interface 可以做到
+
+* 声明合并
+
+```ts
+interface User {
+  name: string
+  age: number
+}
+interface User {
+  sex: string
+}
+
+// User 接口为
+{
+  name
+  age
+  sex
+}
+```
+
+2.3 泛型别名
+
+```ts
+// 非泛型的联合类型重命名
+type ant = string | (() => string)
+
+// 泛型相关类型的重命名
+type ant<T> = T | (() => T)
+```
+
+2.4 泛型接口
+
+```ts
+interface Generics {
+  <S>(arg: S): S;
+}
+
+const generics = <T>(arg: T): T => {
+  return arg
+}
+
+let generics_1: <T>(arg: T) => T = generics
+let generics_2: { <S>(arg: S): S } = generics // 对象字面量
+let generics_3: Generics = generics
+
+console.log(generics_1(18))
+console.log(generics_1('是吧'))
+console.log(generics_1('pre'))
+```
+
+2.5 泛型类
+
+```ts
+class Sum <T> {
+  zero: T;
+  add: (x: T, y: T) => T;
+}
+```
+
+## 3、一些简单的例子|分析|理解
 
 1、[一篇文章中学习](https://2ality.com/2018/04/type-notation-typescript.html)
 
@@ -291,7 +560,7 @@ type ExtractActionParameters<A, T> = A extends { type: T }
   : never
 ```
 
-## react-typescript-cheatsheet
+## 4、react-typescript-cheatsheet
 
 ```jsx
 class App extends React.Component<{ message: string }, { count: number }> {
@@ -337,7 +606,7 @@ class App extends React.Component<{}, { text: string }> {
 
 ```
 
-## 别人的分享
+## 5、别人的分享
 
 1、useContext
 
@@ -404,6 +673,4 @@ export class Modal extends React.Component {
 }
 ```
 
-## 实战中使用心得
-
-
+## 6、实战中使用心得
