@@ -150,6 +150,98 @@ export declare type Position = 'left' | 'right' | 'top' | 'bottom'
 * /* tslint:disable:no-any */ disable tslint restriction on no-any when you WANT to use any
 * /* tslint:disable:max-line-length */ disable line wrapping linting
 
+### 1.2 泛型的再理解
+
+> 这里告诉我，官方的文档还是说得更加详细一些。阮一峰的那个对泛型这一个知识点说得比较简单，例子讲解也不够详细
+
+```ts
+function logIdentiry<T>(arg: T[]): T[] {
+  console.log(arg.length)
+  return arg
+}
+function loggingIdentity<T>(arg: Array<T>): Array<T> {
+  return arg
+}
+
+// - 应出勤和实出勤天数
+let identi: <T>(arg: T) => T = identity
+let identit: { <T>(arg: T): T } = identity
+
+// 提取出来，编写一个泛型接口
+interface GenericIdentity {
+  <T>(arg: T): T
+}
+let test: GenericIdentity = identity
+
+// 把泛型参数当作整个接口的一个参数。这样我们就能清楚的知道使用的具体是哪个泛型类型
+interface GenericIdentit<T> {
+  (arg: T): T
+}
+// 但是这样的花，下面这种写法就不对了。没有
+let test: GenericIdentity = identity
+// 正确的写法应该是这样，包含一个类型参数
+let test2: GenericIdentit<string> = identity
+                          ⬆⬆⬆⬆⬆⬆⬆
+
+// 不再描述泛型函数，而是把非泛型函数签名作为泛型类型一部分。
+// 当我们使用 GenericIdentityFn的时候，还得传入一个类型参数来指定泛型类型（这里是：number），锁定了之后代码里使用的类型。
+// 对于描述哪部分类型属于泛型部分来说，理解何时把参数放在调用签名里和何时放在接口上是很有帮助的。
+
+```
+
+**泛型约束**:
+
+```ts
+function loggingIdentity<T>(arg: T): T {
+    console.log(arg.length);  // Error: T doesn't have .length
+    return arg;
+}
+
+interface Lengthwise {
+  length: number
+}
+
+function loggingIdentity<T extends Lengthwise>(arg: T): T {
+    console.log(arg.length);  // Now we know it has a .length property, so no more error
+    return arg;
+}
+
+loggingIdentity(3);  // Error, number doesn't have a .length property
+loggingIdentity({length: 10, value: 3});
+```
+
+在泛型约束中使用类型参数
+
+```ts
+function getProperty(obj: T, key: K) {
+    return obj[key];
+}
+
+let x = { a: 1, b: 2, c: 3, d: 4 };
+
+getProperty(x, "a"); // okay
+getProperty(x, "m"); // error: Argument of type 'm' isn't assignable to 'a' | 'b' | 'c' | 'd'.
+// 但是上面一个函数并没有提示报错信息
+```
+
+上面的代码中并没有解决两个参数间的使用约束问题。而且 T，K 也会报没有找到对应变量的问题
+正确的写法应该是这样的
+
+```ts
+function getProperty<T, K extends keyof T>(obj: T, key: K) {
+    return obj[key];
+}
+
+let x = { a: 1, b: 2, c: 3, d: 4 };
+
+getProperty(x, "a"); // okay
+getProperty(x, "m"); // error: Argument of type 'm' isn't assignable to 'a' | 'b' | 'c' | 'd'.
+```
+
+这样定义之后，最后一个函数调用前，就会提示。使用 `K extends  keyof T` 很好的解决了该问题
+
+REFER: [keyof and lookup](https://mariusschulz.com/blog/keyof-and-lookup-types-in-typescript)
+
 ## 2、interface 和 type 的不同
 
 2.1 接口有几种类型：
@@ -160,6 +252,8 @@ export declare type Position = 'left' | 'right' | 'top' | 'bottom'
 * 类类型接口
 
 其他还有 接口继承接口，接口继承类
+
+函数类型： 为了使用接口表示函数类型，我们需要给接口定义一个`调用签名`.它就像是一个只有参数列表和返回值类型的函数定义。参数列表里的每个参数都需要名字和类型。
 
 ```ts 属性类接口。type也可以
 interface Person {
@@ -226,6 +320,8 @@ class Clock implements ClockConstructor {
   constructor(h: number, m: number) {}
 }
 ```
+
+__接口可以继承类__.
 
 2.2 interface 和 type 使用的区别
 
@@ -396,6 +492,10 @@ type ant<T> = T | (() => T)
 interface Generics {
   <S>(arg: S): S;
 }
+// 等价于。将泛型参数提前到接口名上
+interface Generics<S> {
+  (arg: S): S;
+}
 
 const generics = <T>(arg: T): T => {
   return arg
@@ -412,12 +512,21 @@ console.log(generics_1('pre'))
 
 2.5 泛型类
 
+> 泛型类看上去与泛型接口差不多。 泛型类使用（ <>）括起泛型类型，跟在类名后面。
+
 ```ts
-class Sum <T> {
+class Sum<T> {
   zero: T;
   add: (x: T, y: T) => T;
 }
+
+// NOTE: 使用。需要传递一个类型参数
+let sum = new Sum<number>() // 这里就限定了类的参数只能是 number 类型
+sum.zero = 12 // 这里就不能是 string
+sum.add(2, 4) // 这里也是如此，不能使用其他数据类型
 ```
+
+与接口一样，直接把泛型类型放在类后面，可以帮助我们确认类的所有属性都在使用相同的类型。
 
 ## 3、一些简单的例子|分析|理解
 
@@ -674,3 +783,55 @@ export class Modal extends React.Component {
 ```
 
 ## 6、实战中使用心得
+
+### 6.1 简直太难了
+
+> 还是需要费很多的脑细胞去理解
+
+```ts
+export interface BaseAction {
+  type: string;
+}
+
+export interface Action<Payload> extends BaseAction {
+  payload?: Payload;
+  error?: boolean;
+}
+
+type ActionFunction0<R> = () => R;
+
+type ActionFunction1<T1, R> = (t1: T1) => R;
+
+type Todo = {
+  id?: string;
+  text: string;
+  completed: boolean;
+}
+
+function createAction(
+  actionType: string
+): ActionFunction0<Action<void>> {
+  return () => ({
+    type: actionType
+  })
+}
+
+function createAction1<Payload, Arg1>(
+  actionType: string,
+  payloadCreator: ActionFunction1<Arg1, Payload>
+): ActionFunction1<Arg1, Action<Payload>> {
+  return (text) => ({
+    type: actionType,
+    payload: payloadCreator(text),
+  })
+}
+
+const c = createAction(
+  'ADD'
+)
+
+const cc = createAction1<Todo, string>(
+  'ADD_NEW',
+  (text: string) => ({ text, completed: false })
+)
+```

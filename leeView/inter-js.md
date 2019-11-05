@@ -1,5 +1,15 @@
 # js探寻
 
+## addEventListener第三个参数
+
+```js
+el.addEventListender('scroll', hander, {
+  capture: false, // 是否捕获型。默认为 false （冒泡）
+  once: false, // 是否设置单次监听
+  passive: false // 是否让 阻止默认行为 （preventDefault）失效
+})
+```
+
 ## 作用域
 
 > 作用域是指程序源代码中定义变量的区域

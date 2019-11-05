@@ -198,6 +198,108 @@ onChangeHandler () {
 
 REFER: https://github.com/dt-fe/weekly/blob/master/80.%E7%B2%BE%E8%AF%BB%E3%80%8A%E6%80%8E%E4%B9%88%E7%94%A8%20React%20Hooks%20%E9%80%A0%E8%BD%AE%E5%AD%90%E3%80%8B.md
 
+### useMemo\useCallback、Memo
+
+主要用于防止组件不必要的重复渲染
+
+useMemo, useCallback 用法都是差不多的。都会在第一次渲染的时候执行，之后会在其依赖的变量发生改变时再次执行，并且两个hooks都会**返回缓存值**，
+useMemo返回**缓存的变量**，useCallback返回**缓存的函数**
+
+```js
+const value = useMemo(fnM, [a])
+
+const fnA = useCallback(fnB, [a])
+```
+
+💥
+在使用 class component 进行开发的时候，我们可以使用 shouldComponentUpdate 来减少不必要的渲染，在使用 react hooks 后，如何实现这样的功能呢？
+答案就是 React.memo和useMemo
+
+REFER:
+[react Hook之useMemo、useCallback及memo](https://juejin.im/post/5d8dd1d6f265da5b950a431c)
+[react渲染性能](https://juejin.im/post/5d26fdb8f265da1b5e731dfe)
+
+```js
+// 子组件会有不必要渲染的例子
+interface ChildProps {
+    name: { name: string; color: string };
+    onClick: Function;
+}
+const Child = ({ name, onClick}: ChildProps): JSX.Element => {
+    console.log('子组件?')
+    return(
+        <>
+            <div style={{ color: name.color }}>我是一个子组件，父级传过来的数据：{name.name}</div>
+            <button onClick={onClick.bind(null, '新的子组件name')}>改变name</button>
+        </>
+    );
+}
+const ChildMemo = memo(Child);
+
+const Page = (props) => {
+    const [count, setCount] = useState(0);
+    const [name, setName] = useState('Child组件');
+
+    return (
+        <>
+            <button onClick={(e) => { setCount(count+1) }}>加1</button>
+            <p>count:{count}</p>
+            <ChildMemo
+                name={{ name, color: name.indexOf('name') !== -1 ? 'red' : 'green'}}
+                onClick={ useCallback((newName: string) => setName(newName), []) }
+            />
+        </>
+    )
+}
+```
+
+更新属性name为对象类型，这时子组件还是一样的执行了，在父组件更新其他状态的情况下，子组件的name对象属性会一直发生重新渲染改变，从而导致一直执行。这也是不必要的性能浪费
+解决这个问题，使用name的参数使用 useMemo，依赖于State.name数据的变化进行更新
+
+```jsx
+interface ChildProps {
+    name: { name: string; color: string };
+    onClick: Function;
+}
+const Child = ({ name, onClick}: ChildProps): JSX.Element => {
+    console.log('子组件?')
+    return(
+        <>
+            <div style={{ color: name.color }}>我是一个子组件，父级传过来的数据：{name.name}</div>
+            <button onClick={onClick.bind(null, '新的子组件name')}>改变name</button>
+        </>
+    );
+}
+const ChildMemo = memo(Child);
+
+const Page = (props) => {
+    const [count, setCount] = useState(0);
+    const [name, setName] = useState('Child组件');
+
+    return (
+        <>
+            <button onClick={(e) => { setCount(count+1) }}>加1</button>
+            <p>count:{count}</p>
+            <ChildMemo
+                //使用useMemo，返回一个和原本一样的对象，第二个参数是依赖性，当name发生改变的时候，才产生一个新的对象
+                name={
+                    useMemo(()=>({
+                        name,
+                        color: name.indexOf('name') !== -1 ? 'red' : 'green'
+                    }), [name])
+                }
+                onClick={ useCallback((newName: string) => setName(newName), []) }
+                {/* useCallback((newName: string) => setName(newName),[]) */}
+                {/* 这里使用了useCallback优化了传递给子组件的函数，只初始化一次这个函数，下次不产生新的函数
+            />
+        </>
+    )
+}
+```
+
+小结：
+在子组件不需要父组件的值和函数的情况下，只需要使用memo函数包裹子组件即可。而在使用值和函数的情况，需要考虑有没有函数传递给子组件使用useCallback, 值有没有所依赖的依赖项而是用 useMemo，而不是盲目使用这些hooks。
+
 ### 修改页面 title
 
 ```js
@@ -627,10 +729,10 @@ const App:React.FC = ({ text }) => {
 如果mapDispatchToProps是一个对象，它的每个键名也是对应 UI 组件的同名参数，`键值应该是一个函数`，会被当作 Action creator ，返回的 Action 会由 Redux发出
 
 ```js
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = (dispatch, ownProps) => {
    return {
-       onJudge:(data)=>{
-           dispatch({type:"LOGIN",data});
+       onJudge: (data)=>{
+           dispatch({ type: "LOGIN", data });
        }
    }
 }
@@ -644,15 +746,61 @@ const mapDispatchToProps = (
   ownProps
 ) => {
   return {
-    onJudge: () => {
+    onClick: () => {
       dispatch({
         type: 'LOGIN',
-        data
+        filter: ownProps.filter
       });
     }
   };
 }
 ```
+
+如果 mapDispatchToProps 是一个对象，她的每一个键名也是对应 UI 组件的同名参数，`键值应该是一个函数`(就是不能简单的就是一个包含 type 的对象)，
+**会被当作 Action creator**，`返回的 action 会由 Redux 自动发出`
+
+上面的 mapDispatchToProps 写成对象就是下面
+
+```js
+const mapDispatchToProps = {
+  onClick: (filter) => {
+    type: 'LOGIN,
+    filter: filter
+  }
+}
+```
+
+所以，我们可以看到这样的简单写法，将 action 直接应用到 mapDispatchToProps 中
+
+```js
+import { connect } from 'react-redux'
+import { toggleTodo } from '../redux/actions'
+
+const Todo = //... 实现的组件
+
+export default connect(
+  null,
+  { toggleTodo }
+)(Todo)
+```
+
+这里的第二个参数就是使用一个 对象 的方式去传递 mapDispatchToProps 参数
+
+**注意**：
+1、即使 connect 什么参数也不传，被包装的组件也会接收到 dispatch 属性. 只是 store 改变时不重新渲染
+2、如果提供了mapDispatchToProps，组件将不再接收到默认的dispatch。但你可以通过在mapDispatchToProps的return中添加dispatch把它重新注入你的组件。多数情况下，你不需要这么做。
+
+```js
+connect()(TodoList)
+```
+
+小结：
+mapDispatchToProps 参数有两种形式：函数式自定义化程度更高，对象形式更简单
+
+* 函数式，更高自由度，能够访问 dispatch 和可选择的 ownProps
+* 对象式，更声明式，更易于使用
+
+REFER: [react-redux](https://segmentfault.com/a/1190000017064759?utm_source=tag-newest)
 
 ### 使用 immutable
 
@@ -716,6 +864,15 @@ export const proData = (state = defaultState, action) => {
 ```
 
 ### 使用 thunk 进行异步获取数据
+
+💥这里添加一点理解：
+
+最原始的 dispatch 方法，接收到对象 action 后会传递给 store，这就是没有中间件的情况
+
+对 dispatch 方法做一个升级后，也就是使用中间件时，再调用 dispatch 方法，如果给 dispatch 传递的仍然是个对象，dispatch 就会把这个对象传给 store，跟之前的方法没有任何区别；
+但是如果传递的是个函数，就不会直接传递给 store 了，会让这个函数先执行，然后执行完之后再调用 store，这个函数再去调用 store
+dispatch 方法会根据参数的不同，执行不同的事情，如果是对象，就直接传给 store，如果时函数，那就直接把函数执行结束
+所以 redux 的中间件原理很简单，就是对 store 的dispatch 方法做一个升级，既可以接收对象，又可以接收函数了。
 
 ```js
 import * as pro from './action-type';
@@ -828,6 +985,242 @@ export default class LoadableDashboard extends React.Component {
     return <LoadableComponent />;
   }
 }
+```
+
+### react-router5
+
+1、history
+
+> history is mutable
+
+```js
+length - (number) The number of entries in the history stack
+action - (string) The current action (PUSH, REPLACE, or POP)
+location - (object) The current location. May have the following
+    pathname - (string) The path of the URL
+    search - (string) The URL query string
+    hash - (string) The URL hash fragment
+    state - (object) location-specific state that was provided to e.g. push(path, state) when this location was pushed onto the stack. Only available in browser and memory history.
+push(path, [state]) - (function) Pushes a new entry onto the history stack
+replace(path, [state]) - (function) Replaces the current entry on the history stack
+go(n) - (function) Moves the pointer in the history stack by n entries
+goBack() - (function) Equivalent to go(-1)
+goForward() - (function) Equivalent to go(1)
+block(prompt) - (function) Prevents navigation (see the history docs)
+```
+
+2、location
+
+Router 会在一下几个地方提供这个属性
+
+```js
+Route component as this.props.location
+Route render as ({ location }) => ()
+Route children as ({ location }) => ()
+withRouter as this.props.location
+```
+
+同时，我们也可以在这些地方使用location
+
+```js
+Web Link to
+Native Link to
+Redirect to
+history.push
+history.replace
+
+// usually all you need
+<Link to="/somewhere"/>
+
+// but you can use a location instead
+const location = {
+  pathname: '/somewhere',
+  state: { fromDashboard: true }
+}
+
+<Link to={location}/>
+<Redirect to={location}/>
+history.push(location)
+history.replace(location)
+```
+
+3、match
+
+match对象包含以下几个属性
+
+```js
+params - (object) Key/value pairs parsed from the URL corresponding to the dynamic segments of the path
+isExact - (boolean) true if the entire URL was matched (no trailing characters)
+path - (string) The path pattern used to match. Useful for building nested <Route>s
+url - (string) The matched portion of the URL. Useful for building nested <Link>s
+```
+
+我们可以在这几个地方使用或者获得 match 这个属性
+
+```js
+Route component as this.props.match
+Route render as ({ match }) => ()
+Route children as ({ match }) => ()
+withRouter as this.props.match
+matchPath as the return value
+```
+
+当然，match 也有可能是 null 的情况。这是就需要做一些容错处理
+
+4、matchPath
+
+主要用来解析当前路由，获取是否匹配的一个对象
+第一个参数是 pathname
+第二个参数是 props
+  path
+  strict // optional, defaults to false
+  exact // optional, defaults to false
+
+```js 例子
+import { matchPath } from "react-router";
+
+const match = matchPath("/users/123", {
+  path: "/users/:id",
+  exact: true,
+  strict: false
+});
+
+// 结果
+
+ {
+   isExact: true
+   params: {
+       id: "123"
+   }
+   path: "/users/:id"
+   url: "/users/123"
+ }
+```
+
+如果没有匹配到，直接返回一个null
+
+```js
+matchPath("/users", {
+  path: "/users/:id",
+  exact: true,
+  strict: true
+});
+
+//  null
+```
+
+5、Link
+
+常用的一个组件.下面是几个常用的使用方法
+to后面可以跟几个属性
+  string
+  object 类似 loaction 的一个对象
+  function
+
+```js
+<Link to="/about">About</Link>
+<Link to="/courses?sort=name" />
+
+<Link
+  to={{
+    pathname: "/courses",
+    search: "?sort=name",
+    hash: "#the-hash",
+    state: { fromDashboard: true }
+  }}
+/>
+
+<Link to={location => ({ ...location, pathname: "/courses" })} />
+
+<Link to={location => `${location.pathname}?sort=name`} />
+
+<Link to="/courses" replace />
+
+<Link
+  to="/"
+  innerRef={node => {
+    // `node` refers to the mounted DOM element
+    // or null when unmounted
+  }}
+/>
+
+let anchorRef = React.createRef()
+
+<Link to="/" innerRef={anchorRef} />
+```
+
+6、NavLink
+
+有一个值得关注的属性 activeClassName
+
+```js
+<NavLink to="/faq" activeClassName="selected">
+  FAQs
+</NavLink>
+
+<NavLink
+  to="/faq"
+  activeStyle={{
+    fontWeight: "bold",
+    color: "red"
+  }}
+>
+  FAQs
+</NavLink>
+
+// 可以更加灵活的判断是否是激活状态
+<NavLink
+  to="/events/123"
+  isActive={(match, location) => {
+    if (!match) {
+      return false;
+    }
+
+    // only consider an event active if its event id is an odd number
+    const eventID = parseInt(match.params.eventID);
+    return !isNaN(eventID) && eventID % 2 === 1;
+  }}
+>
+  Event 123
+</NavLink>
+```
+
+7、Redirect
+
+重点关注这个属性的 from 和 to 属性
+
+```js
+<Route exact path="/">
+  {loggedIn ? <Redirect to="/dashboard" /> : <PublicHomePage />}
+</Route>
+
+<Redirect to="/somewhere/else" />
+
+<Redirect
+  to={{
+    pathname: "/login",
+    search: "?utm=your+face",
+    state: { referrer: currentLocation }
+  }}
+/>
+
+// 默认是repalce，这里可以改为 push 方式
+<Redirect push to="/somewhere/else" />
+
+<Switch>
+  <Redirect from='/old-path' to='/new-path' />
+  <Route path='/new-path'>
+    <Place />
+  </Route>
+</Switch>
+
+// Redirect with matched parameters
+<Switch>
+  <Redirect from='/users/:id' to='/users/profile/:id'/>
+  <Route path='/users/profile/:id'>
+    <Profile />
+  </Route>
+</Switch>
 ```
 
 ## Immutable.js 的常用API
@@ -1118,4 +1511,19 @@ const [isRunning, setIsRunning] = useState(true)
 useInterval(() => {
   setCount(count + 1)
 }, isRuning ? delay : null)
+```
+
+### 理解 setState 可以传入两个参数的原因
+
+```js
+const updateValue = (oldValue, newValue) => {
+  if (isFunction(newValue)) {
+    return newValue(oldValue)
+  }
+  return newValue
+}
+
+const isFunction = val => {
+  return typeof val === 'function'
+}
 ```

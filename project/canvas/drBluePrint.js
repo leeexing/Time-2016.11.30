@@ -4,7 +4,7 @@
  * time： 2018-12-19 08:59
  */
 class DrBluePrint {
-  constructor (options) {
+  constructor(options) {
     let defaultOpts = {
       mode: 'image', // or canvas
       cacheMemory: true,
@@ -35,7 +35,7 @@ class DrBluePrint {
     this.attachEvent()
   }
   // -使用canvas
-  init () {
+  init() {
     // - 0-1代表图片上的端点
     this.processRect = [0, 0, 1, 1]
 
@@ -55,82 +55,82 @@ class DrBluePrint {
     this.containerCanvas.context = this.containerCanvas.getContext('2d')
 
     // -上层canvas
-    this.overlappedCanvas = document.createElement("canvas")
+    this.overlappedCanvas = document.createElement('canvas')
     this.overlappedCanvas.width = this.width
     this.overlappedCanvas.height = this.height
     this.container.appendChild(this.overlappedCanvas)
-    this.container.style.position = "relative"
+    this.container.style.position = 'relative'
 
-    this.overlappedCanvas.style.position = "absolute"
+    this.overlappedCanvas.style.position = 'absolute'
     this.overlappedCanvas.style.left = 0
     this.overlappedCanvas.style.top = 0
     this.overlappedCanvas.context = this.overlappedCanvas.getContext('2d')
 
     // -离线绘制canvas
-    this.offlineCanvas = document.createElement("canvas")
+    this.offlineCanvas = document.createElement('canvas')
     this.offlineCanvas.width = this.width
     this.offlineCanvas.height = this.height
     this.offlineCanvas.context = this.offlineCanvas.getContext('2d')
   }
   // 向容器中添加事件:下层canvas，主要用于图像、嫌疑框、Tip 图像的渲染
-  addContainerListenerIfNone (eventType, fun) {
+  addContainerListenerIfNone(eventType, fun) {
     if (this.addedContainerListeners[eventType]) return
     this.addedContainerListeners[eventType] = fun
 
     if (this.Container != undefined) {
       this.Container.addEventListener(eventType, fun)
     } else {
-      throw "容器尚未设置: " + eventType
+      throw '容器尚未设置: ' + eventType
     }
   }
   // -向重叠的canvas添加事件
-  addOverlapListenerIfNone (eventType, fun) {
+  addOverlapListenerIfNone(eventType, fun) {
     if (this.addedOverlapCanvasLIsteners[eventType]) return
     this.addedOverlapCanvasLIsteners[eventType] = fun
     if (this.overlappedCanvas != undefined) {
       this.overlappedCanvas.addEventListener(eventType, fun)
     } else {
-      throw "容器尚未设置: " + eventType
+      throw '容器尚未设置: ' + eventType
     }
   }
   // 获取鼠标或者手指touch触碰的位置 @e: mouseevnet,touchevent
-	getClientPos (e) {
-		let clientX = this.isMobile ? e.touches[0].clientX : e.clientX
-		let clientY = this.isMobile ? e.touches[0].clientY : e.clientY
-		return [clientX, clientY]
+  getClientPos(e) {
+    let clientX = this.isMobile ? e.touches[0].clientX : e.clientX
+    let clientY = this.isMobile ? e.touches[0].clientY : e.clientY
+    return [clientX, clientY]
   }
   // 获取鼠标在页面上的位置
-	getPagePos (e) {
-	  let pageX = this.isMobile ? e.touches[0].pageX : e.pageX
+  getPagePos(e) {
+    let pageX = this.isMobile ? e.touches[0].pageX : e.pageX
     let pageY = this.isMobile ? e.touches[0].pageY : e.pageY
-	  return [pageX, pageY]
+    return [pageX, pageY]
   }
-  setMobileSelectMode (value) {
+  setMobileSelectMode(value) {
     this.mobileSelectMode = value
   }
   // 获取鼠标在PC或者Mobile端的事件名
-	getMouseOrTouchEventName (eventname) {
-	  var eventnamePc = []
-	  var eventnameMobile = []
+  getMouseOrTouchEventName(eventname) {
+    var eventnamePc = []
+    var eventnameMobile = []
 
-	  eventnamePc["mousedown"] = "mousedown"
-	  eventnamePc["mousemove"] = "mousemove"
-		eventnamePc["mouseup"] = "mouseup"
-		eventnamePc["mouseout"] = "mouseout"
-		eventnamePc['mousewheel'] = window.document.mozFullScreen == undefined ? 'mousewheel' : 'DOMMouseScroll'
+    eventnamePc['mousedown'] = 'mousedown'
+    eventnamePc['mousemove'] = 'mousemove'
+    eventnamePc['mouseup'] = 'mouseup'
+    eventnamePc['mouseout'] = 'mouseout'
+    eventnamePc['mousewheel'] = window.document.mozFullScreen == undefined ? 'mousewheel' : 'DOMMouseScroll'
 
-	  eventnamePc["touchstart"] = "touchstart"
-	  eventnamePc["touchmove"] = "touchmove"
-	  eventnamePc["touchend"] = "touchend"
+    eventnamePc['touchstart'] = 'touchstart'
+    eventnamePc['touchmove'] = 'touchmove'
+    eventnamePc['touchend'] = 'touchend'
 
-	  eventnameMobile["mousedown"] = "touchstart"
-	  eventnameMobile["mousemove"] = "touchmove"
-		eventnameMobile["mouseup"] = "touchend"
-		eventnameMobile['mousewheel'] = window.document.mozFullScreen == undefined ? 'mousewheel' : 'DOMMouseScroll'
+    eventnameMobile['mousedown'] = 'touchstart'
+    eventnameMobile['mousemove'] = 'touchmove'
+    eventnameMobile['mouseup'] = 'touchend'
+    eventnameMobile['mousewheel'] = window.document.mozFullScreen == undefined ? 'mousewheel' : 'DOMMouseScroll'
 
     return this.isMobile ? eventnameMobile[eventname] : eventnamePc[eventname]
-	}
-  attachEvent () {
+  }
+  attachEvent() {
     let sliceMouseTrackPosition = {
       x: -100000,
       y: -100000,
@@ -141,7 +141,7 @@ class DrBluePrint {
     this.isRightMouseDown = false
 
     // -禁止鼠标右键
-    this.container.oncontextmenu = function disableContextMenu () {
+    this.container.oncontextmenu = function disableContextMenu() {
       event.returnValue = false
     }
 
@@ -179,7 +179,12 @@ class DrBluePrint {
         sliceMouseTrackPosition.startY = relativeY
 
         // -碰撞检测
-        this.overlappedCanvas.checkBox = { minX: 10000, minY: 10000, maxX: -10000, maxY: -10000 }
+        this.overlappedCanvas.checkBox = {
+          minX: 10000,
+          minY: 10000,
+          maxX: -10000,
+          maxY: -10000
+        }
 
         if (this.overlappedCanvas.checkBox.minX > relativeX) this.overlappedCanvas.checkBox.minX = relativeX
         if (this.overlappedCanvas.checkBox.maxX < relativeX) this.overlappedCanvas.checkBox.maxX = relativeX
@@ -264,7 +269,7 @@ class DrBluePrint {
     // !下层canas
     this.container.addEventListener(this.getMouseOrTouchEventName('mousedown'), event => {
       event.preventDefault()
-			event.returnValue = false
+      event.returnValue = false
       // let clientPos = this.getClientPos(event)
       if (event.which == 1 || (this.isMobile && !this.mobileSelectMode)) {
         this.isLeftMouseDown = true
@@ -277,7 +282,7 @@ class DrBluePrint {
     this.container.addEventListener(this.getMouseOrTouchEventName('mousemove'), event => {
       if (this.isLeftMouseDown) {
         let [offsetX, offsetY] = this.getPagePos(event) // +[e.pageX, e.pageY]
-				let realMoveX = offsetX - this.container.startMouseDownPos[0]
+        let realMoveX = offsetX - this.container.startMouseDownPos[0]
         let realMoveY = offsetY - this.container.startMouseDownPos[1]
 
         this.dx = this.containerCanvas.startX + realMoveX
@@ -286,7 +291,7 @@ class DrBluePrint {
         this.loadImageTexture()
         this.drawUserMarkedRectangles()
 
-			}
+      }
     }, false)
 
     this.container.addEventListener(this.getMouseOrTouchEventName('mouseup'), event => {
@@ -309,14 +314,14 @@ class DrBluePrint {
     }, false)
 
     this.container.addEventListener(this.getMouseOrTouchEventName('mousewheel'), event => {
-      event.preventDefault &&	event.preventDefault()
+      event.preventDefault && event.preventDefault()
       event.returnValue = false
       let delta = 0
       event = event || window.event
-			if (event.wheelDelta) {
-				delta = event.wheelDelta / 120
-			} else if (event.detail) {
-				delta = -event.detail / 3
+      if (event.wheelDelta) {
+        delta = event.wheelDelta / 120
+      } else if (event.detail) {
+        delta = -event.detail / 3
       }
       if (!delta) return
 
@@ -331,7 +336,10 @@ class DrBluePrint {
         return
       }
       // -获取之前鼠标点在图像中的相对位置
-      let {offsetX, offsetY} = event
+      let {
+        offsetX,
+        offsetY
+      } = event
       let relateX = (offsetX - this.dx) / this.width
       let relateY = (offsetY - this.dy) / this.height
 
@@ -345,7 +353,7 @@ class DrBluePrint {
       this.drawUserMarkedRectangles()
     }, false)
   }
-  show (url='./images/sfd1205_0215.jpg') {
+  show(url = './images/sfd1205_0215.jpg') {
     let imageObj = new Image()
     imageObj.src = url
     imageObj.onload = () => {
@@ -355,15 +363,15 @@ class DrBluePrint {
       this.loadImageTexture()
     }
   }
-  clearUserMarkedRectangles () {
+  clearUserMarkedRectangles() {
     this.userMarkedRectangles.length = 0
     this.drawUserMarkedRectangles()
   }
-  loadImageTexture () {
+  loadImageTexture() {
     this.containerCanvas.context.clearRect(0, 0, this.containerW, this.containerH)
     this.containerCanvas.context.drawImage(this.renderData, this.dx, this.dy, this.width, this.height)
   }
-  drawUserMarkedRectangles (showCloseBtn = true) {
+  drawUserMarkedRectangles(showCloseBtn = true) {
     this.overlappedCanvas.context.clearRect(0, 0, this.containerW, this.containerH)
     this.overlappedCanvas.context.lineWidth = 1
     this.userMarkedRectangles.forEach(item => {
@@ -403,7 +411,7 @@ class DrBluePrint {
       }
     })
   }
-  checkRemoveRectangle (event) {
+  checkRemoveRectangle(event) {
     let offsetX, offsetY
     if (this.isMobile) {
       offsetX = event.touches[0].pageX - this.containerLeft
@@ -417,7 +425,7 @@ class DrBluePrint {
     this.userMarkedRectangles.forEach((item, index) => {
       let endX = item[2]
       let startY = item[1]
-      let distance = Math.sqrt((reletaX - endX)**2 + (relateY - startY)**2)
+      let distance = Math.sqrt((reletaX - endX) ** 2 + (relateY - startY) ** 2)
       if (distance < (this.isMobile ? 0.02 : 0.012)) {
         this.removeMarkedRectanglesCallback(item[4])
         this.userMarkedRectangles.splice(index, 1)
@@ -425,19 +433,19 @@ class DrBluePrint {
     })
     this.drawUserMarkedRectangles()
   }
-  addUserMarkedRectangleText (index, text, color) {
+  addUserMarkedRectangleText(index, text, color) {
     this.userMarkedRectangles[index].push(text, color)
     this.drawUserMarkedRectangles()
   }
-  removeUserMarkedRectangleText (index) {
+  removeUserMarkedRectangleText(index) {
     this.userMarkedRectangles.splice(index, 1)
     this.drawUserMarkedRectangles()
   }
-  getUserMarkedRectanglesInfo () {
+  getUserMarkedRectanglesInfo() {
     return this.userMarkedRectangles
   }
   // 还需要一比一的还原
-  getMarkedImage () {
+  getMarkedImage() {
     this.offlineCanvas.width = this.originImageW
     this.offlineCanvas.height = this.originImageH
     this.reset()
@@ -454,16 +462,16 @@ class DrBluePrint {
     image.src = imageSrc
     console.log(this.getUserMarkedRectanglesInfo())
   }
-  getImageData () {
+  getImageData() {
     return this.testCanvas.toDataURL('image/png')
   }
-  setMiddleMouseSelectCallback (fn) {
+  setMiddleMouseSelectCallback(fn) {
     this.middleMouseSelectCallback = fn
   }
   setRemoveMarkedRectanglesCallback(fn) {
     this.removeMarkedRectanglesCallback = fn
   }
-  toImageCoordinateNum (pt1x, pt1y, pt2x, pt2y) {
+  toImageCoordinateNum(pt1x, pt1y, pt2x, pt2y) {
     let relateX1 = (pt1x - this.dx) / this.width
     let relateY1 = (pt1y - this.dy) / this.height
     let relateX2 = (pt2x - this.dx) / this.width
@@ -491,7 +499,7 @@ class DrBluePrint {
     image.src = imageSrc
     console.log('rotate', this.getUserMarkedRectanglesInfo())
   }
-  reset () {
+  reset() {
     this.dx = this.initDx
     this.dy = this.initDy
     this.width = this.initWidth
@@ -501,7 +509,7 @@ class DrBluePrint {
     this.loadImageTexture()
     this.drawUserMarkedRectangles()
   }
-  calculatePos (imgInfo) {
+  calculatePos(imgInfo) {
     let W1 = this.containerW
     let H1 = this.containerH
     let W2 = imgInfo.width
@@ -528,13 +536,15 @@ class DrBluePrint {
     this.initDx = this.dx = Math.floor((W1 - retW) / 2)
     this.initDy = this.dy = Math.floor((H1 - retH) / 2)
   }
-  mobileAndTabletcheck () {
-    var check = false
-    !(function (a) {
-      if (/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino|android|ipad|playbook|silk/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|event(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4))) {
+  mobileAndTabletcheck() {
+    var check = false;
+    (function (a) {
+      if (/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino|android|ipad|playbook|silk/i.test(a)
+          || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|event(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0, 4))
+        ) {
         check = true
       }
-    })(navigator.userAgent||navigator.vendor||window.opera)
+    })(navigator.userAgent || navigator.vendor || window.opera)
     return check
   }
 }
@@ -549,7 +559,7 @@ $(() => {
     let text = texts[Math.floor(Math.random() * texts.length)]
     let color = colors[Math.floor(Math.random() * colors.length)]
     drBluePrint.addUserMarkedRectangleText(len - 1, text, color)
-    // $footer.append(`<a class="btn" style="color:${color}">${text} <span data-index="${len - 1}" class="remove">❌</span></a>`)
+    // $footer.append(`<a class='btn' style='color:${color}'>${text} <span data-index='${len - 1}' class='remove'>❌</span></a>`)
   }
   $footer.on('click', '.remove', function () {
     let index = $(this).data('index')
@@ -561,6 +571,7 @@ $(() => {
 
   let drBluePrint = new DrBluePrint()
   drBluePrint.setMiddleMouseSelectCallback(middleMouseSelectCallback)
+  drBluePrint.setRemoveMarkedRectanglesCallback(console.log)
   drBluePrint.show()
 
   $('.mark').click(() => {
@@ -568,7 +579,8 @@ $(() => {
   })
 
   const urls = ['./images/sfd1205_0215.jpg', './images/testDr.png', './images/testDr_1.png',
-  './images/testDr_2.png', './images/testDr_3.png', './images/testDr_4.png']
+    './images/testDr_2.png', './images/testDr_3.png', './images/testDr_4.png'
+  ]
 
   $('.next').click(() => {
     drBluePrint.show(urls[Math.floor(Math.random() * urls.length)])
@@ -579,10 +591,21 @@ $(() => {
   })
 
   $('.get').click(() => {
-    drBluePrint.getMarkedImage()
+    // drBluePrint.getMarkedImage()
+    let pos = drBluePrint.userMarkedRectangles
+    let posArr = pos[0].slice(0, 4).map((item, i) => {
+      if (i === 0 || i === 2) {
+        return item * drBluePrint.originImageW
+      }
+      return item * drBluePrint.originImageH
+    })
+    console.log(pos)
+    console.log(posArr)
   })
 
   $('.rotate').click(() => {
-    drBluePrint.getRotateImage()
+    // drBluePrint.getRotateImage()
+    drBluePrint.userMarkedRectangles.push([0.1, 0.4, 0.5, 0.87, '测试测试拉拉', 'red'])
+    drBluePrint.userMarkedRectangles.push([0.30343511450381677, 0.4070500030517578, 0.5362595419847328, 0.5870500030517578, '非个人', 'red'])
   })
 })
