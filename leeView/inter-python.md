@@ -1,8 +1,59 @@
 # inter-python
 
-> python 常用的小技巧和函数
+> python 常用的备忘录
+
+* gunicorn + docker 的使用
 
 ## 常用包
+
+### gunicon
+
+结合 supervisor 就另外说了
+
+这里想说的是，单独使用的情况下。需要注意的点。比如在 docker 中就可能单纯的使用 gunicorn
+
+常用
+
+config
+-c CONFIG, --config CONFIG
+
+Gunicorn配置文件路径，路径形式的字符串格式，如：
+
+gunicorn -c gunicorn.conf manager:app
+
+bind
+-b ADDRESS, --bind ADDRESS
+
+Gunicorn绑定服务器套接字，Host形式的字符串格式。Gunicorn可绑定多个套接字，如：
+
+gunicorn -b 127.0.0.1:8000 -b [::1]:9000 manager:app
+
+workers
+-w INT, --workers INT
+
+用于处理工作进程的数量，为正整数，默认为1。worker推荐的数量为当前的CPU个数*2 + 1。计算当前的CPU个数方法：
+
+worker_class
+-k STRTING, --worker-class STRTING
+
+要使用的工作模式，默认为sync。可引用以下常见类型“字符串”作为捆绑类：
+
+daemon
+--daemon
+
+守护Gunicorn进程，默认False
+
+accesslog
+--access-logfile FILE
+
+要写入的访问日志目录
+
+errorlog
+--error-logfile FILE, --log-file FILE
+
+要写入错误日志的文件目录。
+
+参考：[Gunicorn-配置详解](https://blog.csdn.net/y472360651/article/details/78538188)
 
 ### AES\pyCrypto\pycryptodome
 

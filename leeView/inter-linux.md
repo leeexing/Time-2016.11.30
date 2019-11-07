@@ -1,6 +1,35 @@
 # inter-linux
 
+## 设置程序开机自启
 
+```shell
+# 以 nginx 为例
+cd /usr/lib/systemd/system
+
+vim nginx.service
+
+# nginx.service
+[Unit]
+Description=nginx service
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/usr/local/nginx/sbin/nginx
+ExecReload=/usr/local/nginx/sbin/nginx -s reload
+ExecStop=/usr/local/nginx/sbin/nginx -s quit
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+
+# 再执行
+systemctl daemon-reload
+systemctl enable nginx.service
+systemctl start nginx.service
+```
+
+之后，我们执行 `systemctl reload nginx.service` 就是相当于执行 `/usr/local/nginx/sbin/nginx -s reload`
 
 ## 基本使用
 

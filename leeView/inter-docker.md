@@ -6,6 +6,8 @@
 
 ### 构建一个基础的通用的python程序环境
 
+具体还可以参考 `../project/docker`
+
 ```yml docker demo
 FROM python:3.7-alpine
 
@@ -45,6 +47,8 @@ docker build -t python-platform
 
 ### 基于前面创建的镜像，运行自己的程序
 
+第一版：
+
 ```yml docker-compose.yml
 version: "1.0"
 services:
@@ -59,6 +63,107 @@ services:
 networks:
   webnet:
 driver: bridge
+```
+
+第二版：
+
+```yml
+version: "3"
+services:
+  plot_api:
+    image: opera
+    # container_name: plot_api # 默认是 <项目名称><服务名称><序号>
+    ports:
+      - "6281:6281"
+    volumes:
+      - /root/projects/api/plot/plot_api:/mnt/plot_api
+    command: ["python", "/mnt/plot_api/manage.py", "runserver", "-p", "6281"]
+    restart: always
+  plot_upload:
+    images: opera
+    ports:
+      - "6282:6282"
+    volumes:
+      - /root/projects/api/plot/plot_upload:/mnt/plot_upload
+    command: ["python", "/mnt/plot_upload/manage.py", "runserver", "-p", '6282']
+    restart: always
+  plot_file_scan:
+    images: opera
+    ports:
+      - "6283:6283"
+    volumes:
+      - /root/projects/api/plot/plot_file_scan:/mnt/plot_file_scan
+    command: ["python", "/mnt/plot_file_scan/manage.py", "runserver", "-p", '6283']
+    restart: always
+
+```
+
+### docker + python + gunicorn
+
+踩坑
+这样会报错
+
+```js
+docker run -t -p 6283:5000 -v /root/projects/api/plot/plot_api:/mnt opera gunicorn /mnt/deploylinuxTest:APP -w 2 -b 0.0.0.0:5000
+// => ModuleNotFoundError: No module named '/mnt/deploylinuxTest'
+
+
+// 这样也会报错
+docker run -t -p 6283:5000 -v /root/projects/api/plot/plot_api:/mnt opera gunicorn /mnt.deploylinuxTest:APP -w 2 -b 0.0.0.0:5000
+// => ModuleNotFoundError: No module named '/mnt'
+
+// 这样还会报错
+docker run -t -p 6283:5000 -v /root/projects/api/plot/plot_api:/mnt opera gunicorn mnt.deploylinuxTest:APP -w 2 -b 0.0.0.0:5000
+// => ModuleNotFoundError: No module named 'app'
+
+
+// 😂这样就对了
+docker run -t -p 6283:5000 -v /root/projects/api/plot/plot_api:/mnt opera gunicorn --pythonpath /mnt deploylinuxTest:APP -w 2 -b 0.0.0.0:5000
+```
+
+**重要的原因**
+gunicorn命令解释文档也有很多，不一一说了，我参考的是：gunicorn配置文件解释，有两个需要注意的地方：
+
+一个是：当run.sh和flask启动文件manage.py不在同一级目录时，
+使用 `gunicorn src.manage:app` ，而非：`gunicorn /src/manage:app`，
+或者指定gunicorn的pathonpath参数，`--pythonpath /var/jenkins_home/workspace/src`
+
+另一个注意点：若启动容器时报 "docker standard_init_linux.go:195: exec user process caused  no such file or directory",
+
+其他。gunicorn 可以配置其他参数
+
+```js
+gunicorn src.manage:app \
+        --bind 0.0.0.0:8000 \
+        --workers 4 \
+        --log-level debug \
+        --access-logfile=/var/jenkins_home/workspace/log/access_print.log \
+        --error-logfile=/var/jenkins_home/workspace/log/error_print.log
+```
+
+所以我们可以写成一个脚本 **run.sh**
+
+```py
+#!/bin/bash
+set -e
+pwd
+# 日志文件
+touch /var/jenkins_home/workspace/log/access_print.log
+touch /var/jenkins_home/workspace/log/error_print.log
+touch /var/jenkins_home/workspace/log/output_print.log
+pwd
+ls -l
+echo makedir ok
+chmod 777 src
+
+# gunicorn启动命令
+exec gunicorn src.manage:app \
+        --bind 0.0.0.0:8000 \
+        --workers 4 \
+        --log-level debug \
+        --access-logfile=/var/jenkins_home/workspace/log/access_print.log \
+        --error-logfile=/var/jenkins_home/workspace/log/error_print.log
+exec "$@"
 ```
 
 ## 基本使用
@@ -140,4 +245,63 @@ docer -p hostPort:containerPort # 映射本机的指定端口到容器的指定�
 
 # 映射数据卷
 docker -v /home/data:/opt/data # 这里/home/data 指的是宿主机的目录地址，后者则是容器的目录地址
+```
+
+### 数据卷
+
+数据卷 是一个可以供一个或多个容器使用的特殊目录，他绕过 UFS，可以提供很多有用的特性
+
+* 数据卷 可以在容器之间共享和重用
+* 对数据卷的修改立马生效
+* 对数据卷的更新，不会影响镜像
+* 数据卷 默认会一直存在，即使容器被删除
+
+```js
+// 创建一个数据卷
+docker volume create my-vol
+
+// 查看数据卷
+docker volume inspect my-vol
+
+// 删除数据卷
+docker volume rm my-vol
+```
+
+### 使用网络
+
+当使用 -P 标记时，Docker 会随机映射一个 49000~49900 的端口到内部容器开放的网络端口。
+
+-p 则可以指定要映射的端口，并且，在一个指定端口上只可以绑定一个容器。支持的格式有 ip:hostPort:containerPort | ip::containerPort | hostPort:containerPort。
+
+**映射所有接口地址**
+使用 hostPort:containerPort 格式本地的 5000 端口映射到容器的 5000 端口，可以执行
+
+```js
+ docker run -d -p 5000:5000 training/webapp python app.py
+```
+
+可以使用 ip:hostPort:containerPort 格式指定映射使用一个特定地址，比如 localhost 地址 127.0.0.1
+
+```js
+ docker run -d -p 127.0.0.1:5000:5000 training/webapp python app.py
+```
+
+使用 ip::containerPort 绑定 localhost 的任意端口到容器的 5000 端口，本地主机会自动分配一个端口。
+
+**查看映射端口配置**
+使用 docker port 来查看当前映射的端口配置，也可以查看到绑定的地址
+
+```js
+$ docker port nostalgic_morse 5000
+127.0.0.1:49155.
+```
+
+-p 标记可以多次使用来绑定多个端口
+
+```js
+$ docker run -d \
+    -p 5000:5000 \
+    -p 3000:80 \
+    training/webapp \
+    python app.py
 ```

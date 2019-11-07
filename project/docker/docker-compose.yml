@@ -1,0 +1,46 @@
+version: "3"
+services:
+  plot_api:
+    image: opera
+    ports:
+      - "6281:5000"
+    volumes:
+      - /root/projects/api/plot/plot_api:/mnt/plot_api
+      - /root/public/logs/plot_api:/logs
+      - /ceph-training:/ceph-training
+    command: ["gunicorn", "--pythonpath", "/mnt/plot_api", "deploylinuxTest:APP",
+                "-w", "2",
+                "-b", "0.0.0.0:5000",
+                "--access-logfile", "logs/plot_api.stdout.log",
+                "--error-logfile", "logs/plot_api.error.log"
+              ]
+
+  plot_upload:
+    image: opera
+    ports:
+      - "6282:5000"
+    volumes:
+      - /root/projects/api/plot/plot_upload:/mnt/plot_upload
+      - /root/public/logs/plot_upload:/logs
+      - /ceph-training:/ceph-training
+    command: ["gunicorn", "--pythonpath", "/mnt/plot_upload", "deploylinuxTest:APP",
+                "-w", "2",
+                "-b", "0.0.0.0:5000",
+                "--access-logfile", "logs/plot_upload.stdout.log",
+                "--error-logfile", "logs/plot_upload.error.log"
+              ]
+
+  plot_file_scan:
+    image: opera
+    ports:
+      - "6283:5000"
+    volumes:
+      - /root/projects/api/plot/plot_file_scan:/mnt/plot_file_scan
+      - /root/public/logs/plot_file:/logs
+      - /ceph-training:/ceph-training
+    command: ["gunicorn", "--pythonpath", "/mnt/plot_file_scan", "deploylinuxTest:APP",
+                "-w", "2",
+                "-b", "0.0.0.0:5000",
+                "--access-logfile", "logs/plot_file_scan.stdout.log",
+                "--error-logfile", "logs/plot_file_scan.error.log"
+              ]
