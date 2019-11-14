@@ -34,44 +34,49 @@ function intersectRectArray(r1, r2) {
     var WW = Math.min(W1, W2, X1 + W1 - X2, X2 + W2 - X1);
     var HH = Math.min(H1, H2, Y1 + H1 - Y2, Y2 + H2 - Y1);
 
-    var insectArea = WW * HH;
-    var markArea = W1 * H1;
-
-
     var tipArea = W2 * H2;
+    var markArea = W1 * H1;
+    var insectArea = WW * HH;
+
     var ratioOfA = insectArea / markArea; // -相交区域与用户选择区域的占比
     var ratioOfB = insectArea / tipArea; // -相交区域与嫌疑物区域的占比
 
-    console.log(insectArea, markArea, tipArea, '==', ratioOfA, ratioOfB)
-
     // -判断权重系数
-    var judgeWightOfA = 0.4; // user mark 权重
-    var judgeWightOfB = 0.2; // tip 占比 权重
-    // var judgeWightOfA = 0.5; // user mark 权重
-    // var judgeWightOfB = 0.4; // tip 占比 权重
-    var isCneterInMark = X1 < centerX && (X1 + W1) > centerX && Y1 < centerY && (Y1 + H1) > centerY; // tip中心是否在用户标记框
-    var centersDistance = Math.sqrt((centerX - centerMX) * (centerX - centerMX) + (centerY - centerMY) * (centerY - centerMY)); // tip嫌疑框和mark标记框中心点之间的距离
+    var judgeWeightOfA = 0.4; // user mark 权重
+    var judgeWeightOfB = 0.25; // tip 占比 权重
 
-    tipArea < 0.02 && (judgeWightOfA -= 0.1); // -tip  面积越小，权重适当降低
-    tipArea < 0.01 && (judgeWightOfA -= 0.1);
-    tipArea < 0.005 && (judgeWightOfA -= 0.1);
+    var isCneterPointInMark = X1 < centerX && (X1 + W1) > centerX && Y1 < centerY && (Y1 + H1) > centerY; // tip中心是否在用户标记框
+    var centersDistance = Math.sqrt((centerX - centerMX) ** 2 + (centerY - centerMY) ** 2); // tip嫌疑框和mark标记框中心点之间的距离
 
-    isCneterInMark && (judgeWightOfB -= 0.1); // mark包含tip中心点，权重继续降低
+    // * tip  面积越小，权重适当降低
+    tipArea < 4900 && (judgeWeightOfA -= 0.03);
+    tipArea < 3600 && (judgeWeightOfA -= 0.05);
+    tipArea < 3600 && (judgeWeightOfA -= 0.05);
+    tipArea < 2500 && (judgeWeightOfA -= 0.05);
+    tipArea < 1600 && (judgeWeightOfA -= 0.1);
+    tipArea < 900 && (judgeWeightOfA -= 0.1);
 
-    // -user 包含 tip
+    // * tip 和 user mark 中心点的位置越小，权重越低
+    isCneterPointInMark && (judgeWeightOfB -= 0.1); // mark包含tip中心点，权重继续降低
+    centersDistance < 30 && (judgeWeightOfB -= 0.01);
+    centersDistance < 20 && (judgeWeightOfB -= 0.02);
+    centersDistance < 10 && (judgeWeightOfB -= 0.03);
+
+    console.log(insectArea, markArea, tipArea, '==', ratioOfA, ratioOfB, centersDistance)
+
+    // -user 包含 tip; 外包含情况要求严格一点
     if (X1 < X2 && X1 + W1 > X2 + W2 && Y1 < Y2 && Y1 + H1 > Y2 + H2) {
-      return ratioOfA > (judgeWightOfA + 0.1) ? true : false; // 外包情况要求严格一点
+      return ratioOfA > (judgeWeightOfA + 0.1) ? true : false;
     }
-    // -tip 包含 user
+    // -tip 包含 user; 两个中心点离得远近，权重越低
     else if (X2 < X1 && X2 + W2 > X1 + W1 && Y2 < Y1 && Y2 + H2 > Y1 + H1) {
-      centersDistance < 0.15 && (judgeWightOfB -= 0.03);
-      centersDistance < 0.03 && (judgeWightOfB -= 0.02); // `user mark中心点`和`tip中心点`离得很近
-      centersDistance < 0.01 && (judgeWightOfB -= 0.01); // 离得十分近
-      return ratioOfB > judgeWightOfB ? true : false;
+      console.log('【ratioOfB】', ratioOfB, '【judgeWeightOfB】', judgeWeightOfB)
+      return ratioOfB > judgeWeightOfB ? true : false;
     }
     // -tip 相交 user
-    if (ratioOfA > judgeWightOfA) {
-      return ratioOfB > judgeWightOfB ? true : false;
+    console.log(ratioOfA, '-', judgeWeightOfA, '= B', ratioOfB, '+', judgeWeightOfB)
+    if (ratioOfA > judgeWeightOfA) {
+      return ratioOfB > judgeWeightOfB ? true : false;
     }
     return false;
   }
@@ -85,7 +90,7 @@ function intersectRectArray(r1, r2) {
  * @param {用户标记嫌疑框的坐标数组} signBoxes
  */
 function apiOfJudgeTipResult(userSignBoxes) {
-  const tipBoxes = [[140, 110, 276, 186], [179, 144, 326, 219]]
+  const tipBoxes = [[140, 110, 276, 186], [376, 288, 533, 391]]
   let result = false
   let lenOfUserSignBoxes = userSignBoxes.length
   let lenOfTipBoxes = tipBoxes.length
@@ -94,11 +99,11 @@ function apiOfJudgeTipResult(userSignBoxes) {
   let tipBoxesRet = new Array(lenOfTipBoxes).fill(false)
   for (let i = 0; i < lenOfUserSignBoxes; i++) {
     let isSignBoxHitTarget = false
-    console.log('i', i)
+    // console.log('i', i)
     for (let j = 0; j < lenOfTipBoxes; j++) {
-      console.log('j', j)
+      // console.log('j', j)
       let checkRet = intersectRectArray(userSignBoxes[i], tipBoxes[j])
-      console.log('ret', checkRet)
+      // console.log('ret', checkRet)
       if (checkRet) {
         isSignBoxHitTarget = checkRet
         tipBoxesRet[j] = checkRet
@@ -117,9 +122,6 @@ function apiOfJudgeTipResult(userSignBoxes) {
   return result
 }
 
-let ret = apiOfJudgeTipResult([[165, 133, 336, 228], [272, 188, 400, 250]])
+let ret = apiOfJudgeTipResult([[212, 154, 292, 198], [272, 188, 400, 250]])
 // let ret = apiOfJudgeTipResult([[156, 90, 243, 201], [272, 188, 400, 250]])
-// let ret = apiOfJudgeTipResult([[158, 123, 298, 203], [272, 188, 400, 250]])
-// let ret = apiOfJudgeTipResult([[158, 123, 298, 203], [156, 90, 243, 201]])
-// let ret = apiOfJudgeTipResult([[158, 123, 298, 203]])
 console.log('最终判图结果：', ret)
