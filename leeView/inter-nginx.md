@@ -208,3 +208,22 @@ server {
     }
 }
 ```
+
+## DR图像测试 23 环境nginx配置
+
+```js
+server {
+    listen      5200;
+    server_name localhost;
+
+    location /dr {
+        root /home/pizhipeng/projects;
+        index dr.html;
+    }
+
+    location /ct {
+        root /home/pizhipeng/projects;
+        index ct.html;
+    }
+}
+```

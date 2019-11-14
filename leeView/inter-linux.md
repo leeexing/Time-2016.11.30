@@ -31,6 +31,18 @@ systemctl start nginx.service
 
 之后，我们执行 `systemctl reload nginx.service` 就是相当于执行 `/usr/local/nginx/sbin/nginx -s reload`
 
+## 添加删除用户
+
+```js
+useradd testuser
+passwd testuser
+// 说明：新创建的用户会在 `/home` 下创建一个用户目录testuser
+
+usermod --help  修改用户这个命令的相关参数
+userdel testuser  删除用户testuser
+rm -rf testuser  删除用户testuser所在目录
+```
+
 ## 基本使用
 
 ### 全家桶安装

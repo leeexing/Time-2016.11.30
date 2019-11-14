@@ -178,6 +178,103 @@ components/
 
 ## vue
 
+### $mount
+
+vm.$mount([elementOrSelector])
+
+参数：
+{Element | string} [elementOrSelector]
+{boolean} [hydrating]
+
+返回值：
+vm - 实例本身
+
+1、如果 Vue 实例在实例化时没有收到 `el` 选项，则它处于“未挂载”状态，没有关联的 DOM 元素。可以使用 `vm.$mount()` 手动地挂载一个未挂载的实例。
+
+2、如果没有提供 elementOrSelector 参数，模板将被渲染为文档之外的的元素，并且你必须使用原生 DOM API 把它插入文档中。
+
+3、这个方法返回实例自身，因而可以链式调用其它实例方法。
+
+```js
+var MyComponent = Vue.extend({
+  template: '<div>Hello!</div>'
+})
+
+// 创建并挂载到 #app (会替换 #app)
+new MyComponent().$mount('#app')
+
+// 同上
+new MyComponent({ el: '#app' })
+
+// 或者，在文档之外渲染并且随后挂载
+var component = new MyComponent().$mount()
+document.getElementById('app').appendChild(component.$el)
+```
+
+```js 源码实现
+Vue.extend = function (extendOptions = {}) {
+  const Super = this  // Vue基类构造函数
+  const name = extendOptions.name || Super.options.name
+
+  const Sub = function (options) {  // 定义构造函数
+    this._init(options)  // _init继承而来
+  }
+
+  Sub.prototype = Object.create(Super.prototype)  // 继承基类Vue初始化定义的原型方法
+  Sub.prototype.constructor = Sub  // 构造函数指向子类
+  Sub.options = mergeOptions( // 子类合并options
+    Super.options,  // components, directives, filters, _base
+    extendOptions  // 传入的组件对象
+  )
+  Sub['super'] = Super // Vue基类
+
+  // 将基类的静态方法赋值给子类
+  Sub.extend = Super.extend
+  Sub.mixin = Super.mixin
+  Sub.use = Super.use
+
+  ASSET_TYPES.forEach(function (type) { // ['component', 'directive', 'filter']
+    Sub[type] = Super[type]
+  })
+
+  if (name) {  让组件可以递归调用自己，所以一定要定义name属性
+    Sub.options.components[name] = Sub  // 将子类挂载到自己的components属性下
+  }
+
+  Sub.superOptions = Super.options
+  Sub.extendOptions = extendOptions
+
+  return Sub  // 返回子组件的构造函数
+}
+```
+
+### vue-extend 插件编写
+
+```js
+vue.extend(options)
+
+import Message from './Message.vue'
+
+Vue.extend(Message)
+
+// or
+
+Vue.extend({
+  template: '<div id="message"></div>',
+  data: () {
+    return {
+      name: 'messageComponent'
+    }
+  }
+})
+```
+
+使用基础 Vue 构造器，创建一个 子类 。蚕食是一个包含组件选项的对象。可以是一个 .vue 的组件
+data 选项是特例。需要注意 在 Vue.exten（） 中它必须是函数
+
+创建一个组件实例，并且挂载到一个元素上
+`new Profile().$mount('#mount-root')`
+
 ### redirect 刷新页面
 
 > 一种新的实现方案
@@ -1096,7 +1193,7 @@ export default router
 
 ## vuex
 
-## vue proxy 遇到的坑
+## vue webpack 中 proxy 遇到的坑
 
 ```js config/index.js
 dev: {

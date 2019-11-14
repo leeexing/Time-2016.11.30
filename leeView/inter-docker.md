@@ -2,6 +2,22 @@
 
 > docker 学习
 
+## docker 登录 docker hub
+
+```js
+docker login
+
+username leeing0712
+password xxxxxxx
+
+WARNING! Your password will be stored unencrypted in /root/.docker/config.json.
+Configure a credential helper to remove this warning. See
+https://docs.docker.com/engine/reference/commandline/login/#credentials-store
+
+Login Succeeded
+
+```
+
 ## 自己的主要配置相关参数
 
 ### 构建一个基础的通用的python程序环境
