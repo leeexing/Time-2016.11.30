@@ -1,5 +1,198 @@
 # js探寻
 
+## js 原生DOM操作
+
+### NodeList
+
+NodeList 对象是一个节点的集合，一般由 Node.childNodes、document.getElementByName、 document.querySelectorAll 返回
+
+Node.childNodes 、 document.getElementsByName 返回的 NodeList 的结果是实时的，实时更新的，当其所包含的元素发生改变时，它会自动更新
+
+HTMLCollection
+HTMLCollection是一个特殊的NodeList，表示包含了若干元素（元素顺序为文档流中的顺序）的通用集合，它是实时更新的，当其所包含的元素发生改变时，它会自动更新。另外，它是一个伪数组，如果想像数组一样操作它们需要像 Array.prototype.slice.call(nodeList, 2) 这样调用。
+
+### 创建元素
+
+1、document.createElement(tagName)
+2、document.createTextNode(textString)
+3、克隆：node.cloneNode(true/false) 它接收一个bool参数，用来表示是否复制子元素
+4、createDocumentFragment 也就是文档碎片，它表示一种轻量级的文档，主要是用来存储临时节点，大量操作DOM时用它可以大大提升性能
+
+### appendChild()
+
+### removeChild()
+
+```js
+document.getElementById('app').removeChild(oldNode)
+```
+
+### replaceChild()
+
+```js
+document.getElementById('app').replaceChild(newNode, oldNode)
+```
+
+### 节点关系API
+
+父关系API
+parentNode ：每个节点都有一个parentNode属性，它表示元素的父节点。Element的父节点可能是Element，Document或DocumentFragment；
+parentElement ：返回元素的父元素节点，与parentNode的区别在于，其父节点必须是一个Element元素，如果不是，则返回null；
+
+子关系API
+children ：返回一个实时的 HTMLCollection ，子节点都是Element，IE9以下浏览器不支持；
+childNodes ：返回一个实时的 NodeList ，表示元素的子节点列表，注意子节点可能包含文本节点、注释节点等；
+firstChild ：返回第一个子节点，不存在返回null，与之相对应的还有一个 firstElementChild ；
+lastChild ：返回最后一个子节点，不存在返回null，与之相对应的还有一个 lastElementChild ；
+
+兄弟关系型API
+previousSibling ：节点的前一个节点，如果不存在则返回null。注意有可能拿到的节点是文本节点或注释节点，与预期的不符，要进行处理一下。
+nextSibling ：节点的后一个节点，如果不存在则返回null。注意有可能拿到的节点是文本节点，与预期的不符，要进行处理一下。
+previousElementSibling ：返回前一个元素节点，前一个节点必须是Element，注意IE9以下浏览器不支持。
+nextElementSibling ：返回后一个元素节点，后一个节点必须是Element，注意IE9以下浏览器不支持。
+
+### 元素属性型API
+
+setAttribute
+给元素设置属性：
+element.setAttribute(name, value);
+
+其中name是特性名，value是特性值。如果元素不包含该特性，则会创建该特性并赋值。
+getAttribute
+getAttribute返回指定的特性名相应的特性值，如果不存在，则返回null：
+var value = element.getAttribute("id");
+
+### 样式相关API
+
+直接修改元素的样式
+elem.style.color = 'red';
+elem.style.setProperty('font-size', '16px');
+elem.style.removeProperty('color');
+动态添加样式规则
+var style = document.createElement('style');
+style.innerHTML = 'body{color:red} #top:hover{background-color: red;color: white;}';
+document.head.appendChild(style);
+window.getComputedStyle
+通过 element.sytle.xxx 只能获取到内联样式，借助 window.getComputedStyle 可以获取应用到元素上的所有样式，IE8或更低版本不支持此方法。
+var style = window.getComputedStyle(element[, pseudoElt]);
+
+### getBoundingClientRect
+
+getBoundingClientRect 用来返回元素的大小以及相对于浏览器可视窗口的位置，用法如下：
+var clientRect = element.getBoundingClientRect();
+clientRect是一个 DOMRect 对象，包含width、height、left、top、right、bottom，它是相对于窗口顶部而不是文档顶部，滚动页面时它们的值是会发生变化的。
+
+## js数据类型转换
+
+### 对象转原始数据类型是根据什么流程运行的
+
+对象转原始类型，会调用内置的 [ToPrimitive] 函数，对于该函数而言，其逻辑如下：
+
+1. 如果 `Symbol.ToPrimitive()` 方法存在，优先调用再返回
+2. 调用 `valueOf()`，如果转换为原始类型，则返回
+3. 调用 `toString()`, 如果转换为原始类型，则返回
+4. 如果都没有返回原始类型，则报错
+
+```js
+let obj = {
+  value: 3,
+  valueOf() {
+    return 4
+  },
+  toString() {
+    return '5'
+  },
+  [Symbol.toPrimitive]() {
+    return 6
+  }
+}
+console.log(obj + 1) // 7
+```
+
+如何让 if(a == 1 && a == 2) 条件成立？
+
+```js
+var a = {
+  value: 0,
+  valueOf: function() {
+    this.value++;
+    return this.value;
+  }
+};
+console.log(a == 1 && a == 2);//true
+```
+
+## 闭包
+
+定义：闭包是指有权访问另外一个函数作用域中的变量的函数
+
+## js 原型链
+
+### 如何继承的
+
+参考：[原始js之问](https://juejin.im/post/5dac5d82e51d45249850cd20)
+
+了解到继承是如何一步步进行优化的
+
+简单摘录一下三种继承的实现和优化
+
+```js
+function Parent1() {
+  this.name = 'parent1'
+  this.play = [1, 2, 3]
+}
+
+function Child1() {
+  Parent1.call(this)
+  this.type = 'child1'
+}
+Child1.prototype = new Parent1()
+// 不足：Parent1 的构造函数多执行了一次
+```
+
+```js
+function Parent2() {
+  this.name = 'Parent2'
+  this.play = [1, 2, 3]
+}
+function Child2() {
+  Parent2.call(this)
+  this.type = 'Child2'
+}
+Child2.prototype = Parent2.prototype
+// 将父类原型对象直接给到子类，父类构造函数只执行一次，而且父类属性和方法均能访问
+// 不足：子类实例的构造函数都是 Parent2，这显然不对
+```
+
+```js
+function Parent3() {
+  this.name = 'Parent3'
+  this.play = [1, 2, 3]
+}
+function Child3() {
+  Parent3.call(this)
+  this.type = 'child3'
+}
+Child3.prototype = Object.create(Parent3.prototype)
+Child3.prototype.constructor = Child3
+// 这是最推荐的一种方式，接近完美的继承，它的名字也叫做**寄生组合继承**
+```
+
+当然继承也是有弊端的，有隐患的。典型的就是 `大象和香蕉` 的问题
+
+所以，现在有种趋势是使用组合的设计模式
+
+```js
+function drive() {}
+function music() {}
+function addOil() {}
+
+let car = compose(drive, music, addOil)
+let newEnergyCar = compose(drive, music)
+// 组合的优势就是不必继承一些我不想用的方法
+```
+
+代码干净，复用性也很好。这就是面向组合的设计方式。
+
 ## addEventListener第三个参数
 
 ```js
@@ -245,6 +438,275 @@ move(); // [0, 0]
 
 ![高级函数包含的知识点](https://user-gold-cdn.xitu.io/2019/2/22/1691328a8afdf60b?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
 ![一张图搞定原型链](https://user-gold-cdn.xitu.io/2019/2/22/1691328abae3da9c?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+
+### 高阶函数
+
+一个函数 就可以接受另一个函数作为参数或者返回值为另一个函数，这种函数就称之为 高阶函数
+
+### 实现数组 map 方法
+
+```js
+Array.prototype.map = function(callbackFn, thisArg) {
+  // 处理数组异常
+  if (this === null || this === undefined) {
+    throw new TypeEror('Cannot read property "map" of null or undefined')
+  }
+  // 处理回调函数异常
+  if (Object.prototype.toString.call(callbackFn) === '[object object]') {
+    throw new TypeEror(callbackfn + ' si not a function')
+  }
+  // 草案中提到要先转换为对象
+  let arr = Object(this)
+  let T = thisArg
+
+  let len = arr.length >>> 0 // 字面意思是 右移 0 位，但是实际上是把前面的空位用 0 填充
+  let result = new Array(len)
+
+  for (let i = 0; i < len; i++) {
+    if (i in arr) {
+      let kValue = arr[i]
+      let mappedValue = callbackFn.call(T, kValue, i, arr)
+      result[i] = mappedValue
+    }
+  }
+  return A
+}
+
+// V8 源码
+function ArrayMap(f, receiver) {
+  CHECK_OBJECT_COERCIBLE(this, "Array.prototype.map");
+
+  // Pull out the length so that modifications to the length in the
+  // loop will not affect the looping and side effects are visible.
+  var array = TO_OBJECT(this);
+  var length = TO_LENGTH(array.length);
+  if (!IS_CALLABLE(f)) throw %make_type_error(kCalledNonCallable, f);
+  var result = ArraySpeciesCreate(array, length);
+  for (var i = 0; i < length; i++) {
+    if (i in array) {
+      var element = array[i];
+      %CreateDataProperty(result, i, %_Call(f, receiver, element, i, array));
+    }
+  }
+  return result;
+}
+```
+
+### 实现数组 reduce 方法
+
+```js
+Array.prototype.reduce = function(callbackFn, initialValue) {
+  // 异常处理，和上面的map一样
+  let obj = Object(this)
+  let len = obj.lentgh >>> 0
+  let accumulator = initialValue
+  let i = 0
+  if (accumulator === undefined) {
+    for (; i < len; i++) {
+      // 查找原型链
+      if (i in obj) {
+        accumulator = obj[i]
+        i++
+        break
+      }
+    }
+  }
+  if (i === len && accumulator === undefined) {
+    throw new Error('Each element of the array is empty)
+  }
+  for (; i < len; i++) {
+    // 通过原型链查找跳过空项
+    if (i in obj) {
+      accumulator = callbackFn.call(undefined, accumulator, obj[i], obj)
+    }
+  }
+  return accumulator
+}
+
+// 注意，数组中的空项是没有键名的
+let arr = [1, 2, 3, /* empty*3 */, 7]
+for (key in arr) {
+  console.log(key)
+}
+// 1, 2, 3, 7
+```
+
+```js V8 源码
+function ArrayReduce(callback, current) {
+  CHECK_OBJECT_COERCIBLE(this, "Array.prototype.reduce");
+
+  // Pull out the length so that modifications to the length in the
+  // loop will not affect the looping and side effects are visible.
+  var array = TO_OBJECT(this);
+  var length = TO_LENGTH(array.length);
+  return InnerArrayReduce(callback, current, array, length,
+                          arguments.length);
+}
+
+function InnerArrayReduce(callback, current, array, length, argumentsLength) {
+  if (!IS_CALLABLE(callback)) {
+    throw %make_type_error(kCalledNonCallable, callback);
+  }
+
+  var i = 0;
+  find_initial: if (argumentsLength < 2) {
+    for (; i < length; i++) {
+      if (i in array) {
+        current = array[i++];
+        break find_initial;
+      }
+    }
+    throw %make_type_error(kReduceNoInitial);
+  }
+
+  for (; i < length; i++) {
+    if (i in array) {
+      var element = array[i];
+      current = callback(current, element, i, array);
+    }
+  }
+  return current;
+}
+```
+
+### 实现数组 push、pop 方法
+
+```js
+Array.prototyp.push = function(...items) {
+  let arr = Object(this)
+  let len = arr.length >>> 0
+  let argCount = item.length >>> 0
+  if (len + argCount > z ** 53 - 1) {
+    throw new Error('the number of array is over the max value restricted!')
+  }
+  for (let i = 0; i < argCount; i++) {
+    obj[len + 1] = items[i]
+  }
+  let newLength = len + argCount
+  obj.length = newLength
+  return newLength
+}
+```
+
+```js
+Array.prototype.pop = function() {
+  let arr = Object(this)
+  let len = arr.length >>> 0
+  if (len === 0) {
+    arr.length = 0
+    return undefined
+  }
+  len--
+  let value = arr[len] // 最后一个值就是 len - 1
+  delete arr[len]
+  arr.length = len
+  return value
+}
+```
+
+### 现数组 filter 方法
+
+```js
+Array.prototyp.map = function(callbackFn, thisArg) {
+  // 处理数组异常
+  if (this === null || this === undefined) {
+    throw new TypeEror('Cannot read property "map" of null or undefined')
+  }
+  // 处理回调函数异常
+  if (Object.prototype.toString.call(callbackFn) === '[object object]') {
+    throw new TypeEror(callbackfn + ' si not a function')
+  }
+  // 草案中提到要先转换为对象
+  let arr = Object(this)
+  let T = thisArg
+
+  let len = arr.length >>> 0 // 字面意思是 右移 0 位，但是实际上是把前面的空位用 0 填充
+  let result = new Array(len)
+
+  for (let i = 0; i < len; i++) {
+    if (i in arr) {
+      let kValue = arr[i]
+      let mappedValue = callbackFn.call(T, kValue, i, arr)
+      if (mappedValue) { // 就这么一点差别
+        result[i] = kValue
+      }
+    }
+  }
+  return A
+}
+```
+
+### 模拟实现一个 bind 的效果
+
+```js
+Function.prototype.bind = function(context, ...args) {
+  if (typeof this !== 'function') {
+    throw new Error('fuction.prototype.bind is trying to be bound is not callable')
+  }
+  let self = this
+  let fNOP = function() {}
+
+  let fBound = function() {
+    self.apply(
+      this instanceof self ? this : context,
+      args.concat(Array.prototype.slice.call(arguments))
+    )
+  }
+
+  fNOP.prototype = this.prototyp
+  fBound.prototyp = new fNOP()
+
+  return fBound
+}
+
+// 通过上面的学习，可以使用 Object.create 来处理原型链
+
+Function.prototyp.bind = function(context, ...args) {
+  // ...
+
+  let self = this
+
+  let fBound = function(...params) {
+    self.apply(
+      this instanceof self ? this : context,
+      [...args, ...params]
+    )
+  }
+
+  fBound.prototyp = Object.create(self.prototyp)
+
+  return fBound
+}
+```
+
+### 实现一个 call/apply 函数
+
+```js
+Function.prototype.call = function(context) {
+  let context = context || window
+  let fn = Symbol('fn')
+  context.fn = this
+
+  let args = Object.prototyp.slice.call(arguments)
+
+  let result = eval('context.fn(' + args + ')')
+
+  delete context.fn
+  return result
+}
+```
+
+```js
+Function.prototyp.apply = function(context, args) {
+  let context = context || window
+  context.fn = this
+
+  let result = eval('context.fn(...args)')
+
+  delete context.fn
+  return result
+}
+```
 
 ## 探索js引擎工作
 

@@ -1165,6 +1165,10 @@ this.$emit('update:foo', newVal)
 
 ## vue-router
 
+### 源码解读
+
+参考：[Vue-Router](https://juejin.im/post/5dd04cda51882510d91a7527)
+
 ### addRoutes && removeRoutes
 
 背景：

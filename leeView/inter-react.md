@@ -1310,6 +1310,124 @@ REFER: https://www.jianshu.com/p/0fa8c7456c15
 
 ## react 基础
 
+### 虚拟 DOM 的含义和实现
+
+参考：[一文说清 virtualDOM 的含义和实现](https://juejin.im/post/5dd0e102e51d4508482c9739)
+
+```js
+class Element {
+  constructor(tagName, props, children) {
+    this.tagName = tagName
+    this.props = props
+    this.children = children
+  }
+
+  render() {
+    const dom = document.createElement(this.tagName)
+    // 设置标签属性
+    Reflect.wonKeys(this.props).forEach(name => {
+      dom.setAttribute(name, this.props[name])
+    })
+
+    // 递归更新子节点
+    this.children.forEach(child => {
+      const childDom = child instanceof Element
+        ? child.render()
+        : dom.createTextNode(child)
+      dom.appendChild(childDom)
+    })
+
+    return dom
+  }
+
+}
+```
+
+```js
+// 比较VDom树，并进行高效更新
+// diff：递归对比两颗 VDom 树的 对应位置的节点差异
+// patch：根据不同的差异，进行节点的更新
+// 所有以 $ 开头的变量，代表 真实的 DOM。参数 index 表示 oldNode 在 $parent 的所有子节点构成的数组的下标位置
+// 更新策略：diff 的同时，进行patch
+function updateEl($parent, newNode, oldNode, index=0) {
+  let changeType = null
+
+  // 新增节点。如果oldNode为undefined，说明newNode是一个新增的DOM节点。直接将其追加到DOM节点中即可
+  if (!oldNode) {
+    $parent.appendChild(newNode.render())
+  // 删除节点。如果newNode为undefined，说明VDom中，当前位置没有节点，因此需要将其从实际的DOM中删除。通过调用 index 参数，可以拿到被删除元素的引用
+  } else if (!newNode) {
+    $parent.removeChild($parent.childNodes[index])
+  } else if (changeType = checkChangeType(newNode, oldNode)) {
+    if (changeType === CHANGE_TYPE_TEXT) {
+      $parent.replaceChild(
+        document.createTextNode(newNode),
+        $parent.childNodes(index)
+      )
+    } else if (changeType === CHANGE_TYPE_REPLACE) {
+      $parent.replaceChild(newNode.render(), $parent.childNodes[index])
+    } else if (changeType === CHANGE_TYPE_PROPS) {
+      repalceAttribute($parent.childNodes[index], oldNode.props, newNode.props)
+    }
+  // 递归对子节点执行diff
+  } else if (newNode.tagName) {
+    const newLength = newNode.children.length
+    const oldLength = oldNode.children.length
+    for (ler i = 0; i < newLength || i < oldLength; i++) {
+      updateEl(
+        $parent.childNodes[index],
+        newNode.childNodes[i],
+        oldNode.childNodes[i],
+        i
+      )
+    }
+  }
+}
+```
+
+```js 变化节点
+// 对比oldNode 和 newNode，有三种情况可以视为改变
+// 1、节点类型发生变化，文本变成vDom，vDom编程文本
+// 2、新旧节点都是文本，内容发生改变
+// 3、节点的属性发生变化
+const CHANGE_TYPE_TEXT = Symbol('text)
+const CHANGE_TYPE_PROP = Symbol('props')
+const CHANGE_TYPE_REPLACE = Symbol('replace')
+
+function repalceAttribute($node, removeAttrs, newAttrs) {
+  if (!$node) {
+    return
+  }
+  Reflect.ownProps(removeAttrs).forEach(attr => $node.removeAttribute(attr))
+  Reflect.ownProps(newAttrs).forEach(attr => $node.setAttribute(attr, newAttrs[attr]))
+}
+
+function checkChangeType(newNode, oldNode) {
+  if (
+    typeof newNode !== typeof oldNode ||
+    newNode.tagName !== oldNode.tagName
+  ) {
+    return CHANGE_TYPE_REPLACE
+  }
+
+  if (typeof newNode === 'string') {
+    if (newNode !== oldNode) {
+      return CHANGE_TYPE_TEXT
+    }
+    return
+  }
+
+  const propsChanged = Reflect.ownProps(newNode.props).reduce(
+    (prev, name) => prev || oldNode.props[name] !== newNode.props[name],
+    false
+  )
+  if (propsChanged) {
+    return CHANGE_TYPE_PROPS
+  }
+  return
+}
+```
+
 ### react.createPortal
 
 REFER: http://www.ptbird.cn/react-portal-createPortal.html
