@@ -203,6 +203,96 @@ el.addEventListender('scroll', hander, {
 })
 ```
 
+## js String 基本操作
+
+### slice
+
+> 返回被操作字符的子字符串，原字符串不变
+
+1. 接受两个参数，字符串的起始位置和结束位置，返回的字符串不包含结束位置的字符
+2. 第一个参数要大于第二个参数，否则返回""
+3. 若只有一个参数，返回起始位置到字符串结尾的所有字符串
+4. 若传递的参数为 `负数` ，将传入的负值与字符串的长度相加. 【就是不管几个参数是负数，都将对应的负数值加上字符串的长度】
+
+### substring
+
+> 当传入的参数是正数时，substring与slice的功能基本相同。原字符串不变
+
+区别：
+
+1. 唯一的区别是当第一个参数大于第二个参数时，方法将第二个参数作为截取的起始位置，而将第一个参数作为截取结束的位置，且截取的字符串不包含第一个参数位置对应的值
+
+```js
+let s = 'leeing'
+s.slice(2, 3) // e
+s.substring(3, 2) // 等价于 s.substring(2, 3)  -> e
+```
+
+* 当传入的参数是`负值`时，该方法会将所有的`负值转化为0`
+
+```js
+s.substring(-7, 3) // 等价于 s.substring(0, 3)
+s.substring(-7, -3) // 等价于 s.substring(0, 0)
+```
+
+### substr
+
+> 返回指定位置开始的指定长度的字符串，原字符串不变
+
+* 若第二个参数缺省就一直截取到字符串结束
+* 当传递的参数为`负值`时，方法会将负的第一个参数与字符串的长度相加，将负的第二个参数转化为0
+* 第一个参数大于第二个参数时，那么从第一个参数开始，截取 `长度为第二个参数值` 的字符串
+
+```js
+var s = 'hello world!'
+alert(s.substr(0, 5));//从索引0开始，截取5个字符串，返回hello
+alert(s.substr(7)); //从索引7开始截取，一直到结束，返回orld!
+alert(s.substr(-7,3));//负数与长度相加，即str.substr(5,3),返回 wo
+alert(s.substr(-7,-3));//负数与长度相加，即str.substr(5,0),返回""
+```
+
+### match vs exec
+
+1. match是字符串的方法，exec是正则对象实例的方法
+2. 正则表达式中没有子表达式，且非全局匹配（没有修饰符g），match和exec结果一样都是返回数组
+3. 正则表达式中含有子表达式(就是带有括号的表达式)，且非全局匹配，match和exec结果一致
+4. 正则表达式中没有子表达式，全局匹配。match返回所有匹配项组成的数组，exec返回一个匹配项的数组
+5. 正则表达式中有子表达式，全局匹配。match返回所有匹配项组成的数组，忽略子表达式的捕获项，exec忽略全局匹配。
+6. exec适合用于循环匹配，虽然全局匹配和非全局的返回值一样，但使用exec循环时，必须要加修饰符g
+
+```js
+// 2
+var s ='hello123456数组';
+var result1 = s.match(/\d/);
+console.log(result1); // ["1", index: 5, input: "hello123456数组", groups: undefined]
+
+var result2 = /\d/.exec(s);
+console.log(result2); // 结果同string.match(reg)
+
+var s='abc,bbc,cbc,dbc';
+var result=/(\w)bc/.exec(s);
+console.log(result);
+
+// 4
+ar str = 'abcd';
+var re = /(a)(b)(c)/;
+console.log( str.match(re) ) // ["abc", "a", "b", "c", index: 0, input: "abcd", groups: undefined]
+console.log(re.exec(str)); // ["abc", "a", "b", "c", index: 0, input: "abcd", groups: undefined]
+
+// 5
+var s = 'abc,bbc,cbc,dbc';
+var result = /(\w)bc/g.exec(s);
+console.log(result); // ['abc','a'],index为0，input为'abc,bbc,cbc,dbc'
+var result2 = s.match(/(\w)bc/g);
+console.log(result2); // ['abc','bbc','cbc','dbc']
+```
+
+### split
+
+> 基于指定的分隔符将一个字符串分割成多个字符串，并将结果存放在一个数组中
+
+* 可以传两个参数，第一个参数为分隔符，第二个参数用于指定返回数组的大小
+
 ## 作用域
 
 > 作用域是指程序源代码中定义变量的区域
