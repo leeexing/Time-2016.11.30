@@ -206,3 +206,106 @@ type：把从命令行输入的结果转成设置的类型
 choice：允许的参数值
 parser.add_argument("-v", "--verbosity", type=int, choices=[0, 1, 2], help="increase output verbosity")
 help：参数命令的介绍
+
+## re 正则表达式
+
+### 分组 group
+
+那实际例子说话吧
+
+```py
+s = 'background-image: url(http://img01.lavaradio.com/up/png/2018/06/13/17/02/5b20dd8c4d9a3.png!bgmediam0)'
+
+reg = re.compile(r'background-image: url\((.*)\)')
+
+print(re.match(r'background-image: url\((.*)\)', s).group())
+print(re.match(r'background-image: url\((.*)\)', s).group(0))
+print(re.match(r'background-image: url\((.*)\)', s).group(1))
+print(re.match(reg, s).group(1))
+
+# http://img01.lavaradio.com/up/png/2018/06/13/17/02/5b20dd8c4d9a3.png!bgmediam0
+```
+
+记住一点：group(0)永远是原始字符串，group(1)、group(2)……表示第1、2、……个子串
+
+groups() 返回一个元组
+
+```py
+print(re.match(reg, s).groups())
+# ('http://img01.lavaradio.com/up/png/2018/06/13/17/02/5b20dd8c4d9a3.png!bgmediam0',)
+```
+
+### re.sub()
+
+Python 的 re 模块提供了re.sub用于替换字符串中的匹配项。
+
+`re.sub(pattern, repl, string, count=0, flags=0)`
+
+```py
+phone = "2004-959-559 # 这是一个电话号码"
+
+# 删除注释
+num = re.sub(r'#.*$', "", phone)
+print ("电话号码 : ", num)
+
+# 移除非数字的内容
+num = re.sub(r'\D', "", phone)
+print ("电话号码 : ", num)
+[python@master test]$ python3 d.py
+```
+
+### re.search
+
+扫描整个字符串并返回第一个成功的匹配。
+
+re.search(pattern, string, flags=0)
+
+### re.match
+
+尝试从一个字符串的起始位置匹配一个模式，如果不是起始位置匹配成功的话，则返回None。
+
+re.match(pattern, string, flags=0)
+
+返回值：匹配成功返回匹配对象（group(num=0) / groups() 返回的是一个元组），匹配失败返回None
+
+group(num=0)    匹配的整个表达式的字符串，group() 可以一次输入多个组号，在这种情况下它将返回一个包含那些组所对应值的元组。
+
+groups()            返回一个包含所有小组字符串的元组，从 1 到 所含的小组号。
+
+### findall()
+
+在字符串中找到正则表达式所匹配的所有子串，并返回一个列表，如果没有找到匹配的，则返回空列表。
+注意： match 和 search 是匹配一次 findall 匹配所有。
+
+findall(string[, pos[, endpos]])
+
+```py
+pattern = re.compile(r'\d+')   # 查找数字
+result1 = pattern.findall('runoob 123 google 456')
+result2 = pattern.findall('run88oob123google456', 0, 10)
+
+print(result1)
+print(result2)
+[python@master test]$ python3 a.py
+['123', '456']
+['88', '12']
+```
+
+### re.split()
+
+split 方法按照能够匹配的子串将字符串分割后返回列表，它的使用形式如下：
+re.split(pattern, string[, maxsplit=0, flags=0])
+
+```py
+re.split('\W+','runoob,runoob,runoob.')
+['runoob', 'runoob', 'runoob', '']
+
+re.split('(\W+)',' runoob,runoob,runoob.')
+['', ' ', 'runoob', ',', 'runoob', ',', 'runoob', '.', '']
+
+re.split('\W+', ' runoob, runoob, runoob.', 1)
+['', 'runoob, runoob, runoob.']
+
+re.split('a', 'hello world')
+['hello world']# 对于一个找不到匹配的字符串而言，split 不会对其作出分割
+```

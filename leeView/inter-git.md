@@ -5,6 +5,20 @@
 * git bash 中 git status 显示中文乱码
 * 提交规范
 
+## git config
+
+```js
+git config -l  // 显示当前配置
+git config --global alias.logg 'log --graph --oneline' // 配置全局别面
+```
+
+```js
+// 一个有趣有用炫酷的log配置
+git config --global alias.lg "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+```
+
+`cat .git/config`会显示每个仓库的 Git 配置
+
 ## git bash 中显示中文乱码
 
 ```js
@@ -131,9 +145,32 @@ git show commitId fileName 查看某次commit中具体某个文件的修改
 2. git reset --mixed
 3. git reset --hard
 
+## git checkout
+
+* git checkout commit_id 这样会切换到这个commit_id的上，文件的内容就是这个commit保存的内容
+* git checkout -b new_branch_name commit_id以commit_id的状态，新建一个分支
+
+```js
+$ git logo
+b84cd41 (HEAD -> master) :memo: 添加字符串 substring,substr操作的认识
+ee2be66 (origin/master, origin/HEAD) :memo: 添加js基本知识点的学习
+ca02055 :zap: 优化tip多标记嫌疑框结果的判断
+c2b6c32 :sparkles: 添加多tip标记的逻辑判断
+
+// 接下来以 ca02055 这个 commitId 的状态新建一个分支.这时 test 分支的最近提交点就是 ca02055 这个提交历史点
+git ck -b test ca02055
+```
+
+/usr/libexec/mysqld --basedir=/usr --datadir=/var/lib/mysql --plugin-dir=/usr/lib64/mysql/plugin --log-error=/var/log/mariadb/mariadb.log --pid-file=/var/run/mariadb/mariadb.pid --socket=/var/lib/mysql/mysql.sock --port=3306
+
+这两个方法都可以找到原来某状态下的任意一个文件，同时不用修改commit历史。
+
+* git checkout .  -> 撤销当前项目的所有暂存修改
+
 ## git diff
 
 1. git diff
+
 2. git diff --cache
 3. git diff --HEAD
 
