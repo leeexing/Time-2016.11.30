@@ -43,8 +43,10 @@ class DrBluePrint {
     this.addedContainerListeners = {}
     this.addedOverlapCanvasLIsteners = {}
 
+    // - 兼容手机端的控制变量
     this.isMobile = this.mobileAndTabletcheck()
     this.mobileSelectMode = false // -手机端没有鼠标中键的概念，需要切换模式
+    this.isZoomOnMobile = false // - 手机端缩放是通过两个手指缩放实现的。逻辑需要单独处理
 
     this.userSelectRegion = null
     this.userMarkedRectangles = []
@@ -108,6 +110,9 @@ class DrBluePrint {
   setMobileSelectMode(value) {
     this.mobileSelectMode = value
   }
+  setMobileZoomMode(value) {
+    this.isZoomOnMobile = value
+  }
   // 获取鼠标在PC或者Mobile端的事件名
   getMouseOrTouchEventName(eventname) {
     var eventnamePc = []
@@ -163,8 +168,7 @@ class DrBluePrint {
       } else if (e.which == 2 || (this.isMobile && this.mobileSelectMode)) {
         this.isMiddleBtn = true
         this.overlappedCanvas.context.clearRect(
-          0,
-          0,
+          0, 0,
           this.overlappedCanvas.width,
           this.overlappedCanvas.height
         )
@@ -256,11 +260,16 @@ class DrBluePrint {
           selectRegion.right,
           selectRegion.bottom
         )
-        // console.log(this.userSelectRegion)
-        this.userMarkedRectangles.push([...this.userSelectRegion])
-        this.drawUserMarkedRectangles()
+        if (this.validateSelectRegion()) {
+          this.userMarkedRectangles.push([...this.userSelectRegion])
+        }
         let len = this.userMarkedRectangles.length
-        this.middleMouseSelectCallback && this.middleMouseSelectCallback(this.userSelectRegion, len)
+        if (len > 0) {
+          this.drawUserMarkedRectangles()
+          this.middleMouseSelectCallback && this.middleMouseSelectCallback(this.userSelectRegion, len)
+        } else {
+          this.clearUserMarkedRectangles()
+        }
       }
     }, false)
 
@@ -270,7 +279,6 @@ class DrBluePrint {
     this.container.addEventListener(this.getMouseOrTouchEventName('mousedown'), event => {
       event.preventDefault()
       event.returnValue = false
-      // let clientPos = this.getClientPos(event)
       if (event.which == 1 || (this.isMobile && !this.mobileSelectMode)) {
         this.isLeftMouseDown = true
         this.containerCanvas.startX = this.dx
@@ -280,7 +288,7 @@ class DrBluePrint {
     }, false)
 
     this.container.addEventListener(this.getMouseOrTouchEventName('mousemove'), event => {
-      if (this.isLeftMouseDown) {
+      if (this.isLeftMouseDown && !this.isZoomOnMobile) {
         let [offsetX, offsetY] = this.getPagePos(event) // +[e.pageX, e.pageY]
         let realMoveX = offsetX - this.container.startMouseDownPos[0]
         let realMoveY = offsetY - this.container.startMouseDownPos[1]
@@ -324,39 +332,46 @@ class DrBluePrint {
         delta = -event.detail / 3
       }
       if (!delta) return
+      // -获取之前鼠标点在图像中的相对位置
+      let { offsetX, offsetY } = event
 
       let scaleRatio = delta > 0 ? 1.05 : 0.9
-      this.scale *= scaleRatio
-      if (this.scale <= this.options.minScale) {
-        this.scale = this.options.minScale
-        return
-      }
-      if (this.scale >= this.options.maxScale) {
-        this.scale = this.options.maxScale
-        return
-      }
-      // -获取之前鼠标点在图像中的相对位置
-      let {
-        offsetX,
-        offsetY
-      } = event
-      let relateX = (offsetX - this.dx) / this.width
-      let relateY = (offsetY - this.dy) / this.height
-
-      let dx = relateX * (scaleRatio - 1) * this.width
-      let dy = relateY * (scaleRatio - 1) * this.height
-      this.dx -= dx
-      this.dy -= dy
-      this.width = this.initWidth * this.scale
-      this.height = this.initHeight * this.scale
-      this.loadImageTexture()
-      this.drawUserMarkedRectangles()
+      this.zoomImage(offsetX, offsetY, scaleRatio)
     }, false)
+  }
+  validateSelectRegion () {
+    console.log(this.userSelectRegion)
+    let [x1, y1, x2, y2] = this.userSelectRegion
+    console.log((x2 - x1) * (y2 - y1))
+    return (x2 - x1) * (y2 - y1) > 0.002
+  }
+  zoomImage (offsetX, offsetY, scaleRatio) {
+    this.scale *= scaleRatio
+    if (this.scale <= this.options.minScale) {
+      this.scale = this.options.minScale
+      return
+    }
+    if (this.scale >= this.options.maxScale) {
+      this.scale = this.options.maxScale
+      return
+    }
+    let relateX = (offsetX - this.dx) / this.width
+    let relateY = (offsetY - this.dy) / this.height
+
+    let dx = relateX * (scaleRatio - 1) * this.width
+    let dy = relateY * (scaleRatio - 1) * this.height
+    this.dx -= dx
+    this.dy -= dy
+    this.width = this.initWidth * this.scale
+    this.height = this.initHeight * this.scale
+    this.loadImageTexture()
+    this.drawUserMarkedRectangles()
   }
   show(url = './images/sfd1205_0215.jpg') {
     let imageObj = new Image()
     imageObj.src = url
     imageObj.onload = () => {
+      this.scale = 1
       this.renderData = imageObj
       this.calculatePos(imageObj)
       this.clearUserMarkedRectangles()
@@ -499,6 +514,21 @@ class DrBluePrint {
     image.src = imageSrc
     console.log('rotate', this.getUserMarkedRectanglesInfo())
   }
+  getCenterPosition () {
+    return {
+      offsetX: Math.ceil(this.containerW / 2),
+      offsetY: Math.ceil(this.containerH / 2)
+    }
+  }
+  // 函数调用，以中心点进行缩放。传入的值不是放大倍数，而是放大比例（和之前的放大系数进行相乘）
+  setZoomIndex (scaleRatio = 1.05) {
+    let { offsetX, offsetY } = this.getCenterPosition()
+    this.zoomImage(offsetX, offsetY, scaleRatio)
+  }
+	// 获取图像缩放倍数
+	getImageScale () {
+		return this.scale
+	}
   reset() {
     this.dx = this.initDx
     this.dy = this.initDy
@@ -570,6 +600,7 @@ $(() => {
 
 
   let drBluePrint = new DrBluePrint()
+  window.DR = drBluePrint
   drBluePrint.setMiddleMouseSelectCallback(middleMouseSelectCallback)
   drBluePrint.setRemoveMarkedRectanglesCallback(console.log)
   drBluePrint.show()
