@@ -203,6 +203,59 @@ el.addEventListender('scroll', hander, {
 })
 ```
 
+## ResizeObserver
+
+* ResizeObserver.disconnect() 取消观察某个observer的所有observed目标元素。
+* ResizeObserver.observe() 初始化观察一个指定元素。
+* ResizeObserver.observe() 取消观察一个指定元素。
+* new ResizeObserver(callback) callback的入参包括entries和observer。
+
+entries是一个数组，它由所有的ResizeObserverEntry object组成。
+通过for (let entry of entries) {}的方式，entry代表一个ResizeObserver object，一个entry由contentRect和target组成。
+
+```js
+{
+  target: div, contentRect: DOMRectReadOnly}
+  contentRect: DOMRectReadOnly
+  bottom: 312.3125
+  height: 292.3125
+  left: 20
+  right: 626
+  top: 20
+  width: 606
+  x: 20
+  y: 20
+  __proto__: DOMRectReadOnly
+  target: div
+  __proto__: ResizeObserverEntry
+}
+```
+
+```js 使用
+// <div class="main" :style="{minHeight: dynamicMainHeight}">
+//       <chatView></chatView>
+// </div>
+
+observerChartView() {
+  if (window.ResizeObserver) {
+    const viewElem = document.querySelector('.main')
+    const resizeObserver = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        if (!this.initialHeight) {
+          this.initialHeight = entry.contentRect.height
+        }
+        if (this.initialHeight) {
+          const deltaHeight = this.initialHeight - entry.contentRect.height
+          this.$bus.$emit('renderderViewAndEditor', deltaHeight)
+        }
+      }
+    })
+  } else {
+    this.$Message.warning('不支持)
+  }
+}
+```
+
 ## js String 基本操作
 
 ### slice

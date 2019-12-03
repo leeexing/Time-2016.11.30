@@ -124,7 +124,7 @@ class Student(Person):
 
 dir()返回的属性是字符串列表，如果已知一个属性名称，要获取或者设置对象的属性，就需要用 `getattr()` 和 `setattr( )` 函数了：
 
-## shutil
+## shutil & makedirs
 
 ### shutil.copytree
 
@@ -309,3 +309,126 @@ re.split('\W+', ' runoob, runoob, runoob.', 1)
 re.split('a', 'hello world')
 ['hello world']# 对于一个找不到匹配的字符串而言，split 不会对其作出分割
 ```
+
+## 装饰器
+
+### wraps
+
+> 作用是避免装饰函数自身信息的丢失
+
+```py
+from functools import wraps
+
+def decorator(func):
+    @wraps(func)
+    def inner_function():
+        pass
+    return inner_function
+
+@decorator
+def func():
+    pass
+
+print(func.__name__)
+
+# 如果不加@wraps，那么这里的输出就是一个 inner_function，而正确的应该是 func
+```
+
+### 带参数的装饰器
+
+```py 自己项目中的代码
+
+from functools import wraps
+
+from app.public.enumtype import UserTypeEnum
+
+
+def user_type_required(*args, **kwargs):
+    """用户类型权限装饰器"""
+
+    if len(args) > 0:
+        auth_user_types = args[0]
+    else:
+        auth_user_types = kwargs.get('user_type')
+    is_types_list = isinstance(auth_user_types, list)
+
+    def auth_wrapper(fn):
+
+        @wraps(fn)
+        def wrapper(*arg, **kw):
+            self = arg[0]
+            identity = self.get_user()
+            user_type = identity.get('usertype')
+            auth_validate = user_type in auth_user_types if is_types_list else user_type == auth_user_types
+            if not auth_validate:
+                return self.Response.return_false_data(msg='权限不足', status=403)
+            return fn(*arg, **kw)
+
+        return wrapper
+
+    return auth_wrapper
+```
+
+对于类方法来说，都会有一个默认的参数self，它实际表示的是类的一个实例，所以在装饰器的内部函数wrapper也要传入一个参数
+
+### 类装饰器
+
+```py
+class Decorator(object):
+    def __init__(self, f):
+        self.f = f
+    def __call__(self):
+        print("decorator start")
+        self.f()
+        print("decorator end")
+
+@Decorator
+def func():
+    print("func")
+
+func()
+
+'''
+decorator start
+func
+decorator end
+'''
+```
+
+这个看着也挺厉害的的亚子
+
+基于类实现的装饰器
+装饰器函数其实是这样一个接口约束，它必须接受一个callable对象作为参数，然后返回一个callable对象。在Python中一般callable对象都是函数，但也有例外。只要某个对象重载了__call__()方法，那么这个对象就是callable的。重载__call__些魔法方法一般会改变对象的内部行为，让一个类对象拥有了被调用的行为。
+
+__带参数的类装饰器__:
+
+```py
+class logging(object):
+    def __init__(self, level='INFO'):
+        self.level = level
+
+    def __call__(self, func):  # 接受函数
+        def wrapper(*args, **kwargs):
+            print('[{level}]: enter function {func}()'.format(
+                level=self.level,
+                func=func.__name__))
+            func(*args, **kwargs)
+
+        return wrapper  # 返回函数
+
+@logging(level='INFO')
+def say(something):
+    print('say {}'.format(something))
+
+say('love you.')
+print(say.__name__)  # wrapper -> 只要在 wrapper 上面再加上 @wraps(func) 得到的就是 say 这个原本装饰函数的函数名
+```
+
+### 多个装饰器
+
+多个装饰器执行的顺序就是从最后一个装饰器开始，执行到第一个装饰器，再执行函数本身
+
+### 注意事项
+
+1、不确定的代码执行顺序。最好不要在装饰器函数之外添加逻辑功能，否则这个装饰器就不受你控制了
+2、多层装饰器。使用场景较小

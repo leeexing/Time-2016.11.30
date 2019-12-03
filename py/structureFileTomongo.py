@@ -7,13 +7,15 @@ from pathlib import Path
 from datetime import datetime
 from pymongo import MongoClient
 
-base_path = r'E:\magi'
 base_origin_path = r'E:\magi\original'
 base_thumb_path = r'E:\magi\thumbnail'
 
-save_origin_path = r'image_sieve/'
+save_origin_path = r'image_sieve/' # -暂时没有用到
 
-batch_name = '20191128'
+batch_name = '20191128' # -批次名称
+batch_cname = '白云机场' # -批次中文名
+
+# - UserIDS
 # userIDs = ['12', '13'] # 测试环境的用户ID
 userIDs = ['3', '4'] # 生产环境的用户ID
 
@@ -22,18 +24,18 @@ thumbnail_batch_path = os.path.join(base_thumb_path, batch_name)
 
 
 # conn = MongoClient(host='127.0.0.1:27017') # 开发环境
-# conn = MongoClient(host='mongodb://root:root123@10.15.225.23:27017/admin') # 测试环境
-conn = MongoClient(host='mongodb://root:root123@52.80.171.106:27017/admin') # 生产环境
+conn = MongoClient(host='mongodb://root:root123@10.15.225.23:27017/admin') # 测试环境
+# conn = MongoClient(host='mongodb://root:root123@52.80.171.106:27017/admin') # 生产环境
 mongodb = conn.sourceData
 
-# print(list(mongodb.brushing_image.find().limit(10)))
+print(list(mongodb.sieve_image.find().limit(10))) # 测试mongo是否可以连接成功
 
-count = 0
+count = 0 # 用户给不同用户分配图像的变量
 
 def get_userID_by_count(count):
-    if count < 1000:
+    if count < 1001:
         return userIDs[0]
-    elif count < 2000:
+    elif count < 2001:
         return userIDs[1]
 
 def structure_file_to_db(path_url):
@@ -82,6 +84,7 @@ def structure_file_to_db(path_url):
                 print('Error happend:%s' % str(err))
                 print('[xxx] 报错图像为: ', current_path)
                 # continue
+
 
 def generate_water_mark(url):
     """生成图像水印"""
