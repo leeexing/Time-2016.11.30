@@ -4,6 +4,58 @@
 
 * gunicorn + docker 的使用
 
+## 命名规范
+
+[谷歌命名规范](https://zh-google-styleguide.readthedocs.io/en/latest/google-python-styleguide/python_style_rules/)
+
+摘录几条容易犯的错误：
+
+1、不要用空格来垂直对齐多行间的标记, 因为这会成为维护的负担 (适用于:, #, = 等):
+2、顶级定义之间空两行, 比如函数或者类定义. 方法定义, 类定义与第一个方法之间, 都应该空一行. 函数或方法中, 某些地方要是你觉得合适, 就空一行.
+3、如果一个类不继承自其它类, 就显式的从 object 继承. 嵌套类也一样.
+4、TODO 注释应该在所有开头处包含”TODO” 字符串, 紧跟着是用括号括起来的你的名字, email 地址或其它标识符. 然后是一个可选的冒号. 接着必须有一行注释, 解释要做什么；eg：`# TODO(kl@gmail.com): Use a "*" here for string repetition.` and `# TODO(Zeke) Change this to use relations.`
+5、命名
+
+```py
+module_name, package_name, ClassName, method_name, ExceptionName, function_name, GLOBAL_VAR_NAME, instance_var_name, function_parameter_name, local_var_name.
+```
+
+6、所有的顶级代码在模块导入时都会被执行. 要小心不要去调用函数, 创建对象, 或者执行那些不应该在使用 pydoc 时执行的操作
+
+## 常用内置函数
+
+all
+any
+fiter(function, iterable) -> 过滤 (lamda)
+map(function, iterable) -> 会根据提供的函数对指定序列列做映射(lamda)
+zip
+ord
+chr
+bytes(str, encoding='utf-8') -> 把字符串转化成bytes类型
+frozenset() -> 创建一个冻结的集合. 冻结的集合不能进行添加和删除操作
+enumerate
+reversed(list) -> 将一个序列翻转, 返回翻转序列的迭代器
+slice(start, end, step) -> 列表的切片
+
+**作用域相关**：
+locals() 返回当前作用域中的名字
+globals() 返回全局作用域中的名字
+
+**和迭代器/生成器相关**：
+range() 生成数据
+next() 迭代器向下执行一次, 内部实际使⽤用了__ next__()⽅方法返回迭代器的下一个项目
+iter() 获取迭代器, 内部实际使用的是__ iter__()⽅方法来获取迭代器
+
+**查看内置属性**：
+dir() : 查看对象的内置属性, 访问的是对象中的__dir__()方法
+
+callable() : 用于检查一个对象是否是可调用的. 如果返回True, object有可能调用失败, 但如果返回False. 那调用绝对不会成功
+help() : 函数用于查看函数或模块用途的详细说明
+
+`__ import__()` : 用于动态加载类和函数
+
+open() : 用于打开一个文件, 创建一个文件句柄
+
 ## 常用包
 
 ### gunicon
@@ -91,6 +143,34 @@ print("test{:x<4f}".format(3)); # test3xxx
 13          {:^10d}   13          中间对齐 (宽度为10)
 ```
 
+1、%s、%d
+2、format
+
+```py
+name = 'python'
+age = 30
+print('hello, {}, you are {}'.format(name, age))
+```
+
+3、f-String格式化（3.6版本，向上兼容）。建议使用
+
+```py
+name = 'python'
+age = 30
+print(f'hello, {name}, you are {age}')
+```
+
+这种方式比较简单，实用。f 或者 F 都可以。
+
+**打印更好看**：
+
+```py
+print(f'更加好看：{name:*<10}') # name在左边
+print(f'更加好看：{name:*>10}') # name在右便
+print(f'更加好看：{name:*^10}') # name在中间
+print(f'更加好看：{name:.2f}')  # 保留小数点后两位
+```
+
 ## 继承
 
 我们定义一个class的时候，可以从某个现有的class继承，新的class称为子类（Subclass），而被继承的class称为基类、父类或超类（Base class、Super class）。
@@ -125,6 +205,16 @@ class Student(Person):
 dir()返回的属性是字符串列表，如果已知一个属性名称，要获取或者设置对象的属性，就需要用 `getattr()` 和 `setattr( )` 函数了：
 
 ## shutil & makedirs
+
+### mkdir vs makedirs
+
+1.mkdir( path [,mode] )
+    作用：创建一个目录，可以是相对或者绝对路径，mode的默认模式是0777。
+    如果目录有多级，则创建最后一级。如果最后一级目录的上级目录有不存在的，则会抛出一个OSError。
+
+ 2.makedirs( path [,mode] )
+    作用： 创建递归的目录树，可以是相对或者绝对路径，mode的默认模式也是0777。
+    如果子目录创建失败或者已经存在，会抛出一个OSError的异常，Windows上Error 183即为目录已经存在的异常错误。如果path只有一级，与mkdir一样。
 
 ### shutil.copytree
 
@@ -432,3 +522,117 @@ print(say.__name__)  # wrapper -> 只要在 wrapper 上面再加上 @wraps(func)
 
 1、不确定的代码执行顺序。最好不要在装饰器函数之外添加逻辑功能，否则这个装饰器就不受你控制了
 2、多层装饰器。使用场景较小
+
+## 图像JPG to PNG
+
+```py
+im = Image.open('./demo.png')
+out = im.convert('RGB')
+out.save('./test.t.jpg')
+# out.save('./test.t.jpg', quality=95)
+# out.save('./test.t.jpg', quality=95, dpi=(300.0, 300.0))
+```
+
+`imObj.save(image_name, quality=95)` 参数解释
+
+quality参数： 保存图像的质量，值的范围从1（最差）到95（最佳）
+默认值为75，使用中应尽量避免高于95的值; 100会禁用部分JPEG压缩算法，并导致大文件图像质量几乎没有任何增益。
+
+`imObj.save(new_name, quality=95, subsampling=0)` 参数解析
+
+subsampling参数：子采样，通过实现色度信息的分辨率低于亮度信息来对图像进行编码的实践
+可能的子采样值是0,1和2，对应于4：4：4,4：2：2和4：1：1（或4：2：0？）。
+
+经过实践将值设为0便可以满足图片大小增大的需求
+
+`imObj.save(image_name, dpi=(300.0, 300.0))` 参数解释
+
+dpi 图像像素
+
+## 基本类库使用
+
+### open
+
+```py
+file1 = open（'file'，'mode'）
+```
+
+mode:
+.r    以只读方式打开文件。这是默认模式。文件必须存在，不存在抛出错误
+
+rb    以二进制格式打开一个文件用于只读。
+
+.'w'：以只写模式打开
+    若文件存在，则会自动清空文件，然后重新创建。
+    若文件不存在，则新建文件。
+    使用这个模式必须要保证文件所在目录存在，文件可以不存在。
+
+.'a'：以追加模式打开
+    若文件存在，则会追加到文件的末尾。
+    若文件不存在，则新建文件。
+    该模式不能使用 read*()方法。
+
+.'r+'： 以文本读写模式打开
+    可以写到文件任何位置。
+    默认写的指针开始指在文件开头, 因此会覆写。
+    可以使用 read*()
+
+.'w+'： 以文本读写模式打开（打开前文件会被清空）
+    可以使用 read*()
+
+'a+'： 以文本读写模式打开（写只能写在文件末尾）
+    可以使用 read*()
+
+`file.seek(offset[, whence])` 解读
+.seek（）指针从哪里开始写入
+    offset -- 开始的偏移量，也就是代表需要移动偏移的字节数
+    whence：可选，默认值为 0。给offset参数一个定义，表示要从哪个位置开始偏移；0代表从文件开头开始算起，1代表从当前位置开始算起，2代表从文件末尾算起
+
+### getattr 内置函数
+
+函数原型： `getattr(object, name[, default])`:
+
+name:str类型
+
+default:如果不存在name属性,设置default则返回default,不设置返回AttributeError.
+
+与__getattr__的区别:
+    __getattr__是类的内置方法,当找不到某个属性时会调用该方法;找到就不会调用.
+    getattr与类无关.
+
+```py
+class DataProxy(...):
+
+    def __getattr__(self, item):
+        return getattr(self.data, item)
+```
+
+### importlib 模块
+
+```py
+# 根据字符串导入模块
+# 通常用来导入包下面的模块
+o = importlib.import_module("aa.bb")
+s2 = "Person"
+
+# 由字符串找函数、方法、类  利用 反射
+the_class = getattr(o, "Person")
+p2 = the_class("小黑")
+p2.dream()
+```
+
+### os.path
+
+os.path.abspath(path)  #返回绝对路径
+os.path.split(path     #将path分割成目录和文件名二元组返回
+os.path.dirname(path)  #返回path的目录。其实就是os.path.split(path)的第一个元素
+os.path.basename(path) #返回path最后的文件名
+os.path.exists(path)   #如果path存在，返回True；如果path不存在，返回False
+os.path.isabs(path)    #如果path是绝对路径，返回True
+os.path.isfile(path)   #如果path是一个存在的文件，返回True。否则返回False
+os.path.isdir(path)    #如果path是一个存在的目录，则返回True。否则返回False
+os.path.getatime(path) #返回path所指向的文件或者目录的最后存取时间
+os.path.getmtime(path) #返回path所指向的文件或者目录的最后修改时间
+s.path.join(path1[, path2[, ...]])  #将多个路径组合后返回，第一个绝对路径之前的参数将
+
+### a

@@ -4,6 +4,12 @@
 
 ## 基本使用
 
+### bitmap
+
+> 可用于统计账号在线人数等相关
+
+[REDIS实践之在线人数统计几种方案分析](https://blog.csdn.net/hao508506/article/details/52496656/)
+
 ### list
 
 * blpop | BLPOP key1 [key2 ] timeout

@@ -7,6 +7,13 @@ TOC
 
 * 自动生成一个颜色块图像
 
+## npm 类库
+
+1、colors 👉 node控制台里面可以输出带颜色的字体
+2、nanoid 👉 A tiny, secure, URL-friendly, unique string ID generator for JavaScript.
+  -[refer](https://github.com/ai/nanoid/)
+3、其他
+
 ## 前端
 
 ### vue类库
@@ -15,6 +22,8 @@ TOC
 2. [dropzonejs](https://www.dropzonejs.com/)
 3. [fusejs](https://fusejs.io/) -- 轻量级的模糊搜索
 4. [screenfull](https://www.npmjs.com/package/screenfull) -- 更加便捷的全屏唤起
+5. [roughViz](https://github.com/jwilber/roughViz) -- 妙趣横生的手绘图表
+6. [element-resize-detector](https://www.npmjs.com/package/element-resize-detector) -- 灵活监听页面中DOM元素的宽高等属性的变化
 
 ### Audio/Video
 

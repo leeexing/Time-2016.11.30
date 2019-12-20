@@ -260,15 +260,30 @@ class DrBluePrint {
           selectRegion.right,
           selectRegion.bottom
         )
-        if (this.validateSelectRegion()) {
-          this.userMarkedRectangles.push([...this.userSelectRegion])
-        }
-        let len = this.userMarkedRectangles.length
-        if (len > 0) {
-          this.drawUserMarkedRectangles()
-          this.middleMouseSelectCallback && this.middleMouseSelectCallback(this.userSelectRegion, len)
+        let regionX = selectRegion.right - selectRegion.left
+        let regionY = selectRegion.bottom - selectRegion.top
+        let region = regionX * regionY
+        if ((regionX > 1) && (regionY > 1) && (region > 1)) {
+          // -嫌疑框在图像上的相对位置
+          this.userSelectRegion = this.toImageCoordinateNum(
+            selectRegion.left,
+            selectRegion.top,
+            selectRegion.right,
+            selectRegion.bottom
+          )
+          // 面积太小直接丢弃
+          if (this.validateSelectRegion()) {
+            this.userMarkedRectangles.push([...this.userSelectRegion])
+            if (this.middleMouseSelectCallback) {
+              let len = this.userMarkedRectangles.length
+              this.drawUserMarkedRectangles()
+              this.middleMouseSelectCallback(this.userSelectRegion, len)
+            }
+          } else {
+            this.drawUserMarkedRectanglesWhenInvalidateMark()
+          }
         } else {
-          this.clearUserMarkedRectangles()
+          this.drawUserMarkedRectanglesWhenInvalidateMark()
         }
       }
     }, false)
@@ -344,6 +359,14 @@ class DrBluePrint {
     let [x1, y1, x2, y2] = this.userSelectRegion
     console.log((x2 - x1) * (y2 - y1))
     return (x2 - x1) * (y2 - y1) > 0.002
+  }
+  drawUserMarkedRectanglesWhenInvalidateMark () {
+    let len = this.userMarkedRectangles.length
+    if (len > 0) {
+      this.drawUserMarkedRectangles()
+    } else {
+      this.clearUserMarkedRectangles()
+    }
   }
   zoomImage (offsetX, offsetY, scaleRatio) {
     this.scale *= scaleRatio

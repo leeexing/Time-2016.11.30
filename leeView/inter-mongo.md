@@ -99,6 +99,36 @@ list(db.images.find({'rcTime': {'$gte': datetime(2019, 6, 27, 12, 9, 0, tzinfo=s
  A:
 一个原因就可能是 log 日志文件夹中没有事先创建 `mongodb.log` 这个文件
 
+### shell 下执行 js 文件
+
+```js
+//  在OS命令行下，运行一个js文件
+
+mongo 127.0.0.1:27017/test userfindone.js
+
+userfindone.js 的内容：
+printjson(db.users.findOne());
+
+```
+
+```js
+function testFn() {
+  conn = new Mongo("127.0.0.1:27017");
+  db = conn.getDB("sourceData");
+  db.test_image.save({
+    "userName" : "totot",
+    "brand" : "苹果8",
+    "version" : "1213",
+    "question" : "士大夫十分"
+  })
+}
+
+
+mongo
+load("E:/Leeing/node/besame/test.js")
+testFn()
+```
+
 ## 数据导入导出
 
 REFER: https://www.cnblogs.com/qingtianyu2015/p/5968400.html
@@ -132,15 +162,19 @@ mongoimport -d dbname -c collectionname --file filename --headerline --type json
 ```
 
 参数说明：
-            -d ：数据库名
-            -c ：collection名
-            --type ：导入的格式默认json
-            -f ：导入的字段名
-            --headerline ：如果导入的格式是csv，则可以使用第一行的标题作为导入的字段
-            --file ：要导入的文件
+            h,--host ：代表远程连接的数据库地址，默认连接本地Mongo数据库；
+            --port：代表远程连接的数据库的端口，默认连接的远程端口27017；
+            -u,--username：代表连接远程数据库的账号，如果设置数据库的认证，需要指定用户账号；
+            -p,--password：代表连接数据库的账号对应的密码；
+            -d,--db：代表连接的数据库；
+            -c,--collection：代表连接数据库中的集合；
+            -f, --fields：代表导入集合中的字段；
+            --type：代表导入的文件类型，包括csv和json,tsv文件，默认json格式；
+            --file：导入的文件名称
+            --headerline：导入csv文件时，指明第一行是列名，不需要导入；
 
 ```js
-sudo mongoimport -d mongotest -c users --file /home/mongodump/articles.json --type json --port 27018 -u root -p 'Train!ok.' --autenticationDatabase admin --upsert
+sudo mongoimport -d mongotest -c users --file /home/mongodump/articles.json --type json -h IP --port 27018 -u root -p Train!ok. --authenticationDatabase=admin --upsert
 ```
 
 ## 备份与恢复

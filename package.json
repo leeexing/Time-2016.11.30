@@ -24,10 +24,15 @@
   },
   "homepage": "https://github.com/leeexing/Time-2016.11.30#readme",
   "dependencies": {
+    "colors": "^1.4.0",
     "gulp": "^3.9.1",
     "gulp-livereload": "^3.8.1",
     "gulp-rename": "^1.4.0",
     "gulp-uglify": "^3.0.1",
+    "husky": "^3.1.0",
+    "immer": "^5.0.0",
+    "nanoid": "^2.1.7",
+    "pre-commit": "^1.2.2",
     "ramda": "^0.25.0",
     "redux": "^4.0.0"
   },

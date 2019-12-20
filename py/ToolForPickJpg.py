@@ -41,11 +41,13 @@ def pick_jpg():
                     os.makedirs(destdir)
                 destname = os.path.join(destdir, basename + '.jpg')
                 copyfile(searchname, destname)
-                print('拷贝图像：', name)
+                # 有输出，程序不慌
+                if count % 100 == 0:
+                    print(f'拷贝了{count:,} 副图像。最近一幅：{name}')
                 count += 1
 
 
 if __name__ == '__main__':
     """执行"""
     pick_jpg()
-    print('本次拷贝图像数量：', count)
+    print(f'本次拷贝图像数量：{count:,}')

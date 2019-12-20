@@ -67,6 +67,12 @@ rm -rf testuser  删除用户testuser所在目录
 * head 只看头几行   : head [-n number] 文件 | -n ：后面接数字，代表显示几行的意思
 * tail 只看尾巴几行 : tail [-n number] 文件
 
+### 显示文件夹大小
+
+```shell
+du -h --max-depth=1 /usr/local/tomcat_8888/
+```
+
 ### chmod
 
 > 改变一个或多个文件的存取模式(mode)

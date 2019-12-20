@@ -8,7 +8,7 @@ The first repository in github
 2. css3
 3. vue
 4. react
-5. python/flask
+5. python
 
 there are the modules in this repository.
 
@@ -21,4 +21,3 @@ second, learning is interesting.
 so, I need learn some new characters of js and new frames.
 
 third, learning is endless.
-

@@ -25,3 +25,9 @@ datetime    表示日期时间。常用的属性有hour, minute, second, microse
 
 timedelta   表示时间间隔，即两个时间点之间的长度。
 """
+
+import datetime, time
+t = datetime.datetime(2009, 10, 21, 0, 0, 10, 10)   # 分别是年份、月份、日、小时、分钟、秒、微妙(10-6秒)
+print (t-datetime.datetime(1970,1,1)).total_seconds()  # 总共多少秒
+
+time.mktime(t.timetuple())
