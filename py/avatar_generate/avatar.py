@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
-"""图像生成"""
+"""图像生成
+    workon test_env
+"""
 
-from avatar_generator import render_identicon
+import pagan
 
 
+inpt = 'zhaowenna'
 
-if __name__ == '__main__':
-    img = render_identicon(100020000, 24)
-    img.save('./avatar.png', 'PNG')
+img = pagan.Avatar(inpt, pagan.SHA512)
+
+img.save('./', 'test')
+

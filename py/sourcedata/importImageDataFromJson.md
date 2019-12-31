@@ -43,6 +43,8 @@ ingest options:
 
 ```js
 mongo 10.15.225.23:27017/admin -u root -p root123
+
+mongo 52.80.171.106:27017/admin -u root -p root123
 ```
 
 ### 从测试环境的数据库中导出 AI 图像筛选的数据
@@ -62,9 +64,17 @@ mongoimport -d sourceData -c sieve_image --file "D:/sourcedata/mongoData/2019121
 // prod
 mongoimport -d sourceData -c sieve_image --file "D:/sourcedata/mongoData/20191218_sieve_image_nuctech_1.json" --type json --upsert -h "52.80.171.106" --port 27017 -u root -p root123 --authenticationDatabase=admin
 
+// 2019-12-25
+mongoimport -d sourceData -c sieve_image --file "D:/sourcedata/mongoData/20191225_sieve_image_nuctech_2.json" --type json --upsert -h "52.80.171.106" --port 27017 -u root -p root123 --authenticationDatabase=admin
+
+// 2019-12-31
+mongoimport -d sourceData -c sieve_image --file "D:/sourcedata/mongoData/20191231_sieve_image_nuctech_9.json" --type json --upsert -h "52.80.171.106" --port 27017 -u root -p root123 --authenticationDatabase=admin
+
 
 // local
 mongoimport -d sourceData -c sieve_image_nuctech --file "D:/sourcedata/mongoData/20191218_sieve_image_nuctech_1.json"
+mongoimport -d sourceData -c sieve_image_nuctech --file "D:/sourcedata/mongoData/20191225_sieve_image_nuctech_2.json"
+mongoimport -d sourceData -c sieve_image_nuctech --file "D:/sourcedata/mongoData/20191231_sieve_image_nuctech_9.json"
 ```
 
 ## 给这一批图像设定一个用户ID
@@ -96,4 +106,6 @@ load('E:/Leeing/node/besame/test.js')
 
 ```js
 mongo 10.15.225.23:27017/admin -u root -p root123 **.js
+
+mongo 52.80.171.106:27017/admin -u root -p root123 **.js
 ```

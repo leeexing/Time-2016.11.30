@@ -1,5 +1,9 @@
 # inter-linux
 
+## 服务器扩容
+
+REFER: [AWS EC2扩容](https://www.jianshu.com/p/d07becb150f4)
+
 ## 设置程序开机自启
 
 ```shell
