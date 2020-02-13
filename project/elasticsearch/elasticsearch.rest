@@ -1,0 +1,596 @@
+@hostname = localhost
+@port = 9200
+@Authorization = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NzkyMjEwNzMsIm5iZiI6MTU3OTIyMTA3MywianRpIjoiOGRkMmU4N2UtOGZhMS00ZDQ0LTg0YTctYzc0ZjAwNjk4MDcxIiwiZXhwIjoxNTc5ODI1ODczLCJpZGVudGl0eSI6eyJ1c2VySUQiOjEsInVzZXJuYW1lIjoiYWRtaW4iLCJ1c2VydHlwZSI6MX0sImZyZXNoIjpmYWxzZSwidHlwZSI6ImFjY2VzcyJ9.ldnpLWBNdGw1p4nfo-N3HIJQN9OITcWWE62pzCkSZ5s
+@contentType = application/json
+
+
+### 创建索引 （database）
+PUT http://{{hostname}}:{{port}}/blog
+User-Agent: vscode-restclient
+Content-Type: {{contentType}}
+# article 相当于 type 表相当于 type 表
+# properties 相当于 文档 document 的 属性 filed
+# 踩坑 https://www.cnblogs.com/feiquan/p/11888812.html
+
+{
+  "settings": {
+    "number_of_shards": 3,
+    "number_of_replicas": 1
+  },
+  "mappings": {
+    "properties": {
+      "id": {
+        "type": "long",
+        "store": true
+      },
+      "title": {
+        "type": "text",
+        "store": true,
+        "index": true,
+        "analyzer": "standard"
+      },
+      "content": {
+        "type": "text",
+        "store": true,
+        "index": true,
+        "analyzer": "standard"
+      }
+    }
+  }
+}
+
+
+### 获取用户列表 （旧的写法）
+PUT http://{{hostname}}:{{port}}/blog?include_type_name=true
+Authorization: Bearer {{Authorization}}
+
+{
+  "settings": {
+    "number_of_shards": 3,
+    "number_of_replicas": 1
+  },
+  "mappings": {
+    "article": {
+      "properties": {
+        "id": {
+          "type": "long",
+          "store": true
+        },
+        "title": {
+          "type": "text",
+          "store": true,
+          "index": true,
+          "analyzer": "standard"
+        },
+        "content": {
+          "type": "text",
+          "store": true,
+          "index": true,
+          "analyzer": "standard"
+        }
+      }
+    }
+  }
+}
+
+### 设置 index-hello 中具体的 type 信息
+POST http://{{hostname}}:{{port}}/index-hello/hello/_mappings
+User-Agent: vscode-restclient
+Content-Type: {{contentType}}
+
+{
+  "hello": {
+    "id": {
+      "type": "long",
+      "store": true
+    },
+    "title": {
+      "type": "text",
+      "store": true,
+      "index": true,
+      "analyzer": "standard"
+    },
+    "content": {
+      "type": "text",
+      "store": true,
+      "index": true,
+      "analyzer": "standard"
+    }
+  }
+}
+
+
+### 创建document
+POST http://{{hostname}}:{{port}}/blog/_doc/3
+Authorization: Bearer {{Authorization}}
+Content-Type: {{contentType}}
+
+{
+  "id": 3,
+  "title": "在家办公",
+  "content": "注意，上面的 group_by_word_count 表示该聚合的名称，是自定义的，可以自己为该聚合命名。"
+}
+
+
+### 查询（标准：只能是一个关键字，两个就不行）
+POST http://{{hostname}}:{{port}}/blog/_doc/_search
+Content-Type: {{contentType}}
+
+{
+  "query": {
+    "term": {
+      "content": "当"
+    }
+  }
+}
+
+
+### 查询（关键词：可以是多个字符串）
+POST http://{{hostname}}:{{port}}/blog/_doc/_search
+Content-Type: {{contentType}}
+
+{
+  "query": {
+    "query_string": {
+      "default_field": "content",
+      "query": "大规模"
+    }
+  }
+}
+
+
+### 查看分词结果 (v7版本有变化). 默认是 standard。可以安装 ik。使用 ik_smart | ik_max_word
+POST http://{{hostname}}:{{port}}/_analyze
+Content-Type: {{contentType}}
+
+{
+  "analyzer": "ik_smart",
+  "text": "端正坐姿，好好上班"
+}
+
+
+### 添加修改数据
+POST http://{{hostname}}:{{port}}/people/_doc/4
+Content-Type: {{contentType}}
+
+{
+  "name" : "小男",
+  "age" : 22,
+  "sex": "男"
+}
+
+
+### 获取数据
+GET http://{{hostname}}:{{port}}/people/_doc/2
+Content-Type: {{contentType}}
+
+
+### 查询所有
+GET http://{{hostname}}:{{port}}/people/_search
+Content-Type: {{contentType}}
+
+
+### 匹配查询
+GET http://{{hostname}}:{{port}}/people/_search
+Content-Type: {{contentType}}
+
+{
+  "query": {
+    "match": {
+      "sex": "男"
+    }
+  }
+}
+
+
+### 词条匹配（精确查找） term 被用于精确值 匹配。 使用只能是 term：{"sex": "男"} 不能是数组
+### _source 用于过滤字段
+GET http://{{hostname}}:{{port}}/people/_search
+Content-Type: {{contentType}}
+
+{
+  "query": {
+    "terms": {
+      "sex": ["男", "女"]
+    }
+  },
+  "_source": "name"
+}
+
+
+###  NOTE:  第二部分：集群
+
+### 🎈集群，创建索引 映射
+PUT http://{{hostname}}:9201/blog/_mapping
+User-Agent: vscode-restclient
+Content-Type: {{contentType}}
+
+{
+  "properties": {
+    "id": {
+      "type": "long",
+      "store": true
+    },
+    "title": {
+      "type": "text",
+      "store": true,
+      "analyzer": "ik_smart"
+    },
+    "content": {
+      "type": "text",
+      "store": true,
+      "analyzer": "ik_smart"
+    }
+  }
+}
+
+### 添加数据
+POST http://{{hostname}}:9201/blog/_doc/5
+User-Agent: vscode-restclient
+Content-Type: {{contentType}}
+
+{
+  "id": 5,
+  "title": "快递公司",
+  "content": "据国家邮政局2019年发布的快递员生存现状调查报告,76.31%的快递员"
+}
+
+### 查询数据
+GET http://{{hostname}}:9201/blog/_search
+User-Agent: vscode-restclient
+Content-Type: {{contentType}}
+
+{
+  "query": {
+    "match_all": {}
+  },
+  "_source": "content",
+  "size": 2
+}
+
+
+### 多字段查询数据
+GET http://{{hostname}}:9201/blog/_search
+User-Agent: vscode-restclient
+Content-Type: {{contentType}}
+
+{
+  "query": {
+    "multi_match": {
+      "query": "公司",
+      "fields": ["title", "content"]
+    }
+  },
+  "sort": [
+    {"id": "desc"}
+  ]
+}
+
+
+### 查询数据 添加过滤条件
+GET http://{{hostname}}:9201/blog/_search
+User-Agent: vscode-restclient
+Content-Type: {{contentType}}
+
+{
+  "query": {
+    "bool": { // 这里需要事 bool ean
+      "filter": {
+        "range": {
+          "id": {"gt": 2}
+        }
+      }
+    }
+  },
+  "sort": [
+    {"id": "desc"}
+  ]
+}
+
+
+### 全文检索 （full-text search）
+GET http://{{hostname}}:9201/blog/_search
+User-Agent: vscode-restclient
+Content-Type: {{contentType}}
+
+{
+  "query": {
+    "match": {
+      "content": "2月 11日"
+    }
+  },
+  "sort": [
+    {"id": "desc"}
+  ]
+}
+
+
+### 短语检索 （phrase search）：要求输入的搜索串，必须在指定的字段文本中，完全包含一模一样的，才可以算匹配
+GET http://{{hostname}}:9201/blog/_search
+User-Agent: vscode-restclient
+Content-Type: {{contentType}}
+
+{
+  "query": {
+    "match_phrase": {
+      "content": "2月 10日 杨"
+    }
+  },
+  "sort": [
+    {"id": "desc"}
+  ]
+}
+
+
+### 高亮检索
+GET http://{{hostname}}:9201/blog/_search
+User-Agent: vscode-restclient
+Content-Type: {{contentType}}
+
+{
+  "query": {
+    "match": {
+      "content": "2月"
+    }
+  },
+  "highlight": {
+    "fields": {
+      "title": {}
+    }
+  }
+}
+
+
+### 聚合查询. 将title field的fielddata属性设置为true.
+### REFER: https://blog.csdn.net/jacke121/article/details/85042223
+### REFER: https://blog.csdn.net/aawmx123/article/details/88781262
+GET http://{{hostname}}:9201/blog/_search
+User-Agent: vscode-restclient
+Content-Type: {{contentType}}
+
+{
+  "size": 0,
+  "query": {
+    "match": {
+      "content": "2月"
+    }
+  },
+  "aggs": {
+    "group_by_title": {
+      "terms": {"field": "title.keyword"},
+    },
+    "aggs": {
+      "all_tag": {
+        "terms": {
+          "field": "title"
+        }
+      }
+    }
+  }
+}
+
+
+### 聚合查询. 获取最大年龄
+GET http://{{hostname}}:9201/people/_search
+User-Agent: vscode-restclient
+Content-Type: {{contentType}}
+
+{
+  "size": 0,
+  "query": {
+    "match_all": {}
+  },
+  "aggs": {
+    "max_age": {
+      "max": {
+        "field": "age"
+      }
+    }
+  }
+}
+
+
+### 聚合查询. 获取年龄和
+GET http://{{hostname}}:9201/people/_search
+User-Agent: vscode-restclient
+Content-Type: {{contentType}}
+
+{
+  "size": 0,
+  "query": {
+    "match_all": {}
+  },
+  "aggs": {
+    "sum_age": {
+      "sum": {
+        "field": "age"
+      }
+    }
+  }
+}
+
+
+### 聚合查询. 范围聚合
+GET http://{{hostname}}:9201/people/_search
+User-Agent: vscode-restclient
+Content-Type: {{contentType}}
+
+{
+  "size": 0,
+  "aggs": {
+    "test_missing": {
+      "histogram": {
+        "field": "age",
+        "interval": 5,
+        "order": {
+          "_key": "asc"
+        }
+      }
+    }
+  }
+}
+
+
+### 聚合查询. 👍计算每个性别下面的平均年龄，并按 平均年龄 升序排序
+GET http://{{hostname}}:9201/people/_search
+User-Agent: vscode-restclient
+Content-Type: {{contentType}}
+
+{
+  "size": 0,
+  "aggs": {
+    "test_age": {
+      "terms": {
+        "field": "sex",
+        "size": 5,
+        "order": {
+          "avg_age": "asc"
+        }
+      },
+      "aggs": {
+        "avg_age": {
+          "avg": {"field": "age"}
+        }
+      }
+    }
+  }
+}
+
+
+### 聚合查询. 👍按照指定的价格范围区间进行分组，然后计算每个性别下面的平均年龄，并按 平均年龄 升序排序
+### ❌注意嵌套关系。不要放到外面去了
+GET http://{{hostname}}:9201/people/_search
+User-Agent: vscode-restclient
+Content-Type: {{contentType}}
+
+{
+  "size": 0,
+  "aggs": {
+    "group_by_age": {
+      "range": {
+        "field": "age",
+        "ranges": [
+          {
+            "from" : 0,
+            "to": 20
+          },
+          {
+            "from": 20,
+            "to": 30
+          },
+          {
+            "from": 30,
+            "to": 40
+          },
+          {
+            "from": 40,
+            "to": 50
+          }
+        ]
+      },
+      "aggs": {
+        "group_by_sex": {
+          "terms": {
+            "field": "sex"
+          },
+          "aggs": {
+            "avg_age": {
+              "avg": {"field": "age"}
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+### 局部更新数据
+POST http://{{hostname}}:9201/news/_doc/DlcmN3ABuA_ZBa0L5Jhm/_update
+User-Agent: vscode-restclient
+Content-Type: {{contentType}}
+
+{
+  "doc": {
+    "tags": ["校园"],
+    "views": 0
+  }
+}
+
+
+### 局部更新数据.添加到字符串
+POST http://{{hostname}}:9201/news/_doc/DlcmN3ABuA_ZBa0L5Jhm/_update
+User-Agent: vscode-restclient
+Content-Type: {{contentType}}
+
+{
+  "script": {
+    "source": "ctx._source.title += (params.new_title)",
+    "params": {
+      "new_title": "。湖南大学"
+    }
+  }
+}
+
+
+### 局部更新数据.使用脚本更新
+POST http://{{hostname}}:9201/news/_doc/DlcmN3ABuA_ZBa0L5Jhm/_update
+User-Agent: vscode-restclient
+Content-Type: {{contentType}}
+
+{
+  "script": "ctx._source.views+=1"
+}
+
+
+### 局部更新数据.往数组里加字符串
+### REFER: https://blog.csdn.net/z457181562/article/details/93470152
+POST http://{{hostname}}:9201/news/_doc/DlcmN3ABuA_ZBa0L5Jhm/_update
+User-Agent: vscode-restclient
+Content-Type: {{contentType}}
+
+{
+  "script": {
+    "source": "ctx._source.tags.add(params.new_tag)",
+    "params": {
+      "new_tag": "车辆"
+    }
+  }
+}
+
+
+
+### TIP:  👍查询数据里面的对象
+GET http://{{hostname}}:9201/topic/_search
+User-Agent: vscode-restclient
+Content-Type: {{contentType}}
+
+{
+  "query": {
+    "nested": {
+      "path": "options",
+      "query": {
+        "match": {
+          "options.title": "可燃物"
+        }
+      }
+    }
+  }
+}
+
+
+### 测试
+GET http://{{hostname}}:9201/topic/_search
+User-Agent: vscode-restclient
+Content-Type: {{contentType}}
+
+{
+  "query": {
+    "range": {
+      "createTime": {
+        "gt": "2018-09-07 08:28:13",
+        "lt": "2018-10-07 08:28:13"
+      }
+    }
+  }
+}

@@ -227,3 +227,89 @@ server {
     }
 }
 ```
+
+## 静态资源缓存
+
+REFER: https://www.cnblogs.com/wpjamer/articles/7124087.html
+REFER: https://blog.csdn.net/qq_36514766/article/details/99856405
+
+```js
+location ~* \.(gif|jpg|jpeg|bmp|png|ico|txt|js|css)$
+{
+    root /dist;
+    expires  30d;
+}
+
+// 图片缓存时间设置  
+
+location ~ .*.(gif|jpg|jpeg|png|bmp|swf)$  
+{  
+expires 8d;  
+}  
+
+// JS和CSS缓存时间设置  
+location ~ .*.(js|css)?$  
+{  
+expires 2h;  
+}  
+```
+
+```conf
+location ~ .*\.(?:jpg|jpeg|gif|png|ico|cur|gz|svg|svgz|mp4|ogg|ogv|webm)$ {
+        log_not_found off;
+        # 关闭日志
+        access_log off;
+        # 缓存时间7天
+        expires 7d;
+        # 源服务器
+        proxy_pass http://localhost:5678;
+        # 指定上面设置的缓存区域
+        proxy_cache imgcache;
+        # 缓存过期管理
+        proxy_cache_valid 200 302 1d;
+        proxy_cache_valid 404 10m;
+        proxy_cache_valid any 1h;
+        proxy_cache_use_stale error timeout invalid_header updating http_500 http_502 http_503 http_504;
+    }
+```
+
+```conf
+
+http {
+  ...
+
+  // 缓存目录：/data/nginx/cache
+  // 缓存名称：one
+  // 缓存占用内存空间：10m
+  // 加载器每次迭代过程最多执行300毫秒
+  // 加载器每次迭代过程中最多加载200个文件
+  // 缓存硬盘空间最多为 200m
+  proxy_cache_path / data / nginx / cache keys_zone = one: 10 m loader_threshold = 300
+  loader_files = 200 max_size = 200 m;
+
+  server {
+    listen 8080;
+
+    // 使用名称为one的缓存
+    proxy_cache one;
+
+    location / {
+      // 此location中使用默认的缓存配置
+      proxy_pass http: //backend1;
+    }
+
+    location / some / path {
+      proxy_pass http: //backend2;
+
+      // 缓存有效期为1分钟
+      proxy_cache_valid any 1 m;
+
+      // 被请求3次以上时才缓存
+      proxy_cache_min_uses 3;
+
+      // 请求中有下面参数值时不走缓存
+      proxy_cache_bypass $cookie_nocache $arg_nocache$arg_comment;
+    }
+  }
+}
+```

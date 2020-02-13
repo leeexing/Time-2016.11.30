@@ -25,6 +25,16 @@ git config --global alias.lg "log --color --graph --pretty=format:'%Cred%h%Crese
 git config --global core.quotepath false
 ```
 
+## 有趣的git命令
+
+### 查看谁提交最多
+
+`git shortlog -sn`
+
+### 撤销提交历史上的某次 commit
+
+`git rebase -i --onto <commit-ish>^ <commit-ish>`
+
 ## 提交规范
 
 1. type

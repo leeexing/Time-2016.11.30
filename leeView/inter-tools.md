@@ -24,6 +24,7 @@ TOC
 4. [screenfull](https://www.npmjs.com/package/screenfull) -- 更加便捷的全屏唤起
 5. [roughViz](https://github.com/jwilber/roughViz) -- 妙趣横生的手绘图表
 6. [element-resize-detector](https://www.npmjs.com/package/element-resize-detector) -- 灵活监听页面中DOM元素的宽高等属性的变化
+7. [vue-transition动画库](https://github.com/WebCodeFarmer/vue-transition.css) -- 效果不错，可以方便使用
 
 ### Audio/Video
 
@@ -72,3 +73,12 @@ REFER:
 https://picsum.photos/id/122/50/50
 
 https://picsum.photos/images
+
+
+labels: ['安培云', '产品版', '源数据管理平台', '在线标注平台', '海关大比武平台', '图像功能开发'],
+values: [20, 15, 30, 20, 5, 10]
+
+labels: ['源数据管理平台', '安培云', '大数据中台', '其他'],
+values: [45, 25, 15, 15]
+
+🍕

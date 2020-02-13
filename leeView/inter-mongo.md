@@ -1259,3 +1259,21 @@ db.reviews.find({
   } // 相当于 /best|worst/i
 })
 ```
+
+### 查找数组里面对象的字段
+
+> 使用 $elemMatch
+
+``` JS
+找出数组中, 具有 qid=1并且reorderFlag=0的记录
+
+查询数组内同一条记录同时满足2个条件的语句:
+
+{ "qList": { $elemMatch: { "qid": 1, "reorderFlag": 0} } }
+
+// or
+
+{ "qList.qid": 1, "qList.reorderFlag": 0}
+
+// -直接使用对象连接符号 点
+```

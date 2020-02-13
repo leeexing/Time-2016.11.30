@@ -474,6 +474,10 @@ dict(d)
 {'chunkNumber': ['1'], 'chunkSize': ['2048000'], 'currentChunkSize': ['1268333'], 'totalSize': ['1268333'], 'identifier': ['f6ef0c41e4eefd77bcdf3ee4307e9b84'], 'filename': ['5cd160f153d45d1a6cd89410.zip'], 'relativePath': ['5cd160f153d45d1a6cd89410.zip'], 'totalChunks': ['1']}
 ```
 
+### get请求中获取数组参数
+
+使用这个 `request.args.getlist('arrParams', type=int)`
+
 ## JWT
 
 JWT格式：

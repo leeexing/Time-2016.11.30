@@ -66,5 +66,7 @@ mongoexport -d sourceData -c sieve_image -q "{ batch: '20191125' }" -o "D:/sourc
 mongoexport -d sourceData -c sieve_image -q "{ batch: 'nuctech_1' }" -o "D:/sourcedata/mongoData/20191218_sieve_image_nuctech_1.json" --type json
 mongoexport -d sourceData -c sieve_image -q "{ batch: 'nuctech_2' }" -o "D:/sourcedata/mongoData/20191225_sieve_image_nuctech_2.json" --type json
 mongoexport -d sourceData -c sieve_image -q "{ batch: 'nuctech_9' }" -o "D:/sourcedata/mongoData/20191231_sieve_image_nuctech_9.json" --type json
+mongoexport -d sourceData -c sieve_image -q "{ batch: 'nuctech_10' }" -o "D:/sourcedata/mongoData/20200116_sieve_image_nuctech_10.json" --type json
+mongoexport -d sourceData -c sieve_image -q "{ batch: 'nuctech_11' }" -o "D:/sourcedata/mongoData/20200116_sieve_image_nuctech_11.json" --type json
 
 ```

@@ -12,9 +12,12 @@ from pathlib import Path
 from datetime import datetime
 from pymongo import MongoClient
 
-root_path = r'E:\test\weixianbao'
-base_search_path = r'E:\test\weixianbao'
-base_dest_path = r'E:\test\tiaoxuanbao'
+root_path = r'F:\anquanbao\3.民航现场图像初标成果'
+base_search_path = r'F:\anquanbao\3.民航现场图像初标成果'
+base_dest_path = r'F:\anquanbao\春运保障'
+# root_path = r'E:\test\weixianbao'
+# base_search_path = r'E:\test\weixianbao'
+# base_dest_path = r'E:\test\tiaoxuanbao'
 
 # - db
 # conn = MongoClient(host='127.0.0.1:27017') # 开发环境
@@ -36,7 +39,7 @@ def structure_file_to_db(path_url):
     global count, pick_count
 
     for root, dirs, files in os.walk(path_url):
-        # if count >= 50:
+        # if pick_count >= 50:
         #     return
         try:
             for name in files:

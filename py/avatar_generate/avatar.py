@@ -6,7 +6,7 @@
 import pagan
 
 
-inpt = 'zhaowenna'
+inpt = 'leeing'
 
 img = pagan.Avatar(inpt, pagan.SHA512)
 

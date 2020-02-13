@@ -1,0 +1,38 @@
+@hostname = localhost
+@port = 5284
+@Authorization = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NzkyMjEwNzMsIm5iZiI6MTU3OTIyMTA3MywianRpIjoiOGRkMmU4N2UtOGZhMS00ZDQ0LTg0YTctYzc0ZjAwNjk4MDcxIiwiZXhwIjoxNTc5ODI1ODczLCJpZGVudGl0eSI6eyJ1c2VySUQiOjEsInVzZXJuYW1lIjoiYWRtaW4iLCJ1c2VydHlwZSI6MX0sImZyZXNoIjpmYWxzZSwidHlwZSI6ImFjY2VzcyJ9.ldnpLWBNdGw1p4nfo-N3HIJQN9OITcWWE62pzCkSZ5s
+@contentType = application/json
+
+
+### 登录
+POST http://{{hostname}}:{{port}}/v1/api/login
+User-Agent: vscode-restclient
+Content-Type: {{contentType}}
+
+{
+  "username": "admin",
+  "password": "123456"
+}
+
+
+### 获取用户列表
+GET http://{{hostname}}:{{port}}/v1/api/user
+Authorization: Bearer {{Authorization}}
+
+
+### 获取用户权限
+GET http://{{hostname}}:{{port}}/v1/api/permission
+Authorization: Bearer {{Authorization}}
+
+
+### 获取具体页面权限
+@route_name = system_usertype
+GET http://{{hostname}}:{{port}}/v1/api/permission/page/{{route_name}}
+Authorization: Bearer {{Authorization}}
+
+
+### 获取菜单列表
+@menu_name = 管理
+GET http://{{hostname}}:{{port}}/v1/api/menu/list
+    ?name={{menu_name}}
+Authorization: Bearer {{Authorization}}
