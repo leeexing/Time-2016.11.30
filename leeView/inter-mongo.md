@@ -550,6 +550,18 @@ db.products.aggregate([
   {$project: {count: {$size: '$uids'}}}
 ])
 
+// - 👍 查询一个字段的重复数据
+db.getCollection('topic').aggregate(
+    {'$group':{
+        '_id': {'id': '$number'},
+        'uniqueIds': {'$addToSet': '$_id'},
+        'count' : {'$sum': 1}
+    }},
+    {'$match': {
+        'count': {'$gt': 1}
+    }}
+)
+
  NOTE:  这样就可以可以不使用 `distinct` 这个操作符来获取绝对唯一的字段数量了。
 
 只有在添加的值不存在于 tags 中才进行添加

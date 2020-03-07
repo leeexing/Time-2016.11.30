@@ -10,7 +10,7 @@ from pymongo import MongoClient
 
 # 指定连接
 es = Elasticsearch(
-    ['127.0.0.1:9201'],
+    ['127.0.0.1:9200'],
     # 认证信息
     # http_auth=('elastic', 'changeme')
 )
@@ -151,8 +151,8 @@ def mongo_data():
 
 if __name__ == '__main__':
     print('start')
-    # init()
-    mongo_data()
+    init()
+    # mongo_data()
     # delete_data()
     # search_aggs()
     print('end...')

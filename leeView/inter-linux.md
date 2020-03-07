@@ -1,8 +1,84 @@
 # inter-linux
 
+## 重要
+
+gunicorn 版本一定要安装 19.9.0. 免得报错。一些问题还不好解决
+
 ## 服务器扩容
 
 REFER: [AWS EC2扩容](https://www.jianshu.com/p/d07becb150f4)
+
+## 查看端口占用情况
+
+ss -lntpd | grep :22
+
+## Linux集群分发脚本xsync
+
+1.scp（secure copy）安全拷贝
+2.rsync 远程同步工具
+3.xsync集群分发脚本
+
+scp定义：scp可以实现服务器与服务器之间的数据拷贝（from server1 to server2）
+
+``` Python
+scp    -r          $pdir/$fname              $user@hadoop$host:$pdir/$fname
+命令   递归     要拷贝的文件路径/名称    目的用户@主机:目的路径/名称
+```
+
+在hadoop101上，将hadoop101中/opt/module目录下的软件拷贝到hadoop102上：
+
+`[zxy@hadoop101 /]$ scp -r /opt/module root@hadoop102:/opt/module`
+
+在hadoop103上，将hadoop101服务器上的/opt/module目录下的软件拷贝到hadoop103上：
+
+`[zxy@hadoop103 opt]$sudo scp -r zxy@hadoop101:/opt/module root@hadoop103:/opt/module`
+
+将hadoop101中/etc/profile文件拷贝到hadoop104的/etc/profile上：
+
+`[zxy@hadoop101 ~]$ sudo scp /etc/profile root@hadoop104:/etc/profile`
+
+**注意：**拷贝过来的配置文件别忘了source一下/etc/profile，
+
+rsync主要用于备份和镜像，具有速度快、避免复制相同内容和支持符号链接的优点。
+
+把hadoop101机器上的/opt/software目录同步到hadoop102服务器的root用户下的/opt/目录
+
+`[zxy@hadoop101 opt]$ rsync -av /opt/software/ root@hadoop102:/opt/software`
+
+### 3.xsync集群分发脚本
+
+> 循环复制文件到所有节点的相同目录下
+
+rsync命令原始拷贝：`rsync -av /opt/module root@hadoop103:/opt/`
+
+``` shell
+#!/bin/sh
+# 获取输入参数个数，如果没有参数，直接退出
+pcount=$#
+if((pcount==0)); then
+        echo no args...;
+        exit;
+fi
+# 获取文件名称
+p1=$1
+fname=`basename $p1`
+echo fname=$fname
+# 获取上级目录到绝对路径
+pdir=`cd -P $(dirname $p1); pwd`
+echo pdir=$pdir
+# 获取当前用户名称
+user=`whoami`
+# 循环
+for((host=3; host<=4; host++)); do
+        echo $pdir/$fname $user@slave$host:$pdir
+        echo ==================slave$host==================
+        rsync -rvl $pdir/$fname $user@slave$host:$pdir
+done
+#Note:这里的slave对应自己主机名，需要做相应修改。另外，for循环中的host的边界值
+```
+
+最后chmod 777 xsync给文件添加执行权限即可。
+使用xsync filename就能将filename分发到集群中的各个节点中。
 
 ## 设置程序开机自启
 

@@ -74,12 +74,16 @@ mongoimport -d sourceData -c sieve_image --file "D:/sourcedata/mongoData/2019123
 mongoimport -d sourceData -c sieve_image --file "D:/sourcedata/mongoData/20200116_sieve_image_nuctech_10.json" --type json --upsert -h "52.80.171.106" --port 27017 -u root -p root123 --authenticationDatabase=admin
 mongoimport -d sourceData -c sieve_image --file "D:/sourcedata/mongoData/20200116_sieve_image_nuctech_11.json" --type json --upsert -h "52.80.171.106" --port 27017 -u root -p root123 --authenticationDatabase=admin
 
+// 2020-02-27 桂林斗图比赛第一名，分配一个账号。AIGL001 2W 副图像
+mongoimport -d sourceData -c sieve_image --file "D:/sourcedata/mongoData/20200227_sieve_image_nuctech_12.json" --type json --upsert -h "52.80.171.106" --port 27017 -u root -p root123 --authenticationDatabase=admin
+
 // local
 mongoimport -d sourceData -c sieve_image_nuctech --file "D:/sourcedata/mongoData/20191218_sieve_image_nuctech_1.json"
 mongoimport -d sourceData -c sieve_image_nuctech --file "D:/sourcedata/mongoData/20191225_sieve_image_nuctech_2.json"
 mongoimport -d sourceData -c sieve_image_nuctech --file "D:/sourcedata/mongoData/20191231_sieve_image_nuctech_9.json"
 mongoimport -d sourceData -c sieve_image_nuctech --file "D:/sourcedata/mongoData/20200116_sieve_image_nuctech_10.json"
 mongoimport -d sourceData -c sieve_image_nuctech --file "D:/sourcedata/mongoData/20200116_sieve_image_nuctech_11.json"
+mongoimport -d sourceData -c sieve_image_nuctech --file "D:/sourcedata/mongoData/20200227_sieve_image_nuctech_12.json"
 ```
 
 ## 给这一批图像设定一个用户ID

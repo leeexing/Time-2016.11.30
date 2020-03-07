@@ -25,6 +25,12 @@ git config --global alias.lg "log --color --graph --pretty=format:'%Cred%h%Crese
 git config --global core.quotepath false
 ```
 
+## 撤销已经加入暂存区的文件
+
+1.git reset HEAD -- . 撤销所有
+2.git reset HEAD -- filename 撤销特定目标
+3.git rm -cached filepath 将文件从缓存中删除
+
 ## 有趣的git命令
 
 ### 查看谁提交最多
