@@ -1,9 +1,12 @@
+# 依赖文件
+lib/
+node_modules/
+
+# css测试文件
 *.scss
 *.less
 *.map
 *.min.css
-node_modules/
-uploads/
 
 # 源码文件
 *.core.js
@@ -18,8 +21,6 @@ work/
 
 # 思维导图等
 LeeMap/
-project/phaser
 
 # 配置相关
 .vscode
-lib/

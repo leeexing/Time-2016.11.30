@@ -1,6 +1,6 @@
-# mucho
+# MUCHO
 
-The first repository in github
+The first repository in my github
 
 ## Content
 
@@ -9,15 +9,18 @@ The first repository in github
 3. vue
 4. react
 5. python
+6. blog
 
-there are the modules in this repository.
+There are the modules in this repository.
 
 ## Why
 
-first, sometimes I will worry about my css is not master very well.
+First: sometimes I will worry about my css is not master very well.
 so, I need spend some time to review it.
 
-second, learning is interesting.
+Second: learning is interesting.
 so, I need learn some new characters of js and new frames.
 
-third, learning is endless.
+Third: learning is endless.
+
+Stay hungry, Stay foolish.

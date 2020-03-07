@@ -1,4 +1,7 @@
-# inter-python
+---
+title: inter-python
+tag: python
+---
 
 > python 常用的备忘录
 
@@ -59,6 +62,103 @@ help() : 函数用于查看函数或模块用途的详细说明
 `__ import__()` : 用于动态加载类和函数
 
 open() : 用于打开一个文件, 创建一个文件句柄
+
+## 基本类库使用
+
+### concurrent
+
+concurrent.futures是一个非常简单易用的库，主要用来实现**多线程和多进程**的异步并发。
+
+### open
+
+```py
+file1 = open（'file'，'mode'）
+```
+
+mode:
+.r    以只读方式打开文件。这是默认模式。文件必须存在，不存在抛出错误
+
+rb    以二进制格式打开一个文件用于只读。
+
+.'w'：以只写模式打开
+    若文件存在，则会自动清空文件，然后重新创建。
+    若文件不存在，则新建文件。
+    使用这个模式必须要保证文件所在目录存在，文件可以不存在。
+
+.'a'：以追加模式打开
+    若文件存在，则会追加到文件的末尾。
+    若文件不存在，则新建文件。
+    该模式不能使用 read*()方法。
+
+.'r+'： 以文本读写模式打开
+    可以写到文件任何位置。
+    默认写的指针开始指在文件开头, 因此会覆写。
+    可以使用 read*()
+
+.'w+'： 以文本读写模式打开（打开前文件会被清空）
+    可以使用 read*()
+
+'a+'： 以文本读写模式打开（写只能写在文件末尾）
+    可以使用 read*()
+
+`file.seek(offset[, whence])` 解读
+.seek（）指针从哪里开始写入
+    offset -- 开始的偏移量，也就是代表需要移动偏移的字节数
+    whence：可选，默认值为 0。给offset参数一个定义，表示要从哪个位置开始偏移；0代表从文件开头开始算起，1代表从当前位置开始算起，2代表从文件末尾算起
+
+### getattr 内置函数
+
+函数原型： `getattr(object, name[, default])`:
+
+name:str类型
+
+default:如果不存在name属性,设置default则返回default,不设置返回AttributeError.
+
+与__getattr__的区别:
+    __getattr__是类的内置方法,当找不到某个属性时会调用该方法;找到就不会调用.
+    getattr与类无关.
+
+```py
+class DataProxy(...):
+
+    def __getattr__(self, item):
+        return getattr(self.data, item)
+```
+
+### importlib 模块
+
+```py
+# 根据字符串导入模块
+# 通常用来导入包下面的模块
+o = importlib.import_module("aa.bb")
+s2 = "Person"
+
+# 由字符串找函数、方法、类  利用 反射
+the_class = getattr(o, "Person")
+p2 = the_class("小黑")
+p2.dream()
+```
+
+### os.path
+
+os.path.abspath(path)  #返回绝对路径
+os.path.split(path     #将path分割成目录和文件名二元组返回
+os.path.dirname(path)  #返回path的目录。其实就是os.path.split(path)的第一个元素
+os.path.basename(path) #返回path最后的文件名
+os.path.exists(path)   #如果path存在，返回True；如果path不存在，返回False
+os.path.isabs(path)    #如果path是绝对路径，返回True
+os.path.isfile(path)   #如果path是一个存在的文件，返回True。否则返回False
+os.path.isdir(path)    #如果path是一个存在的目录，则返回True。否则返回False
+os.path.getatime(path) #返回path所指向的文件或者目录的最后存取时间
+os.path.getmtime(path) #返回path所指向的文件或者目录的最后修改时间
+s.path.join(path1[, path2[, ...]])  #将多个路径组合后返回，第一个绝对路径之前的参数将
+
+### sys.path
+
+> 使用sys.path.append()方法可以临时添加搜索路径，方便更简洁的import其他包和模块。这种方法导入的路径会在python程序退出后失效。
+
+sys.path.append('../)
+sys.path.insert(0, '../')
 
 ## 常用包
 
@@ -617,99 +717,6 @@ subsampling参数：子采样，通过实现色度信息的分辨率低于亮度
 `imObj.save(image_name, dpi=(300.0, 300.0))` 参数解释
 
 dpi 图像像素
-
-## 基本类库使用
-
-### open
-
-```py
-file1 = open（'file'，'mode'）
-```
-
-mode:
-.r    以只读方式打开文件。这是默认模式。文件必须存在，不存在抛出错误
-
-rb    以二进制格式打开一个文件用于只读。
-
-.'w'：以只写模式打开
-    若文件存在，则会自动清空文件，然后重新创建。
-    若文件不存在，则新建文件。
-    使用这个模式必须要保证文件所在目录存在，文件可以不存在。
-
-.'a'：以追加模式打开
-    若文件存在，则会追加到文件的末尾。
-    若文件不存在，则新建文件。
-    该模式不能使用 read*()方法。
-
-.'r+'： 以文本读写模式打开
-    可以写到文件任何位置。
-    默认写的指针开始指在文件开头, 因此会覆写。
-    可以使用 read*()
-
-.'w+'： 以文本读写模式打开（打开前文件会被清空）
-    可以使用 read*()
-
-'a+'： 以文本读写模式打开（写只能写在文件末尾）
-    可以使用 read*()
-
-`file.seek(offset[, whence])` 解读
-.seek（）指针从哪里开始写入
-    offset -- 开始的偏移量，也就是代表需要移动偏移的字节数
-    whence：可选，默认值为 0。给offset参数一个定义，表示要从哪个位置开始偏移；0代表从文件开头开始算起，1代表从当前位置开始算起，2代表从文件末尾算起
-
-### getattr 内置函数
-
-函数原型： `getattr(object, name[, default])`:
-
-name:str类型
-
-default:如果不存在name属性,设置default则返回default,不设置返回AttributeError.
-
-与__getattr__的区别:
-    __getattr__是类的内置方法,当找不到某个属性时会调用该方法;找到就不会调用.
-    getattr与类无关.
-
-```py
-class DataProxy(...):
-
-    def __getattr__(self, item):
-        return getattr(self.data, item)
-```
-
-### importlib 模块
-
-```py
-# 根据字符串导入模块
-# 通常用来导入包下面的模块
-o = importlib.import_module("aa.bb")
-s2 = "Person"
-
-# 由字符串找函数、方法、类  利用 反射
-the_class = getattr(o, "Person")
-p2 = the_class("小黑")
-p2.dream()
-```
-
-### os.path
-
-os.path.abspath(path)  #返回绝对路径
-os.path.split(path     #将path分割成目录和文件名二元组返回
-os.path.dirname(path)  #返回path的目录。其实就是os.path.split(path)的第一个元素
-os.path.basename(path) #返回path最后的文件名
-os.path.exists(path)   #如果path存在，返回True；如果path不存在，返回False
-os.path.isabs(path)    #如果path是绝对路径，返回True
-os.path.isfile(path)   #如果path是一个存在的文件，返回True。否则返回False
-os.path.isdir(path)    #如果path是一个存在的目录，则返回True。否则返回False
-os.path.getatime(path) #返回path所指向的文件或者目录的最后存取时间
-os.path.getmtime(path) #返回path所指向的文件或者目录的最后修改时间
-s.path.join(path1[, path2[, ...]])  #将多个路径组合后返回，第一个绝对路径之前的参数将
-
-### sys.path
-
-> 使用sys.path.append()方法可以临时添加搜索路径，方便更简洁的import其他包和模块。这种方法导入的路径会在python程序退出后失效。
-
-sys.path.append('../)
-sys.path.insert(0, '../')
 
 ## 面试题
 
