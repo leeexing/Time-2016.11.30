@@ -61,7 +61,22 @@
  * @return {boolean}
  */
 var isValid = function(s) {
-
+  let map = {
+    '(': ')',
+    '[': ']',
+    '{': '}'
+  }
+  let temp = []
+  for (let item of s) {
+    if (item in map) {
+      temp.push(map[item])
+    } else {
+      if (item !== temp.pop()) {
+        return false
+      }
+    }
+  }
+  return temp.length === 0
 };
 // @lc code=end
 
