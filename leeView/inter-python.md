@@ -260,6 +260,16 @@ REFER: https://blog.csdn.net/HH775313602/article/details/78991340
 
 from Crypto.Cipher import AES
 
+## 优秀第三方库
+
+### arrow
+
+REFER: https://arrow.readthedocs.io/en/latest/
+
+Python针对日期时间的处理提供了大量的package，类和方法，但在可用性上来看非常繁琐和麻烦
+
+第三方库Arrow提供了一个合理的、人性化的方法来创建、操作、格式转换的日期，时间，和时间戳，帮助我们使用较少的导入和更少的代码来处理日期和时间。
+
 ## format
 
 ### 数字格式化
@@ -763,6 +773,48 @@ class F1(object):
 
 obj=F1() #实例化对象是谁取决于__new__方法,__new__返回什么就是什么
 print(obj,type(obj))  #打印结果：123 <class 'int'>
+```
+
+```py
+# 创建单例
+class Singleton(object):
+    def __init__(self,*args,**kwargs):
+        pass
+
+    @classmethod
+    def get_instance(cls, *args, **kwargs):
+        # 利用反射,看看这个类有没有_instance属性
+        if not hasattr(Singleton, '_instance'):
+            Singleton._instance = Singleton(*args, **kwargs)
+
+        return Singleton._instance
+
+
+s1 = Singleton()  # 使用这种方式创建实例的时候,并不能保证单例
+s2 = Singleton.get_instance()  # 只有使用这种方式创建的时候才可以实现单例
+# 注意,这样的单例模式在单线程下是安全的,但是如果遇到多线程,就会出现问题.如果遇到多个线程同时创建这个类的实例的时候就会出现问题.
+
+# 推荐的做法是：
+import threading
+
+class Singleton(object):
+    _instance_lock = threading.Lock()
+
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __new__(cls, *args, **kwargs):
+        if not hasattr(cls, '_instance'):
+            with Singleton._instance_lock:
+                if not hasattr(cls, '_instance'):
+                    Singleton._instance = super().__new__(cls)
+
+            return Singleton._instance
+
+
+obj1 = Singleton()
+obj2 = Singleton()
+print(obj1, obj2)
 ```
 
 6、Python中的@property有什么作用?如何实现成员变量的只读属性？

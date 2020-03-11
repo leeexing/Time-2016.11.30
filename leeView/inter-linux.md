@@ -12,6 +12,28 @@ REFER: [AWS EC2扩容](https://www.jianshu.com/p/d07becb150f4)
 
 ss -lntpd | grep :22
 
+## 关闭防火墙
+
+CentOS7版本后防火墙默认使用firewalld，因此在CentOS7中关闭防火墙使用以下命令，
+
+```sh
+//临时关闭
+# systemctl stop firewalld
+//禁止开机启动
+# systemctl disable firewalld
+Removed symlink /etc/systemd/system/multi-user.target.wants/firewalld.service.
+Removed symlink /etc/systemd/system/dbus-org.fedoraproject.FirewallD1.service.
+
+当然，如果安装了iptables-service，也可以使用下面的命令，
+
+# yum install -y iptables-services
+//关闭防火墙
+# service iptables stop
+Redirecting to /bin/systemctl stop  iptables.service
+//检查防火墙状态
+# service iptables status
+```
+
 ## Linux集群分发脚本xsync
 
 1.scp（secure copy）安全拷贝
@@ -121,6 +143,15 @@ passwd testuser
 usermod --help  修改用户这个命令的相关参数
 userdel testuser  删除用户testuser
 rm -rf testuser  删除用户testuser所在目录
+```
+
+### 备忘
+
+> 虚拟机上的用户密码
+
+```sh
+useradd hadoop
+passwd leeing123
 ```
 
 ## 基本使用

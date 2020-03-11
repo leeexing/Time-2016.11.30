@@ -14,7 +14,7 @@ es = Elasticsearch(
     # http_auth=('elastic', 'changeme')
 )
 
-res = Search(using=es, index="blog")\
+res = Search(using=es, index="topic")\
         .filter("match", title='快递')\
         .query("match", content='快递')
         # .exclude("match", message="M(")

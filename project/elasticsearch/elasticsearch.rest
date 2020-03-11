@@ -1,5 +1,5 @@
 @hostname = localhost
-@port = 9200
+@port = 9201
 @Authorization = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NzkyMjEwNzMsIm5iZiI6MTU3OTIyMTA3MywianRpIjoiOGRkMmU4N2UtOGZhMS00ZDQ0LTg0YTctYzc0ZjAwNjk4MDcxIiwiZXhwIjoxNTc5ODI1ODczLCJpZGVudGl0eSI6eyJ1c2VySUQiOjEsInVzZXJuYW1lIjoiYWRtaW4iLCJ1c2VydHlwZSI6MX0sImZyZXNoIjpmYWxzZSwidHlwZSI6ImFjY2VzcyJ9.ldnpLWBNdGw1p4nfo-N3HIJQN9OITcWWE62pzCkSZ5s
 @contentType = application/json
 
@@ -574,6 +574,20 @@ Content-Type: {{contentType}}
           "options.title": "可燃物"
         }
       }
+    }
+  }
+}
+
+
+### TIP:  👍查询数据里面的对象
+GET http://{{hostname}}:9201/topic/_search
+User-Agent: vscode-restclient
+Content-Type: {{contentType}}
+
+{
+  "query": {
+    "match": {
+      "title": "安检"
     }
   }
 }
