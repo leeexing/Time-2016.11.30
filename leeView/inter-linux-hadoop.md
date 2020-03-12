@@ -3,6 +3,87 @@ title: hadoop学习
 tag: linux
 ---
 
+## 虚拟机
+
+### 配置静态 ip
+
+vim /etc/sysconfig/network-scripts/ifcfg-en016777736
+
+IPADDR=100.100.0.8
+
+### 停掉 NetworkManage
+
+systemctl stop NetworkManager.service
+systemctl disable NetworkManager.service
+systemctl is_enabled NetworkManager.service
+
+systemctl is_restarat NetworkManager
+
+### 关掉防火墙
+
+CentOS7版本后防火墙默认使用firewalld，因此在CentOS7中关闭防火墙使用以下命令，
+
+```sh
+//临时关闭
+# systemctl stop firewalld
+//禁止开机启动
+# systemctl disable firewalld
+Removed symlink /etc/systemd/system/multi-user.target.wants/firewalld.service.
+Removed symlink /etc/systemd/system/dbus-org.fedoraproject.FirewallD1.service.
+
+当然，如果安装了iptables-service，也可以使用下面的命令，
+
+# yum install -y iptables-services
+//关闭防火墙
+# service iptables stop
+Redirecting to /bin/systemctl stop  iptables.service
+//检查防火墙状态
+# service iptables status
+```
+
+### 克隆
+
+完整克隆.
+
+需要修改 ip 地址 和 hostname 就可以了。
+
+### 快照
+
+快照管理
+
+快照里面也可以进行克隆
+
+## 准备工作
+
+### 防火墙关闭
+
+### 创建一个一般用户
+
+useradd hadoop
+passwd leeing123
+
+### 在/opt目录下创建 software、module文件夹
+
+mkdir /opt/software /opt/module
+chown hadoop:hadoop /opt/software /opt/module
+
+### 把这个用户加入到 sudoers
+
+vim /etc/sudoers
+
+hadoop ALL=(ALL) NOPASSWD:ALL
+
+:wq!
+
+### 设置hosts
+
+vim /etc/hosts
+
+100.100.0.5 hadoop01
+100.100.0.6 hadoop02
+100.100.0.7 hadoop03
+100.100.0.8 hadoop04
+
 ## 命令备忘录
 
 ``` Python
@@ -275,6 +356,12 @@ done
 # -P 追踪软连接到真实的目录
 ```
 
+然后可以将该文件放到 /bin 目录下。任何地方都可以调用
+
+```py
+sudo cp xsync /bin
+```
+
 ### scp
 
 ```py
@@ -289,7 +376,6 @@ scp -r hadoop01:/opt/module/hadoop-3.2.1 hadoop02:/opt/module
 
 源和目标不能同时为远程端
 
-
 ```py
 rsync -av source destination
 
@@ -299,3 +385,26 @@ rsync -av source destination
 rsync -av hadoop01:/opt/module/jdk1.8.0_231 /opt/module # 在hadoop02 主机上。这是主动拉取过来
 rsync -av /opt/module/jdk1.8.0_231 hadoop02:/opt/module
 ```
+
+### 内容分发
+
+``` Python
+cd /opt/module
+xsync hadoop-3.2.1
+xsync jdk1.8.0_231
+
+cd /etc
+sudo xsync profile # 环境变量
+
+然后再执行脚本是命令生效
+source /etc/profile
+```
+
+### 集群配置
+
+DN：datanode
+NN: namenode
+2NN: second namenode
+RM: resourcemanager
+NM：nodemanager
+

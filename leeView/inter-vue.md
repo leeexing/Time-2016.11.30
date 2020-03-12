@@ -1260,3 +1260,27 @@ dev: {
 ### 不能再IE11上显示
 
 主要问题还是打包的时候，没有进行很好的 babel 编译
+
+## 前端错误监控 vue 版本
+
+Vue全局配置 errorHandler可以进行全局错误收集,我们可以根据这个特性对前端异常做这样的处理：业务错误直接写在业务里；代码错误、ajax请求异常等错误可以进行全局捕获然后抛出，不至于前端页面挂掉
+
+``` JS
+import Vue from 'vue'
+//系统错误捕获
+const errorHandler = (error, vm)=>{
+  console.error('抛出全局异常');
+  console.error(vm);
+  console.error(error);
+
+}
+
+Vue.config.errorHandler = errorHandler;
+Vue.prototype.$throw = (error)=> errorHandler(error,this);
+```
+
+**tips**:
+1、代码错误不用手动抛出，全局会捕获到
+
+2、如果是ajax异步请求，异常需要通过`this.$throw()`手动抛出
+
