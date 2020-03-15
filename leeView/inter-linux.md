@@ -209,6 +209,53 @@ chmod u+x file                　　　   给file的属主增加执行权限
 
 ~/.bashrc也是某用户专有设定文档，可以设定路径，命令别名，每次shell script的执行都会使用它一次
 
+#### Unix/Linux有两个profile文件
+
+1./etc/profile：是全局profile文件，设置后会影响到所有用户
+
+2./home/username/.profile或.bash_profile是针对特定用户的，可以针对用户，来配置自己的环境变量。
+
+注意：profile是unix上才有的；bash_profile是Linux下有的(Linux下，用户目录没有.profile文件)
+/home/username/.profile或.bash_profile，都是隐藏文件，需要使用ls -a才能看到。
+
+**执行顺序**：
+Bash登陆(login)的时候，Profile执行的顺序
+
+1)先执行全局Profile, /etc/profile
+
+接着bash会检查使用者的HOME目录中，是否有 .bash_profile 或者 .bash_login或者 .profile，若有，则会执行其中一个，执行顺序为：
+
+.bash_profile 最优先 > .bash_login其次 > .profile 最后
+
+总之，就是全局或者局部，他们之间有调用关系及调用优先级
+
+### 设置环境变量（推荐）
+
+例如：python 代替 python3
+
+**方法一：**
+从bash转换命令，python转化成python3。
+
+、将数据写入.bashrc文件
+echo alias python=python3 >> ~/.bashrc
+
+2、使环境变量生效
+source ~/.bashrc
+
+**方法二：**
+从源头更改python的链接文件，推荐这种方法。
+查看已安装的python版本和链接情况：
+ll /usr/bin/python*
+
+1、删除原有的Python连接文件
+sudo rm /usr/bin/python
+
+2、建立指向Python3.X的连接
+ln -s /usr/bin/python3 /user/bin/python
+
+3、把路径/usr/bin/加入环境变量PATH中（一般情况下不需要这一步！）
+PATH=/usr/bin:$PATH
+
 ## mysql
 
 启动：

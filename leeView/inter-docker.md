@@ -2,6 +2,13 @@
 
 > docker 学习
 
+## 安装
+
+使用 yum 安装。
+当然也可以使用python安装。但是，就是你需要安装py环境。所以，网上都是推荐使用yum安装
+
+[一个教程](https://blog.csdn.net/qq_36379495/article/details/92837897)
+
 ## docker 登录 docker hub
 
 ```js
