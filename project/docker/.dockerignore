@@ -1,0 +1,2 @@
+# 准则一：尽量将Dockerfile放在空目录中，如果目录中必须有其他文件，则使用.dockerignore文件。
+*.txt
