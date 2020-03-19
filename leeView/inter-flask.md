@@ -494,7 +494,79 @@ RuntimeError: Working outside of application context.
 
 //  TIP:  **如果您在代码中的其他地方看到与配置应用无关的错误，则很可能表明应该将该代码 移到视图函数或 CLI 命令中。**
 
+## flask_restplus
+
+### swagger UI 加上票
+
+[参考文档](https://flask-restplus.readthedocs.io/en/stable/swagger.html#documenting-authorizations)
+
+主要是在请求的header中加上 `Authorization`
+
+太难了。花了我下午两个小时的时间去处理😭😭😭😭
+
+之前也一直没有解决这个问题。现在终于好了
+
+``` Python
+authorizations = {
+    'apikey': {
+        'type': 'apiKey',
+        'in': 'header',
+        'name': 'Authorization'
+    },
+    # 还可以这样使用。下面的使用地址需要另外设置
+    'oauth2': {
+        'type': 'oauth2',
+        'flow': 'accessCode',
+        'tokenUrl': 'https://somewhere.com/token',
+        'authorizationUrl': 'https://somewhere.com/auth',
+        'scopes': {
+            'read': 'Grant read-only access',
+            'write': 'Grant read-write access',
+        }
+    }
+}
+
+
+api = Api(
+    title='Nuctech Comment Service Api',
+    version='1.0',
+    prefix='/v1/api',
+    authorizations=authorizations,
+    description='为软件服务部提供通用评论模块接口'
+)
+
+api.add_namespace(my_api)
+```
+
+接着，这么使用
+
+``` Python
+from flask_restplus import Namespace, Resource
+
+from app.controllers.my_c import MyCommentManager
+
+ns = Namespace('my', description='我的')
+myCommentManager = MyCommentManager()
+
+
+@ns.route('/<string:user_id>')
+class CommentResource(Resource):
+
+    @ns.doc(security='apikey')
+    def get(self, user_id):
+        """获取我的评论列表"""
+        return myCommentManager.get_my_comments(user_id)
+```
+
 ## JWT
+
+### user_identity_loader
+
+This decorator sets the callback function for getting the JSON serializable identity out of whatever object is passed into create_access_token() and create_refresh_token(). By default, this will return the unmodified object that is passed in as the identity kwarg to the above functions.
+
+HINT: The callback function must be a function that takes only one argument, which is the object passed into create_access_token() or create_refresh_token(), and returns the JSON serializable identity of this token.
+
+[扩展了解](https://flask-jwt-extended.readthedocs.io/en/latest/api/?highlight=token_in_blacklist_loader#flask_jwt_extended.JWTManager.user_identity_loader)
 
 ### refresh_token
 
@@ -503,6 +575,8 @@ RuntimeError: Working outside of application context.
     后台封禁用户
 逻辑
     禁用旧密码的令牌
+
+[扩展](https://github.com/vimalloc/flask-jwt-extended/blob/master/examples/redis_blacklist.py)
 
 ### before_request
 
