@@ -474,11 +474,69 @@ dict(d)
 {'chunkNumber': ['1'], 'chunkSize': ['2048000'], 'currentChunkSize': ['1268333'], 'totalSize': ['1268333'], 'identifier': ['f6ef0c41e4eefd77bcdf3ee4307e9b84'], 'filename': ['5cd160f153d45d1a6cd89410.zip'], 'relativePath': ['5cd160f153d45d1a6cd89410.zip'], 'totalChunks': ['1']}
 ```
 
-### get请求中获取数组参数
+### get请求中[获取数组]参数
 
 使用这个 `request.args.getlist('arrParams', type=int)`
 
+### current_app 请求情景
+
+[个应该好好看看](https://dormousehole.readthedocs.io/en/latest/appcontext.html)
+
+如果您尝试在应用情境之外访问 current_app ，或其他任何使用它的东西， 则会看到以下错误消息：
+
+```py
+RuntimeError: Working outside of application context.
+
+这通常意味着您试图使用功能需要以某种方式与当前的应用程序对象进行交互。
+要解决这个问题，请使用 app.app_context（）设置应用情境。
+
+```
+
+//  TIP:  **如果您在代码中的其他地方看到与配置应用无关的错误，则很可能表明应该将该代码 移到视图函数或 CLI 命令中。**
+
 ## JWT
+
+### refresh_token
+
+需求场景
+    用户修改密码, 需要颁发新的token, 禁用还在有效期的旧token
+    后台封禁用户
+逻辑
+    禁用旧密码的令牌
+
+### before_request
+
+> 这个还是挺好用的。可以在请求之前对用户进行身份验证
+
+``` Python
+
+@app.before_request
+def foot_log():
+    print(999, request.headers)
+    print('=='*10)
+    print('get_csrf_token', decode_token(request.headers['Authorization'][7:]))
+    if request.path != "/login":
+        print("有客人访问了",request.path)
+    return 'login', 402
+
+# 输出
+999 Cookie: __RequestVerificationToken=lZ1XpmFLpSkcniCHJWmCV4twZnHV7YP-06IDhCt9t5lkUXF_AAaIXmG3Edmv64p-uJEl0s6nmsj6m0TiocNyLIY5Y5FtvGMdPVM75vKd5OI1; Hm_lvt_1bcfe93f9c954daa35fa07815202eb80=1582788051; ASP.NET_SessionId=lrm1i1h3ptcsvyzi5sk4ffeq; .AspNet.ApplicationCookie=15JAfztGcfHO9RNn7e44YAzCKufLKEU9YpZNQkKyoumX8P5XXhdM8kWLxsI-BM5O_2NxU9TJcEwp4w-tH_pm7Ok7r3cQWoFIuwIXaYJdzf2qPp-Q93Mk-WXRkKIufzLSWK_Ri0D9h-_PAcfGwmhNOW1qqA-D_J6LCRjOONpJwTXqHZVcxdmx79adKJOWmCA7w_ahGLFGASdx4O5k2T878KZwjul1PtXZ1obCBJ5Qp6IJg3fJih7rJeagV_recwP1oTG2ZgyWLRvcZ-SWFbeVmOCGdkub7Zxw4Q6NqwoiuZtlsFKFoXii3PZ2WkNfhUGg9Ed4zF-cI3Gd02qIzOb8lLk5EdxS2EyJKdnTvx54D2aXtL68TiCYh-8cw5RswQlEii3KRhJa9V60maQYK-iDAFgF0EsxpF4q8oPJmeTF5E89eZr8lEDJg9gBC6To3XzmgG4P14L5OkWw1SrDSlohsOEVyMduKp8b-gRcccF12xDEvb80k8D_5J-JyQkQjG8K-k5zb2AT_RqL4IJOTwADR-pXw-lizpeuLHEisuCliQrZY7SvZnzkh3NwHyGUI1ncZLTobvkL5Oy2nKBYdEWpR6RM4EHLSggojsrHChdAwqS8YTeFWXKkt8ZIInuKiTU-a3xL_xKwGq3JXQwRk7AImgsNK7a7WUiEW2Yr0_jEtZM2TKn64NnCXl1wUD1Iid2BXcmVIRynS88Do8o7_LBldbGwlv62Y0Af1VB8IpYoAZPvEVX4wG1T48km43uHYUm16qRzt8Hm2dS0QkcWakblqUeZyLlweUtt98AYi1Nqy0oS5CIYpZVGfaphzZaRwOwWK8Rko3oJV752DRwJhAMwnUeZd_UeSA8EpSs6f6wlc96b9rn-7WeNeKouALvffldf9B_AtZHbpdTgyePihfQ0as0MtUX9MQx8qk9BNfvZrJcD9uGesaVNba4AHNO4o69p; Hm_lpvt_1bcfe93f9c954daa35fa07815202eb80=1583050896
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOiIxNTg0NTc4NjI1IiwibnRfdWlkIjoiMzg5MDIyMDkzNjkzNDQ2MTYzNyIsIm50X2Vjb2RlIjoiMTMiLCJqdGkiOiIxYTE2Y2Q3ZWUzNTM3Mjc5OWQxNzAwODk2NzEwZDA5MiIsIm50X25hbWUiOiLmnY7mmJ8iLCJudF9yb2xlIjoiU3R1ZGVudCIsIm50X29pZCI6IjM4OTAyMjA5MzY5MzQ0NjE1MjIiLCJuYmYiOjE1ODQ1Nzg2MjUsImV4cCI6MTU4NDU3OTIyNSwiaXNzIjoidG9rZW4uYW5qaWFuYmEuY24_dj0yLjQiLCJhdWQiOiJjbG91ZC5hbmppYW5iYS5jbiJ9.u6GlgJr3t4i1hsQOIM64XMLdSRuc6uDPIYF_-V9U0sA
+User-Agent: PostmanRuntime/7.22.0
+Accept: */*
+Cache-Control: no-cache
+Postman-Token: 9b379648-2827-4bef-a260-e4555be26d03
+Host: localhost:5681
+Accept-Encoding: gzip, deflate, br
+Connection: keep-alive
+
+====================
+get_csrf_token {'iat': '1584578625', 'nt_uid': '3890220936934461637', 'nt_ecode': '13', 'jti': '1a16cd7ee35372799d1700896710d092', 'nt_name': '李星', 'nt_role': 'Student', 'nt_oid': '3890220936934461522', 'nbf': 1584578625, 'exp': 1584579225, 'iss': 'token.anjianba.cn?v=2.4', 'aud': 'cloud.anjianba.cn', 'type': 'access', 'fresh': False, 'user_claims': {}}
+有客人访问了 /v1/api/course/1
+
+127.0.0.1 - - [19/Mar/2020 08:47:44] "GET /v1/api/course/1 HTTP/1.1" 402 -
+```
+
 
 JWT格式：
 

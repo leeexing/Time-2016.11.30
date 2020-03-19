@@ -107,6 +107,22 @@ function addUserID(userID, batchName) {
 // db.sieve_image_nuctech.update({'_id': item._id}, {'$unset': {'userID': 0}}) // 删除字段
 ```
 
+``` JS
+// 修改数据库中的某个字段
+function addUserID(userID, batchName) {
+  if (!userID) {
+    return
+  }
+  // conn = new Mongo("127.0.0.1:27017")
+  // conn = new Mongo("mongodb://root:root123@10.15.225.23:27017/admin")
+  conn = new Mongo("mongodb://root:root123@52.80.171.106:27017/admin")
+  db = conn.getDB("sourceData")
+  db.sieve_image.find({}).limit(1000).forEach(function(item) {
+    db.sieve_image.update({'_id': item._id}, {'$set': {'userID': Number(userID)}})
+  })
+}
+```
+
 ```js
 load('E:/Leeing/node/besame/test.js')
 ```
