@@ -11,6 +11,18 @@
 5. 多行参数时应该分类。这样更清晰直白，便于阅读和review，另外，在每个换行符\前都增加一个空格。
 6. 对构建缓存要有清楚的认识。
 
+### dockerfile编写经验
+
+1.精简镜像用途：                 尽量让每个镜像的用途都比较集中、单一，避免构造大而复杂、多功能的镜像；
+2.选用合适的基础镜像：            过大的基础镜像会造成构建出臃肿的镜像，一般推荐比较小巧的镜像作为基础镜像；
+3.提供详细的注释和维护者信息：     Dockerfile也是一种代码，需要考虑方便后续扩展和他人使用；
+4.正确使用版本号：               使用明确的具体数字信息的版本号信息，而非latest，可以避免无法确认具体版本号，统一环境；
+5.减少镜像层数：                减少镜像层数建议尽量合并RUN指令，可以将多条RUN指令的内容通过&&连接；
+6.及时删除临时和缓存文件：        这样可以避免构造的镜像过于臃肿，并且这些缓存文件并没有实际用途；
+7.提高生产速度：                合理使用缓存、减少目录下的使用文件，使用.dockeringore文件等；
+8.调整合理的指令顺序：           在开启缓存的情况下，内容不变的指令尽量放在前面，这样可以提高指令的复用性；
+9.减少外部源的干扰：             如果确实要从外部引入数据，需要制定持久的地址，并带有版本信息，让他人可以重复使用而不出错。
+
 ## 安装
 
 使用 yum 安装。
@@ -198,9 +210,36 @@ exec gunicorn src.manage:app \
 exec "$@"
 ```
 
+## docker常用的一些基本镜像
+
+### nginx
+
+或则 nginx:alpine
+
+1）默认启动的是 `/etc/nginx/` 下面的 `/etc/nginx/nginx.conf` 和 `/etc/nginx/conf.d/default.conf` 里面的配置
+2）默认的显示文件是 `/usr/share/nginx/` 下面的 `/usr/share/nginx/html/index.html` 显示文件内容
+3）默认的启动命令 `nginx -g daemon off`
+
+
 ## 基本使用
 
 三个重要的概念：镜像（Image）、容器（Container）、仓库（Repository）
+
+### docker容器中访问redis容器中的服务
+
+redis启动的时候。执行这样的脚本
+
+``` Python
+docker run -d -p 6340:6379 -v /root/docker/conf/redis.conf:/usr/local/etc/redis/redis.conf -v /root/docker/data/redis:/data --name docker_redis docker.io/redis redis-server /usr/local/etc/redis/redis.conf --appendonly yes
+```
+
+连接的时候
+
+``` Python
+import redis
+r = redis.Redis(host="132.232.18.77", port=6340)
+r.get('count')
+```
 
 ### 常用参数
 
@@ -231,9 +270,33 @@ Docker 镜像是一个特殊的文件系统，除了提供容器运行时所需�
 
 数据卷的生存周期独立于容器，容器消亡，数据卷不会消亡。因此，使用数据卷后，容器删除或者重新运行之后，数据却不会丢失。
 
-### 安装
+### 安装docker
 
 略
+
+### ADD和COPY
+
+虽然ADD和COPY功能相似，但一般来讲，更建议使用COPY。因为COPY比ADD更透明，COPY只支持从本地文件到容器的拷贝，但是ADD还有一些其他不明显的特性（比如本地tar包解压缩和远程URL支持）。因此，ADD的最优用处是本地tar包自动解压缩到镜像中。如：ADD rootfs.tar.xz /。
+如果有多个Dockerfile步骤用于处理不同的文件，建议分开COPY它们，而不是一次性拷贝。这可以保证每个步骤的build缓存只在对应的文件改变时才无效。比如：
+
+``` Python
+# Python
+COPY requirements.txt /tmp/
+RUN pip install --requirement /tmp/requirements.txt
+COPY . /tmp/
+```
+
+**注意**：最适合使用 ADD 的场合，就是所提及的需要自动解压缩的场合。
+
+另外需要注意的是，ADD 指令会令镜像构建缓存失效，从而可能会令镜像构建变得比较缓慢。
+
+因此在 COPY 和 ADD 指令中选择的时候，可以遵循这样的原则，所有的文件复制均使用 COPY 指令，仅在需要自动解压缩的场合使用 ADD。
+
+在使用该指令的时候还可以加上 `--chown=<user>:<group>` 选项来改变文件的所属用户及所属组。
+
+### ENTRYPOINT
+
+ENTRYPOINT 的最佳用处是设置镜像的主命令，允许将镜像当成命令本身来运行（用 CMD 提供默认选项）。
 
 ### 常用操作
 
@@ -278,6 +341,17 @@ docer -p hostPort:containerPort # 映射本机的指定端口到容器的指定�
 
 # 映射数据卷
 docker -v /home/data:/opt/data # 这里/home/data 指的是宿主机的目录地址，后者则是容器的目录地址
+
+docker build -f my_dockerfile -t image_name .
+# eg: docker build -f docker_nginx.df -t docker_nginx .
+# eg: docker run --name my_docker_nginx -d -p 81:80 docker_nginx
+```
+
+```yml
+docker run -c xxx # 覆盖Dockerfile文件中的 CMD 中的变参
+docker run --enterpoint # 使用Dockerfile文件中的 ENTERPOINT 的定参
+
+ENTERPOINT # 类似于 CMD 指令，但其不会被 docker run 的命令行参数指定的指令所覆盖
 ```
 
 ### 数据卷
@@ -337,4 +411,138 @@ $ docker run -d \
     -p 3000:80 \
     training/webapp \
     python app.py
+```
+
+## docker-compose
+
+Docker-Compose标准模板文件应该包含version、services、networks 三大部分，最关键的是services和networks两个部分。
+
+```yml 一个简单的例子
+version: '3'
+
+services:
+
+  web:
+    # image: has_build_image
+    build: .
+    ports:
+      - "3000"
+      - "8000:8000"
+      - "49100:22"
+      - "127.0.0.1:8001:8001"
+    depends_on:
+      - db
+      - redis
+
+  redis:
+    image: redis
+
+  db:
+    image: postgres
+```
+
+### depends_on
+
+在使用Compose时，最大的好处就是少打启动命令，但一般项目容器启动的顺序是有要求的，如果直接从上到下启动容器，必然会因为容器依赖问题而启动失败。例如在没启动数据库容器的时候启动应用容器，应用容器会因为找不到数据库而退出。depends_on标签用于解决容器的依赖、启动先后的问题
+
+### ports
+
+ports用于映射端口的标签。
+使用HOST:CONTAINER格式或者只是指定容器的端口，宿主机会随机映射端口。
+
+**注意**当使用HOST:CONTAINER格式来映射端口时，如果使用的容器端口小于60可能会得到错误得结果，因为YAML将会解析xx:yy这种数字格式为60进制。所以建议采用字符串格式。
+
+extra_hosts
+　　添加主机名的标签，会在/etc/hosts文件中添加一些记录。
+
+```yml
+extra_hosts:
+ - "somehost:162.242.195.82"
+ - "otherhost:50.31.209.229"
+```
+
+启动后查看容器内部hosts：
+
+```yml
+162.242.195.82  somehost
+50.31.209.229   otherhost
+```
+
+### volumes
+
+挂载一个目录或者一个已存在的数据卷容器，可以直接使用 [HOST:CONTAINER]格式，或者使用[HOST:CONTAINER:ro]格式，后者对于容器来说，数据卷是只读的，可以有效保护宿主机的文件系统。
+Compose的数据卷指定路径可以是相对路径，使用 . 或者 .. 来指定相对目录。
+
+```yml
+volumes:
+  # 只是指定一个路径，Docker 会自动在创建一个数据卷（这个路径是容器内部的）。
+  - /var/lib/mysql
+  # 使用绝对路径挂载数据卷
+  - /opt/data:/var/lib/mysql
+  # 以 Compose 配置文件为中心的相对路径作为数据卷挂载到容器。
+  - ./cache:/tmp/cache
+  # 使用用户的相对路径（~/ 表示的目录是 /home/<用户目录>/ 或者 /root/）。
+  - ~/configs:/etc/configs/:ro
+  # 已经存在的命名的数据卷。
+  - datavolume:/var/lib/mysql
+```
+
+### expose
+
+暴露端口，但不映射到宿主机，只允许能被连接的服务访问。仅可以指定内部端口为参数，如下所示：
+
+expose:
+    - "3000"
+    - "8000"
+
+### links
+
+链接到其它服务中的容器。使用服务名称（同时作为别名），或者“服务名称:服务别名”（如 SERVICE:ALIAS）
+
+links:
+    - db
+    - db:database
+    - redis
+
+### net
+
+设置网络模式。
+
+net: "bridge"
+net: "none"
+net: "host"
+
+模板文件
+
+```yml
+version: '2'
+services:
+  web1:
+    image: nginx
+    ports:
+      - "6061:80"
+    container_name: "web1"
+    networks:
+      - dev
+  web2:
+    image: nginx
+    ports:
+      - "6062:80"
+    container_name: "web2"
+    networks:
+      - dev
+      - pro
+  web3:
+    image: nginx
+    ports:
+      - "6063:80"
+    container_name: "web3"
+    networks:
+      - pro
+
+networks:
+  dev:
+    driver: bridge
+  pro:
+    driver: bridge
 ```

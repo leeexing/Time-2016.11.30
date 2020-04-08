@@ -271,6 +271,54 @@ mongorestore -h dbhost -d dbname --dir dbdirectory
 mongorestore -h 192.168.17.129:27017 -d itcast_restore --dir /home/mongodump/itcast/
 ```
 
+## 固定集合
+
+``` JS
+// 创建固定集合
+db.createCollection("cappedLogCollection",{capped:true,size:10000})
+
+// 还可以指定文档个数,加上max:1000属性：
+db.createCollection("cappedLogCollection",{capped:true,size:10000,max:1000})
+
+
+// 判断集合是否为固定集合:
+db.cappedLogCollection.isCapped()
+
+// 如果需要将已存在的集合转换为固定集合可以使用以下命令：反之不行
+db.runCommand({"convertToCapped":"posts",size:10000})
+```
+
+### 固定集合查询
+
+固定集合文档按照插入顺序储存的,默认情况下查询就是按照插入顺序返回的,也可以使用$natural调整返回顺序。
+
+``` JS
+db.cappedLogCollection.find().sort({$natural:-1})
+```
+
+### 固定集合的功能特点
+
+可以插入及更新,但更新不能超出collection的大小,否则更新失败,不允许删除,但是可以调用drop()删除集合中的所有行,但是drop后需要显式地重建集合。
+
+在32位机子上一个cappped collection的最大值约为482.5M,64位上只受系统文件大小的限制。
+
+属性1:对固定集合进行插入速度极快
+属性2:按照插入顺序的查询输出速度极快
+属性3:能够在插入最新数据时,淘汰最早的数据
+
+用法1:储存日志信息
+用法2:缓存一些少量的文档
+
+``` JS
+db.createCollection("cappedLogCollection",{capped:true,size:10000,max:1000})
+```
+
+size 是整个集合空间大小，单位为【KB】
+
+max 是集合文档个数上线，单位是【个】
+
+如果空间大小到达上限，则插入下一个文档时，会覆盖第一个文档；如果文档个数到达上限，同样插入下一个文档时，会覆盖第一个文档。两个参数上限判断取的是【与】的逻辑。
+
 ## 聚合 - aggregate
 
 聚合框架就是要定义一系列 聚合管道（aggregation pipeline）

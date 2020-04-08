@@ -558,6 +558,18 @@ class CommentResource(Resource):
         return myCommentManager.get_my_comments(user_id)
 ```
 
+### marshal
+
+这个也很好用
+
+多看文档的重要性！！！！
+
+[参考](https://flask-restplus.readthedocs.io/en/stable/marshalling.html#custom-fields-multiple-values)
+
+**有一些属性真的很重要啊**：
+1）Skip fields which value is None
+2）Skip none in Nested fields
+
 ## JWT
 
 ### user_identity_loader

@@ -16,6 +16,3 @@
 8. #FFECD2, #9CE9F7
 9. #FED6E3, #A8EDEA
 
-00:0c:29:a8:db:63
-
-logo

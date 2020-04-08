@@ -34,7 +34,17 @@ Redirecting to /bin/systemctl stop  iptables.service
 # service iptables status
 ```
 
+## linux虚拟机下安装docker有104M
+
+所以克隆镜像的时候不要携带docker。还是使用纯净的初始化镜像就好
+
 ## Linux集群分发脚本xsync
+
+### 使用 MobaxTerm
+
+选择左侧菜单栏中的 `sftp`
+
+### 其他逼格
 
 1.scp（secure copy）安全拷贝
 2.rsync 远程同步工具

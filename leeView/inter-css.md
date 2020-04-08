@@ -150,6 +150,34 @@ Linear gradient linear-gradient is a very important module of CSS3, but in real 
 
 ### 文档流
 
+### 文字换行相关
+
+1、使文字不换行
+
+white-space: nowrap;
+
+2、允许长单词换行
+
+word-wrap:break-word;
+
+3、换行不截断单词
+
+word-break:break-all;
+
+4、单行文字超出显示省略号
+
+overflow: hidden;
+text-overflow: ellipsis;
+white-space: nowrap;
+
+**5、多行文字超出显示省略号**：
+
+overflow: hidden;
+text-overflow: ellipsis;
+display: -webkit-box;
+-webkit-line-clamp: 3;
+-webkit-box-orient: vertical;
+
 ## 优秀样式收集
 
 ### 阴影

@@ -9,7 +9,7 @@ tag: linux
 
 vim /etc/sysconfig/network-scripts/ifcfg-en016777736
 
-IPADDR=100.100.0.8
+IPADDR=100.100.0.3
 
 ### 停掉 NetworkManage
 

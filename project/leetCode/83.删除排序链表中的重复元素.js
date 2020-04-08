@@ -42,16 +42,38 @@
  */
 var deleteDuplicates = function(head) {
   if (head == null || head.next == null) return head
-  while (head.next) {
-    console.log(head, head.next)
-    let nextNode = head.next
-    if (head.value == nextNode.value) {
-      head.next = nextNode.next
-    } else {
-      head.next = nextNode
-    }
-  }
+  // while (head.next) {
+  //   console.log(head, head.next)
+  //   let nextNode = head.next
+  //   if (head.value == nextNode.value) {
+  //     head.next = nextNode.next
+  //   } else {
+  //     head.next = nextNode
+  //   }
+  // }
+  head.next = deleteDuplicates(head.next)
+  if (head.val == head.next.val) head = head.next
   return head
 };
 // @lc code=end
 
+// 备忘
+// 递归大法好
+var deleteDuplicates = function(head) {
+  if (head == null || head.next == null) return head
+  // while (head.next) {
+  //   console.log(head, head.next)
+  //   let nextNode = head.next
+  //   if (head.value == nextNode.value) {
+  //     head.next = nextNode.next
+  //   } else {
+  //     head.next = nextNode
+  //   }
+  // }
+  head.next = deleteDuplicates(head.next)
+  if (head.val == head.next.val) head = head.next
+  return head
+};
+// 165/165 cases passed (76 ms)
+// Your runtime beats 77.84 % of javascript submissions
+// Your memory usage beats 100 % of javascript submissions (35.2 MB)

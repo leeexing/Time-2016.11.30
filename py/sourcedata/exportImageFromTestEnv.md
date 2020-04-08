@@ -13,7 +13,7 @@ mongoexport -d mongotest -c users -o /home/python/Desktop/mongoDB/users.json --t
 参数说明：
             -d ：数据库名
             -c ：collection名
-            -q : 查询条件。ISODate需要使用Date(毫秒数)进行查询
+            -q : 查询条件。ISODate需要使用Date(毫秒数)进行查询。复合查询需要导入一个查询文件
             -o ：输出的文件名
             --type ： 输出的格式，默认为json
             -f ：输出的字段，如果-type为csv，则需要加上-f "字段名"
@@ -38,7 +38,40 @@ mongoexport -d mongotest -c users -o /home/python/Desktop/mongoDB/users.json --t
 1、密码不需要引号引起来 -p Train!ok.
 2、--authenticationDatabase=admin  是等号，而不是空格
 
+### 示例
+
+> 注意 -f
+
+```py
+#导出类型为json，数据库：mapdb,集合：bike 字段：bikeId,lat,lng,current_time,source ，条件为source字段为ofo第一条数据
+mongoexport --port 27030 -u sa -p Expressin@0618 -d mapdb -c bike -f bikeId,lat,lng,current_time,source --type=json -o bike.csv --query='{"source":"ofo"}' --limit=1
+```
+
+**符合查询**：
+--queryFile D:\mongoDataJson\query.txt
+
+```js
+mongoexport -h xx --port xx -u xx -p  xx -d xx -c xx --type=json  --queryFile D:\mongoDataJson\query.txt -o D:\mongoDataJson\run.json
+```
+
+``` JS
+{
+  "type": 2,
+  "exportNum": {
+    "$gt": 1
+  }
+}
+```
+
 ## 实际使用
+
+### 连接远程数据库
+
+```js
+mongo 10.15.225.23:27017/admin -u root -p root123
+
+mongo 52.80.171.106:27017/admin -u root -p root123
+```
 
 ### 测试环境 23
 
@@ -70,4 +103,66 @@ mongoexport -d sourceData -c sieve_image -q "{ batch: 'nuctech_10' }" -o "D:/sou
 mongoexport -d sourceData -c sieve_image -q "{ batch: 'nuctech_11' }" -o "D:/sourcedata/mongoData/20200116_sieve_image_nuctech_11.json" --type json
 mongoexport -d sourceData -c sieve_image -q "{ batch: 'nuctech_12' }" -o "D:/sourcedata/mongoData/20200227_sieve_image_nuctech_12.json" --type json
 
+```
+
+## 导出空包和危险包
+
+### 导出空包
+
+``` Python
+# 导出json数据
+mongoexport -d sourceData -c sieve_image -q "{ type: 2 }" -f "url" --limit 100 -o "D:/sourcedata/mongoData/20200323_sieve_image_danger_10000.json" --type json
+
+mongoexport -d sourceData -c sieve_image --queryFile E:\Leeing\node\besame\py\sourcedata\exportQuery.json -f "url" --limit 100 -o "D:/sourcedata/mongoData/20200323_sieve_image_safe_10000.json" --type json
+```
+
+``` JS
+// 修改数据库中的值
+function exportDanger() {
+  // conn = new Mongo("127.0.0.1:27017")
+  // conn = new Mongo("mongodb://root:root123@10.15.225.23:27017/admin")
+  conn = new Mongo("mongodb://root:root123@52.80.171.106:27017/admin")
+  db = conn.getDB("sourceData")
+
+  // -更新危险图像导出次数
+  db.sieve_image.find({type: 1}).limit(10000).forEach(function(item) {
+    db.sieve_image.update({'_id': item._id}, {'$set': {'exportNum': NumberInt(1)}})
+    // 记录导出事件
+    db.export_events.save({
+      imgId: item._id.str,
+      type: 2,
+      createTime: new Date()
+    })
+  })
+}
+```
+
+### 导出危险包
+
+``` Python
+# 23370
+mongoexport -d sourceData -c sieve_image -q "{ type: 2 }" -f "url" --limit 100 -o "D:/sourcedata/mongoData/20200323_sieve_image_danger_10000.json" --type json
+
+mongoexport -d sourceData -c sieve_image --queryFile E:\Leeing\node\besame\py\sourcedata\exportQuery.json -f "url" --limit 100 -o "D:/sourcedata/mongoData/20200323_sieve_image_danger_23370.json" --type json
+```
+
+``` JS
+// 修改数据库中的值
+function exportDanger() {
+  // conn = new Mongo("127.0.0.1:27017")
+  // conn = new Mongo("mongodb://root:root123@10.15.225.23:27017/admin")
+  conn = new Mongo("mongodb://root:root123@52.80.171.106:27017/admin")
+  db = conn.getDB("sourceData")
+
+  // -更新危险图像导出次数
+  db.sieve_image.find({type: 2}).forEach(function(item) {
+    db.sieve_image.update({'_id': item._id}, {'$set': {'exportNum': NumberInt(1)}})
+    // 记录导出事件
+    db.export_events.save({
+      imgId: item._id.str, // 😜将ObjectID转换成str类型的方法。不是 String（）
+      type: 2,
+      createTime: new Date()
+    })
+  })
+}
 ```

@@ -1,0 +1,16 @@
+version: "3"
+services:
+
+  nginx:
+    container_name: airportng
+    image: nginx
+    ports:
+      - "8040:80"
+    # links:
+    #   - app
+    volumes:
+      - "./nginx.conf.d/:/etc/nginx/conf.d/"
+      - "./app/:/mnt/app/"
+
+  # app:
+  #   image: leecin/app

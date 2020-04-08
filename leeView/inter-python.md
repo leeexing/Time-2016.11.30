@@ -11,6 +11,26 @@ tag: python
 
 * gunicorn + docker 的使用
 
+## python下使用pip freeze >requirements.txt命令迁移模块
+
+查看安装的包 `pip freeze`
+
+自动会导入到你现在的项目文件夹中 `pip freeze > requirements.txt`
+
+创建一个新的环境是可以导入新环境 `pip install -r requirements.txt`
+
+## 安装
+
+### linux centos7
+
+关于在centos下安装python3.7.0以上版本时报错ModuleNotFoundError: No module named '_ctypes'的解决办法
+
+``` Python
+yum install libffi-devel -y
+make install
+```
+
+
 ## 命名规范
 
 [谷歌命名规范](https://zh-google-styleguide.readthedocs.io/en/latest/google-python-styleguide/python_style_rules/)

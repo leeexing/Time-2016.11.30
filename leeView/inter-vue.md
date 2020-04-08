@@ -250,6 +250,12 @@ Vue.extend = function (extendOptions = {}) {
 
 ### vue-extend 插件编写
 
+> Vue.extend 返回的是一个Vue实例构造器
+
+**请注意**，extend创建的是一个组件构造器，而不是一个具体的组件实例。所以他不能直接在new Vue中这样使用： new Vue({components: fuck})
+
+最终还是要通过Vue.components注册才可以使用的。
+
 ```js
 vue.extend(options)
 
@@ -269,11 +275,74 @@ Vue.extend({
 })
 ```
 
-使用基础 Vue 构造器，创建一个 子类 。蚕食是一个包含组件选项的对象。可以是一个 .vue 的组件
+使用基础 Vue 构造器，创建一个 子类 。参数是一个包含组件选项的对象。可以是一个 .vue 的组件
 data 选项是特例。需要注意 在 Vue.exten（） 中它必须是函数
+
+1.data数据对象在内部会进行浅合并 (一层属性深度)。
+
+2.钩子函数会先执行预设选项中的
+
+3.值为对象的选项，例如 methods, components 将被混合为同一个对象，两个对象键名冲突时，会以new myVue({})对象的选项为准。
 
 创建一个组件实例，并且挂载到一个元素上
 `new Profile().$mount('#mount-root')`
+
+#### vue.extend 局部注册
+
+请注意，在实例化extends组件构造器时，传入属性必须是 `propsData`、而不是props
+
+``` JS
+// 局部注册组件
+var todoItem = Vue.extend({
+  data: function () {
+        return {
+            todoData: [
+              { id: 0, text: '蔬菜' },
+              { id: 1, text: '奶酪' },
+              { id: 2, text: '随便其它什么人吃的东西' }
+            ]
+        }
+  },
+  template: `
+        <ul>
+            <li v-for='(d, i) in todoData' :key="i">
+                {{ d.text }}
+            </li>
+        </ul>
+  `
+});
+
+// 请注意，在实例化extends组件构造器时，传入属性必须是propsData、而不是props哦
+new todoItem({
+  propsData: {
+      todoData: [
+          { id: 0, text: '蔬菜' },
+          { id: 1, text: '奶酪' },
+          { id: 2, text: '随便其它什么人吃的东西' }
+      ]
+  }
+}).$mount('#todoItem')
+```
+
+### Vue.component
+
+> Vue.component 是用来全局注册组件的方法
+
+其作用是将通过 Vue.extend 生成的扩展实例构造器注册为一个组件，
+会自动调用类似于 new myVue 这样的构造函数来生成组件实例，并挂载到自定义元素上。
+
+``` JS
+// 全局注册
+Vue.component('myVue',myVue)
+
+// 局部注册
+new Vue({
+  components:{
+    myVue: myVue
+  }
+})
+```
+
 
 ### redirect 刷新页面
 
@@ -529,7 +598,7 @@ this.$emit('update:title', newTitle)
 `<text-document v-bind.sync="doc"></text-document>`
 这样会把 doc 对象中的每一个属性 (如 title) 都作为一个独立的 prop 传进去，然后各自添加用于更新的 v-on 监听器。
 
-### 注意
+### 注意 v-bind.sync
 
 将 v-bind.sync 用在一个字面量的对象上，例如 v-bind.sync=”{ title: doc.title }”，是无法正常工作的，因为在解析一个像这样的复杂表达式的时候，有很多边缘情况需要考虑。
 
@@ -553,15 +622,12 @@ computed是响应式的
 
 更进一步，computed 和 watch 有什么不同呢？
 
-
 ①从属性名上，computed是计算属性，也就是依赖其它的属性计算所得出最后的值。watch是去监听一个值的变化，然后执行相对应的函数。
 ②从实现上，computed的值在getter执行后是会缓存的，只有在它依赖的属性值改变之后，下一次获取computed的值时才会重新调用对应的getter来计算。watch在每次监听的值变化时，都会执行回调。其实从这一点来看，都是在依赖的值变化之后，去执行回调。很多功能本来就很多属性都可以用，只不过有更适合的。<u>如果一个值依赖多个属性（多对一），用computed肯定是更加方便的。如果一个值变化后会引起一系列操作，或者一个值变化会引起一系列值的变化（一对多），用watch更加方便一些。</u>
 ③watch的回调里面会传入监听属性的新旧值，通过这两个值可以做一些特定的操作。computed通常就是简单的计算。
 ④watch和computed并没有哪个更底层，watch内部调用的是vm.$watch，它们的共同之处就是每个定义的属性都单独建立了一个Watcher对象。
 
-### 使用
-
-### 在vue中获取dom元素的宽高
+### 在vue中获取dom元素的宽高 getBoundingClientRect
 
 > getBoundingClientRect
 
@@ -802,7 +868,7 @@ Vue 提供了 transition 的封装组件，在下列情形中，可以给任何�
 <transition :duration="{ enter: 500, leave: 800 }">...</transition>
 ```
 
-### JavaScript 钩子
+### transition JavaScript 钩子
 
 ```js
 <transition
@@ -844,13 +910,14 @@ enter: function (el, done) {
     done()
   },
 ```
+
 当只用 JavaScript 过渡的时候，在 enter 和 leave 中必须使用 done 进行回调。否则，它们将被同步调用，过渡会立即完成。
 
 推荐对于仅使用 JavaScript 过渡的元素添加 v-bind:css="false"，Vue 会跳过 CSS 的检测。这也可以避免过渡过程中 CSS 的影响。
 
 ### 过渡模式
 
-同时生效的进入和离开的过渡不能满足所有要求，所以 Vue 提供了` 过渡模式 `
+同时生效的进入和离开的过渡不能满足所有要求，所以 Vue 提供了 `过渡模式`。
 
 ### 混入
 
@@ -1283,4 +1350,3 @@ Vue.prototype.$throw = (error)=> errorHandler(error,this);
 1、代码错误不用手动抛出，全局会捕获到
 
 2、如果是ajax异步请求，异常需要通过`this.$throw()`手动抛出
-
