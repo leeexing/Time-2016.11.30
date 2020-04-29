@@ -2,7 +2,19 @@
 
 > redis 数据库
 
+## 启动连接
+
+redis-server /usr/local/redis/redis.conf
+
 ## 基本使用
+
+### set
+
+set类型与 hash 存储结构完全相同，仅存储键，不存储值（nil），并且值是不允许重复的。因为键名是不允许重复的
+
+srandmember key [count] 随机获取集合中指定数量的数据
+
+spop key 随机获取集合中的某个数据并将该数据移除集合
 
 ### bitmap
 

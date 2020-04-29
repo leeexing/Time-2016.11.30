@@ -248,6 +248,12 @@ Vue.extend = function (extendOptions = {}) {
 }
 ```
 
+### created()与activated()
+
+created()：在创建vue对象时，当html渲染之前就触发；但是注意，全局vue.js不强制刷新或者重启时只创建一次，也就是说，created()只会触发一次；
+
+activated()：在vue对象存活的情况下，进入当前存在activated()函数的页面时，一进入页面就触发；可用于初始化页面数据等
+
 ### vue-extend 插件编写
 
 > Vue.extend 返回的是一个Vue实例构造器
@@ -342,7 +348,6 @@ new Vue({
   }
 })
 ```
-
 
 ### redirect 刷新页面
 
@@ -974,6 +979,84 @@ Vue.directive('focus', {
 * vnode：Vue 编译生成的虚拟节点。移步 VNode API 来了解更多详情。
 * oldVnode：上一个虚拟节点，仅在 update 和 componentUpdated 钩子中可用。
 
+``` JS
+// 一个例子。有助于理解
+// Inspired by https://github.com/Inndy/vue-clipboard2
+const Clipboard = require('clipboard')
+if (!Clipboard) {
+  throw new Error('you should npm install `clipboard` --save at first ')
+}
+
+export default {
+  bind(el, binding) {
+    if (binding.arg === 'success') {
+      el._v_clipboard_success = binding.value
+    } else if (binding.arg === 'error') {
+      el._v_clipboard_error = binding.value
+    } else {
+      const clipboard = new Clipboard(el, {
+        text() { return binding.value },
+        action() { return binding.arg === 'cut' ? 'cut' : 'copy' }
+      })
+      clipboard.on('success', e => {
+        const callback = el._v_clipboard_success
+        callback && callback(e) // eslint-disable-line
+      })
+      clipboard.on('error', e => {
+        const callback = el._v_clipboard_error
+        callback && callback(e) // eslint-disable-line
+      })
+      el._v_clipboard = clipboard
+    }
+  },
+  update(el, binding) {
+    if (binding.arg === 'success') {
+      el._v_clipboard_success = binding.value
+    } else if (binding.arg === 'error') {
+      el._v_clipboard_error = binding.value
+    } else {
+      el._v_clipboard.text = function() { return binding.value }
+      el._v_clipboard.action = function() { return binding.arg === 'cut' ? 'cut' : 'copy' }
+    }
+  },
+  unbind(el, binding) {
+    if (binding.arg === 'success') {
+      delete el._v_clipboard_success
+    } else if (binding.arg === 'error') {
+      delete el._v_clipboard_error
+    } else {
+      el._v_clipboard.destroy()
+      delete el._v_clipboard
+    }
+  }
+}
+
+```
+
+``` JS
+// 使用
+<el-button
+  v-clipboard:copy="inputData"
+  v-clipboard:success="clipboardSuccess"
+  type="primary"
+  icon="el-icon-document"
+>
+  copy
+</el-button>
+
+clipboardSuccess() {
+  this.$message({
+    message: 'Copy successfully',
+    type: 'success',
+    duration: 1500
+  })
+}
+```
+
+这里需要注意的是，有两个 `v-clipboard` 。所以指令会执行两次bind。
+第一次 bind 的 arg 是 `copy`， value 是 inputData. `v-clipboard:copy="inputData"`
+第二次 bind 的 arg 是 `success`， value 是 clipboardSuccess. `v-clipboard:success="clipboardSuccess"`
+
 ### 选项 / 生命周期钩子 (created、activated、errorCaptured)
 
 所有的生命周期钩子自动绑定 this 上下文到实例中，因此你可以访问数据，对属性和方法进行运算。
@@ -1350,3 +1433,66 @@ Vue.prototype.$throw = (error)=> errorHandler(error,this);
 1、代码错误不用手动抛出，全局会捕获到
 
 2、如果是ajax异步请求，异常需要通过`this.$throw()`手动抛出
+
+## mixin 好例子&好代码
+
+还可以监听侧边栏的 `transition` 动画效果。这个居然没有想到
+
+```js
+import { debounce } from '@/utils'
+
+export default {
+  data() {
+    return {
+      $_sidebarElm: null,
+      $_resizeHandler: null
+    }
+  },
+  mounted() {
+    this.initListener()
+  },
+  activated() {
+    if (!this.$_resizeHandler) {
+      // avoid duplication init
+      this.initListener()
+    }
+
+    // when keep-alive chart activated, auto resize
+    this.resize()
+  },
+  beforeDestroy() {
+    this.destroyListener()
+  },
+  deactivated() {
+    this.destroyListener()
+  },
+  methods: {
+    // use $_ for mixins properties
+    // https://vuejs.org/v2/style-guide/index.html#Private-property-names-essential
+    $_sidebarResizeHandler(e) {
+      if (e.propertyName === 'width') {
+        this.$_resizeHandler()
+      }
+    },
+    initListener() {
+      this.$_resizeHandler = debounce(() => {
+        this.resize()
+      }, 100)
+      window.addEventListener('resize', this.$_resizeHandler)
+
+      this.$_sidebarElm = document.getElementsByClassName('sidebar-container')[0]
+      this.$_sidebarElm && this.$_sidebarElm.addEventListener('transitionend', this.$_sidebarResizeHandler)
+    },
+    destroyListener() {
+      window.removeEventListener('resize', this.$_resizeHandler)
+      this.$_resizeHandler = null
+
+      this.$_sidebarElm && this.$_sidebarElm.removeEventListener('transitionend', this.$_sidebarResizeHandler)
+    },
+    resize() {
+      const { chart } = this
+      chart && chart.resize()
+    }
+  }
+}
+```

@@ -18,6 +18,8 @@ test.*
 
 # 工作文件
 work/
+docker/
+
 
 # 思维导图等
 LeeMap/

@@ -3,6 +3,53 @@ title: rabbitMQ
 tag: rabbitMQ
 ---
 
+## 连接问题
+
+``` Python
+# Python
+mq_connection = None
+
+
+def get_rabbitmq_connection(rabbitmq_url, is_dev_env=True):
+    """Rabbitmq消息队列连接"""
+    global mq_connection
+
+    if is_dev_env:
+        if not mq_connection:
+            mq_connection = pika.BlockingConnection(
+                pika.ConnectionParameters(
+                    'localhost',
+                    heartbeat=0
+                )
+            )
+    else:
+        username = 'Nuctech'
+        pwd = 'Nuctech'
+        user_pwd = pika.PlainCredentials(username, pwd)
+        if not mq_connection:
+            conn_params = pika.ConnectionParameters(rabbitmq_url, virtual_host='NT_Reborn_Pro', credentials=user_pwd)
+            mq_connection = pika.BlockingConnection(conn_params)
+    # connection = pika.BlockingConnection(pika.ConnectionParameters('localhost')) # -dev
+    return mq_connection
+```
+
+经过自己大量的测试，发现
+1）只要程序断开了，这个连接 `conn` 自然就断开
+2）channel 需要关闭。否则 rabbitmq的客户端界面会显示 channel 的个数不断增加
+
+``` Python
+# 使用
+conn = get_rabbitmq_connection(current_app.config['RABBITMQ_URL'], is_dev_env)
+mq_channel = conn.channel()
+mq_channel.exchange_declare(exchange='plot_ols', exchange_type='direct', durable=True)
+mq_channel.basic_publish(
+    exchange = 'plot_ols',
+    routing_key = 'plot:mergechunks',
+    body = json.dumps(merge_queue_data)
+)
+mq_channel.close()
+```
+
 ## vhost 是什么？起什么作用
 
 vhost 可以理解为虚拟 broker ，即 mini-RabbitMQ  server。

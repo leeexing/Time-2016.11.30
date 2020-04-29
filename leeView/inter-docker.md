@@ -2,6 +2,11 @@
 
 > docker 学习
 
+## 基本使用
+
+docker stack deploy -c stack.yml mongo
+docker-compose -f stack.yml up
+
 ## 准则
 
 1. 尽量将Dockerfile放在空目录中，如果目录中必须有其他文件，则使用.dockerignore文件。
@@ -219,7 +224,6 @@ exec "$@"
 1）默认启动的是 `/etc/nginx/` 下面的 `/etc/nginx/nginx.conf` 和 `/etc/nginx/conf.d/default.conf` 里面的配置
 2）默认的显示文件是 `/usr/share/nginx/` 下面的 `/usr/share/nginx/html/index.html` 显示文件内容
 3）默认的启动命令 `nginx -g daemon off`
-
 
 ## 基本使用
 
