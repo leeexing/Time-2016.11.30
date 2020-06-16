@@ -121,3 +121,7 @@ labels: ['源数据管理平台', '安培云', '大数据中台', '其他'],
 values: [45, 25, 15, 15]
 
 🍕
+
+## python相关
+
+from cryptography.fernet import Fernet （python3加密模块）

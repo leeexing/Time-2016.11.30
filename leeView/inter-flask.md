@@ -4,6 +4,10 @@ tags: python, flask
 description: flask相关知识点的使用
 ---
 
+## 项目中须知的问题
+
+1) python 的flask框架在debug模式下会多开一个线程监测项目变化，所以每次会跑两遍，可以将debug选项改为False
+
 ## flask-migrate
 
 基本使用

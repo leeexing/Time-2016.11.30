@@ -2,7 +2,7 @@
 
 ## cmd 使用
 
-1) mysql -hlocalhost -uroot -p(回车)
+1) mysql -h localhost -u root -p(回车)
 2) show databases;
 3) use blog_users;
 4) show tables;

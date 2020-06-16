@@ -67,7 +67,7 @@ $or：有多少个条件就会查询多少次，最后合并结果集，所以�
 
 > use admin
 
-> db.createUser({user: 'rot', pwd: 'root#123', roles: [{role: 'root', db: 'admin'}]}) // 这个角色基本上是最高的权限了.一般情况下使用这个就可以了！！！
+> db.createUser({user: 'root', pwd: 'root#123', roles: [{role: 'root', db: 'admin'}]}) // 这个角色基本上是最高的权限了.一般情况下使用这个就可以了！！！
 
 > db.createUser({user: 'admin', pwd: 'admin#123', roles: [{role: 'readWriteAnyDatabase', db: 'admin'}]})
 
@@ -180,6 +180,18 @@ function testFn() {
 mongo
 load("E:/Leeing/node/besame/test.js")
 testFn()
+```
+
+## mongo查询NumberLong数据类型
+
+> 需要添加双引号
+
+```js
+// Robot
+db.getCollection('topic').find({_id:  NumberLong("3666137634075447629")})
+
+// pymongo
+db_topic.find_one({'_id': Int64(item)})
 ```
 
 ## 数据导入导出
@@ -414,6 +426,98 @@ db.foo.aggregate({
 * 尽早在管道里尝试减少文档的数量和大小
 * 索引只能用于 $match, $sort操作，而且可以大大加速查询
 * 在管道使用 $match和 $sort之外的操作符后不能使用索引
+
+### demo
+
+REFER: [MongoDB 一条数据输出一个字段不同的值的count值](https://blog.csdn.net/hwhaocool/article/details/81741919)
+
+``` JS
+db.getCollection('question').aggregate([
+//     {$group: {_id: '$uid', count: {$sum: 1}}, ''},
+    {$project: {
+        _id: 1,
+        uid: 1,
+        status: 1,
+        Accept: {
+                $cond: {
+                        if: {$eq: [1, '$status']},
+                        then: 1,
+                        else: 0
+                    }
+            },
+         Unaccept: {
+                $cond: {
+                        if: {$eq: [0, '$status']},
+                        then: 1,
+                        else: 0
+                    }
+             }
+     }},
+     {$group: {_id: '$uid', total: {$sum: 1}, accept: {$sum: '$Accept'}, unaccpt: {$sum: '$Unaccept'}}},
+     {$project: {uid: '$_id', _id: 0, total: 1, accept: 1, unaccept: 1}}
+])
+```
+
+``` JS mongo数据结构
+/* 5 */
+{
+    "_id" : ObjectId("5ecf937b5fa0df026bcc41f8"),
+    "uid" : "3666506507647852544",
+    "content" : "golang中的select用法",
+    "pictures" : [
+        "https://user-gold-cdn.xitu.io/2020/5/22/1723b76a3b7ace16?imageView2/2/w/800/q/85"
+    ],
+    "topics" : [
+        4
+    ],
+    "reward" : 2,
+    "create_at" : ISODate("2020-05-28T18:33:31.086Z"),
+    "answer_count" : 2,
+    "status" : 0.0
+}
+
+/* 6 */
+{
+    "_id" : ObjectId("5ecf93945fa0df026bcc41f9"),
+    "uid" : "3666506507647852544",
+    "content" : "go for循环",
+    "pictures" : [
+        "https://user-gold-cdn.xitu.io/2020/5/22/1723b76a3b7ace16?imageView2/2/w/800/q/85"
+    ],
+    "topics" : [],
+    "reward" : 3,
+    "create_at" : ISODate("2020-05-28T18:33:56.241Z"),
+    "answer_count" : 3,
+    "status" : 0.0
+}
+```
+
+``` JS 聚合结果
+/* 1 */
+{
+    "_id" : "3666506561536270336",
+    "total" : 1.0,
+    "accept" : 0.0,
+    "unaccpt" : 1.0
+}
+
+/* 2 */
+{
+    "_id" : "3666506507647852544",
+    "total" : 6.0,
+    "accept" : 1.0,
+    "unaccpt" : 5.0
+}
+```
+
+``` JS
+db.getCollection('answer').aggregate([
+    {$group: {_id: '$uid', count: {$sum: '$like_count'}}},
+    {$group: {_id: '$uid', total: {$sum: 1}, accept: {$sum: '$Accept'}, unaccpt: {$sum: '$Unaccept'}}},
+    {$project: {uid: '$_id', _id: 0, total: 1, accept: 1, unaccept: 1}}
+])
+```
+
 
 ## 原子操作
 

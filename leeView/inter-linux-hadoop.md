@@ -407,4 +407,3 @@ NN: namenode
 2NN: second namenode
 RM: resourcemanager
 NM：nodemanager
-

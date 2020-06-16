@@ -38,3 +38,25 @@
 假如嫌疑框的中心点在 用户画框 里面，那么相交面积相对于嫌疑框的面积只要 > 30% 即可
 假如用户画框的中心点和嫌疑框的中心点相距比较近，那我们就假定用户大概知道嫌疑物就在这，那么相交面积相对于嫌疑框面积的占比会适当减少。两者中心点的位置越近，占比值越小。
 目前最小是只要 相交面积相对于嫌疑框面积 > 10% 即可
+
+## git项目
+
+源数据管理平台
+
+sourcedata-web
+sourcedata-api
+sourcedata-authorization
+sourcedata-platform (dotnet)
+sourcedata-smart (dotnet)
+
+在线标注平台
+
+plot-web
+plot-api
+plot-upload
+plot-filescan
+plot-imageconvert (dotnet)
+
+## 其他
+
+stg测试服务器 10.15.225.22 Ditto1022btby
