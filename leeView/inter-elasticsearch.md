@@ -3,6 +3,19 @@ title: elaticsearch
 tag: db bigdata
 ---
 
+## 启动
+
+1. elasticsearch.bat
+2. grunt server
+3. localshot:9100 // 可视化客户端
+4. localshot:9200 // restful api 服务
+
+## 常见问题或查询
+
+### 获取es所有的索引列表
+
+es.indices.get_alias('*)
+
 ## 优势、特点
 
 1）可以作为一个大型分布式集群（数百台服务器）技术，处理PB级数据，服务大公司；也可以运行在单机上，服务小公司

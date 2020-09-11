@@ -7,6 +7,33 @@
 docker stack deploy -c stack.yml mongo
 docker-compose -f stack.yml up
 
+## 将容器打包成镜像
+
+> docker commit
+
+docker commit -a "leecin" -m "social基础镜像" social_img leeing0712/social:v1.0
+
+docker push leeing0712/social:v1.0
+
+## docker 容器里面没有vim如何编辑文件
+
+1. apt-get update
+2. apt-get install vim
+
+## docker内使用apt-get update时报Temporary failure resolving 'security.ubuntu.com错的解决方法
+
+cd /etc/docker
+touch daemon.json
+然后将如下的内容放入daemon.json里面
+
+{
+    "dns": ["8.8.8.8", "114.114.114.114"]
+}
+
+重启docker
+
+systemctl restart docker
+
 ## 准则
 
 1. 尽量将Dockerfile放在空目录中，如果目录中必须有其他文件，则使用.dockerignore文件。
@@ -225,7 +252,7 @@ exec "$@"
 2）默认的显示文件是 `/usr/share/nginx/` 下面的 `/usr/share/nginx/html/index.html` 显示文件内容
 3）默认的启动命令 `nginx -g daemon off`
 
-## 基本使用
+## docker基本使用
 
 三个重要的概念：镜像（Image）、容器（Container）、仓库（Repository）
 
